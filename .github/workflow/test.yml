@@ -1,0 +1,42 @@
+# https://github.com/actions/virtual-environments
+
+name: test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_15.0.app
+
+jobs:
+  test:
+    name: Test
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v2
+      - name: Test library
+        run: scripts/test.sh
+
+  validation:
+    name: Validation
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v2
+      - name: Show environments
+        run: |
+          swift --version
+          xcodebuild -version
+      - uses: actions/cache@v3
+        with:
+          path: bin
+          key: spm-${{ runner.os }}-${{env.DEVELOPER_DIR}}-${{ hashFiles('Package.swift') }}-${{ github.job }}
+      - name: Validate lint
+        run: make lint
+      - name: Validate format
+        run: |
+          make format
+          if [ -n "$(git status --porcelain)" ]; then echo "Make sure that the code is formated by 'make format'."; exit 1; fi

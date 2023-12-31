@@ -1,0 +1,16 @@
+name: SwiftDexExample
+packages:
+  SwiftDex:
+    path: ../
+targets:
+  SwiftDexExample:
+    type: application
+    platform: macOS
+    deploymentTarget: '14.0'
+    settings:
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - package: SwiftDex
+    sources:
+        - SwiftDexExample
+
