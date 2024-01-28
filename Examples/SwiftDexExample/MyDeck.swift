@@ -3,9 +3,12 @@ import SwiftUI
 
 struct MyDeck: Deck {
     var flow: some Flow {
-        Slide01()
-            .next(Slide02(), transition: .push())
-            .next(Slide01(), transition: .matched())
+        Title()
+            .next(Introduction(), transition: .push())
+            .next(AboutBullets(), transition: .push())
+            .next(AboutFlipper(), transition: .push())
+            .next(AboutCode(), transition: .push())
+            .next(Layout2(), transition: .push())
     }
 }
 

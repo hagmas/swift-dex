@@ -17,7 +17,7 @@ public protocol StandardLayoutSlide: Slide {
 }
 
 public extension StandardLayoutSlide {
-    var head: some View {
+    var head: EmptyView {
         EmptyView()
     }
 
@@ -31,9 +31,9 @@ public extension StandardLayoutSlide {
 
     var content: some View {
         StandardScaffold(
-            head: { head },
-            body: { body },
-            auxiliary: { auxiliary }
+            head: head,
+            body: body,
+            auxiliary: auxiliary
         ).view
     }
 }

@@ -3,25 +3,38 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		274A715550012F0B44E78652 /* AboutCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786503DAEC1B40E8FE92E4F3 /* AboutCode.swift */; };
 		2A964C936EFFD3FD4FB87D13 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE46BC7FF2F4B42204668B45 /* ContentView.swift */; };
-		31673146270910D55FC25FE9 /* Slide01.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9989CA48434F958B482CB79 /* Slide01.swift */; };
-		330C534F2AE44FAD0087A043 /* Slide02.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330C534E2AE44FAD0087A043 /* Slide02.swift */; };
+		3C593253A72F7FD669328DEB /* AboutBullets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13B2BA426B1DF7981125E86F /* AboutBullets.swift */; };
+		41EDA80C0FB3207CFE8ED445 /* Introduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F497EC9F50CC1B8B8B813C /* Introduction.swift */; };
 		74A3546B6459532D9FC788BB /* SwiftDex in Frameworks */ = {isa = PBXBuildFile; productRef = 901786E0D97D642D5C0CE960 /* SwiftDex */; };
+		75575BC4DABC455605E1C1DB /* AboutFlipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD973B5EC48E36BB81327C8D /* AboutFlipper.swift */; };
+		756853649535421BD8C4651D /* Layout1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8962AB4430D3F7C083C3A1E7 /* Layout1.swift */; };
+		7E9E5ADFABCD0A103D28DC37 /* Layout2.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF13C473CE27B52270AB704F /* Layout2.swift */; };
 		93912B3C4425A6203FC96450 /* SwiftDexExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BD7255273A93DB0FEF98C81 /* SwiftDexExampleApp.swift */; };
+		9EEC10946E592DFFAEA1B03A /* Title.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1F9F0DDDBC33B4282CCF9D7 /* Title.swift */; };
+		C65C6EBF4499FB2BD42BC98F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AAC5BDDB4254D1D61F5EAEE8 /* Assets.xcassets */; };
 		F738B7DCE656C80C7505BF48 /* MyDeck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 461ABD1D9D01D34EED6CFA3F /* MyDeck.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		13B2BA426B1DF7981125E86F /* AboutBullets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutBullets.swift; sourceTree = "<group>"; };
+		1914BA586BA4C9DEEA1C1F1B /* SwiftDexExample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftDexExample.entitlements; sourceTree = "<group>"; };
 		1CF0C9952FE28D81CF2AAC16 /* SwiftDexExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftDexExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		330C534E2AE44FAD0087A043 /* Slide02.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Slide02.swift; sourceTree = "<group>"; };
 		461ABD1D9D01D34EED6CFA3F /* MyDeck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyDeck.swift; sourceTree = "<group>"; };
 		5BD7255273A93DB0FEF98C81 /* SwiftDexExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDexExampleApp.swift; sourceTree = "<group>"; };
-		D9989CA48434F958B482CB79 /* Slide01.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Slide01.swift; sourceTree = "<group>"; };
+		786503DAEC1B40E8FE92E4F3 /* AboutCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutCode.swift; sourceTree = "<group>"; };
+		87F497EC9F50CC1B8B8B813C /* Introduction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Introduction.swift; sourceTree = "<group>"; };
+		8962AB4430D3F7C083C3A1E7 /* Layout1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layout1.swift; sourceTree = "<group>"; };
+		AAC5BDDB4254D1D61F5EAEE8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B1F9F0DDDBC33B4282CCF9D7 /* Title.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Title.swift; sourceTree = "<group>"; };
+		BF13C473CE27B52270AB704F /* Layout2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layout2.swift; sourceTree = "<group>"; };
 		EC28170B7BB8A2D53CEF3B2E /* swift-dex */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "swift-dex"; path = ..; sourceTree = SOURCE_ROOT; };
+		FD973B5EC48E36BB81327C8D /* AboutFlipper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutFlipper.swift; sourceTree = "<group>"; };
 		FE46BC7FF2F4B42204668B45 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -40,8 +53,10 @@
 		501A26D594E8B4BB207D6E6B /* SwiftDexExample */ = {
 			isa = PBXGroup;
 			children = (
+				AAC5BDDB4254D1D61F5EAEE8 /* Assets.xcassets */,
 				FE46BC7FF2F4B42204668B45 /* ContentView.swift */,
 				461ABD1D9D01D34EED6CFA3F /* MyDeck.swift */,
+				1914BA586BA4C9DEEA1C1F1B /* SwiftDexExample.entitlements */,
 				5BD7255273A93DB0FEF98C81 /* SwiftDexExampleApp.swift */,
 				FC0CCF23004E37A3CF6D3F94 /* Slides */,
 			);
@@ -76,8 +91,13 @@
 		FC0CCF23004E37A3CF6D3F94 /* Slides */ = {
 			isa = PBXGroup;
 			children = (
-				D9989CA48434F958B482CB79 /* Slide01.swift */,
-				330C534E2AE44FAD0087A043 /* Slide02.swift */,
+				13B2BA426B1DF7981125E86F /* AboutBullets.swift */,
+				786503DAEC1B40E8FE92E4F3 /* AboutCode.swift */,
+				FD973B5EC48E36BB81327C8D /* AboutFlipper.swift */,
+				87F497EC9F50CC1B8B8B813C /* Introduction.swift */,
+				8962AB4430D3F7C083C3A1E7 /* Layout1.swift */,
+				BF13C473CE27B52270AB704F /* Layout2.swift */,
+				B1F9F0DDDBC33B4282CCF9D7 /* Title.swift */,
 			);
 			path = Slides;
 			sourceTree = "<group>";
@@ -90,6 +110,7 @@
 			buildConfigurationList = 91A8A4C7D21F847F9E6820A0 /* Build configuration list for PBXNativeTarget "SwiftDexExample" */;
 			buildPhases = (
 				D1D78B81991655C484F8BB8C /* Sources */,
+				9D98F95B3F56ED4ABF891806 /* Resources */,
 				8805283124F92CB74061485B /* Frameworks */,
 			);
 			buildRules = (
@@ -112,6 +133,8 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
 			};
 			buildConfigurationList = E15E23152568D5865A7732DB /* Build configuration list for PBXProject "SwiftDexExample" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -130,16 +153,32 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		9D98F95B3F56ED4ABF891806 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C65C6EBF4499FB2BD42BC98F /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		D1D78B81991655C484F8BB8C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C593253A72F7FD669328DEB /* AboutBullets.swift in Sources */,
+				274A715550012F0B44E78652 /* AboutCode.swift in Sources */,
+				75575BC4DABC455605E1C1DB /* AboutFlipper.swift in Sources */,
 				2A964C936EFFD3FD4FB87D13 /* ContentView.swift in Sources */,
+				41EDA80C0FB3207CFE8ED445 /* Introduction.swift in Sources */,
+				756853649535421BD8C4651D /* Layout1.swift in Sources */,
+				7E9E5ADFABCD0A103D28DC37 /* Layout2.swift in Sources */,
 				F738B7DCE656C80C7505BF48 /* MyDeck.swift in Sources */,
-				31673146270910D55FC25FE9 /* Slide01.swift in Sources */,
 				93912B3C4425A6203FC96450 /* SwiftDexExampleApp.swift in Sources */,
-				330C534F2AE44FAD0087A043 /* Slide02.swift in Sources */,
+				9EEC10946E592DFFAEA1B03A /* Title.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
