@@ -102,6 +102,6 @@ private struct TextStyleModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .font(fontStyle.font(textStyle: textStyle))
-            .foregroundColor(colorStyle.textColor(textStyle: textStyle))
+            .foregroundStyle(colorStyle.textColor(textStyle: textStyle))
     }
 }

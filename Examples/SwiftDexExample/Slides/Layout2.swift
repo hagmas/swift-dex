@@ -5,23 +5,15 @@ import AppKit
 
 struct Layout2: StandardLayoutSlide {
     @ViewBuilder
-    var head: some View {
-        "Layout"
-    }
-
-    @ViewBuilder
     var body: some View {
-        "Body View"
-    }
-
-    @ViewBuilder
-    var auxiliary: some View {
-        Image("Image")
+        "Background"
+            .foregroundStyle(.white)
+            .textStyle(.title)
     }
 
     var background: some View {
-        Image(systemName: "moon")
-//        Image("Mountain")
+        Image("Image")
+            .resizable()
     }
 }
 

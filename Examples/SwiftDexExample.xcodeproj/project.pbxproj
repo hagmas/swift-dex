@@ -3,12 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		274A715550012F0B44E78652 /* AboutCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786503DAEC1B40E8FE92E4F3 /* AboutCode.swift */; };
 		2A964C936EFFD3FD4FB87D13 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE46BC7FF2F4B42204668B45 /* ContentView.swift */; };
+		3332219C2B6EE99500C1DC63 /* MatchedTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3332219B2B6EE99500C1DC63 /* MatchedTitle.swift */; };
+		3332219E2B6EE9CB00C1DC63 /* MatchedContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3332219D2B6EE9CB00C1DC63 /* MatchedContent.swift */; };
 		3C593253A72F7FD669328DEB /* AboutBullets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13B2BA426B1DF7981125E86F /* AboutBullets.swift */; };
 		41EDA80C0FB3207CFE8ED445 /* Introduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F497EC9F50CC1B8B8B813C /* Introduction.swift */; };
 		74A3546B6459532D9FC788BB /* SwiftDex in Frameworks */ = {isa = PBXBuildFile; productRef = 901786E0D97D642D5C0CE960 /* SwiftDex */; };
@@ -25,6 +27,8 @@
 		13B2BA426B1DF7981125E86F /* AboutBullets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutBullets.swift; sourceTree = "<group>"; };
 		1914BA586BA4C9DEEA1C1F1B /* SwiftDexExample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftDexExample.entitlements; sourceTree = "<group>"; };
 		1CF0C9952FE28D81CF2AAC16 /* SwiftDexExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftDexExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3332219B2B6EE99500C1DC63 /* MatchedTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchedTitle.swift; sourceTree = "<group>"; };
+		3332219D2B6EE9CB00C1DC63 /* MatchedContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchedContent.swift; sourceTree = "<group>"; };
 		461ABD1D9D01D34EED6CFA3F /* MyDeck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyDeck.swift; sourceTree = "<group>"; };
 		5BD7255273A93DB0FEF98C81 /* SwiftDexExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDexExampleApp.swift; sourceTree = "<group>"; };
 		786503DAEC1B40E8FE92E4F3 /* AboutCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutCode.swift; sourceTree = "<group>"; };
@@ -50,6 +54,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3332219F2B70422900C1DC63 /* CustomViews */ = {
+			isa = PBXGroup;
+			children = (
+				13B2BA426B1DF7981125E86F /* AboutBullets.swift */,
+				786503DAEC1B40E8FE92E4F3 /* AboutCode.swift */,
+				FD973B5EC48E36BB81327C8D /* AboutFlipper.swift */,
+			);
+			path = CustomViews;
+			sourceTree = "<group>";
+		};
 		501A26D594E8B4BB207D6E6B /* SwiftDexExample */ = {
 			isa = PBXGroup;
 			children = (
@@ -91,12 +105,12 @@
 		FC0CCF23004E37A3CF6D3F94 /* Slides */ = {
 			isa = PBXGroup;
 			children = (
-				13B2BA426B1DF7981125E86F /* AboutBullets.swift */,
-				786503DAEC1B40E8FE92E4F3 /* AboutCode.swift */,
-				FD973B5EC48E36BB81327C8D /* AboutFlipper.swift */,
+				3332219F2B70422900C1DC63 /* CustomViews */,
 				87F497EC9F50CC1B8B8B813C /* Introduction.swift */,
 				8962AB4430D3F7C083C3A1E7 /* Layout1.swift */,
 				BF13C473CE27B52270AB704F /* Layout2.swift */,
+				3332219B2B6EE99500C1DC63 /* MatchedTitle.swift */,
+				3332219D2B6EE9CB00C1DC63 /* MatchedContent.swift */,
 				B1F9F0DDDBC33B4282CCF9D7 /* Title.swift */,
 			);
 			path = Slides;
@@ -134,6 +148,9 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					2466A19CA864616F94C97AEC = {
+						ProvisioningStyle = Manual;
+					};
 				};
 			};
 			buildConfigurationList = E15E23152568D5865A7732DB /* Build configuration list for PBXProject "SwiftDexExample" */;
@@ -171,11 +188,13 @@
 			files = (
 				3C593253A72F7FD669328DEB /* AboutBullets.swift in Sources */,
 				274A715550012F0B44E78652 /* AboutCode.swift in Sources */,
+				3332219C2B6EE99500C1DC63 /* MatchedTitle.swift in Sources */,
 				75575BC4DABC455605E1C1DB /* AboutFlipper.swift in Sources */,
 				2A964C936EFFD3FD4FB87D13 /* ContentView.swift in Sources */,
 				41EDA80C0FB3207CFE8ED445 /* Introduction.swift in Sources */,
 				756853649535421BD8C4651D /* Layout1.swift in Sources */,
 				7E9E5ADFABCD0A103D28DC37 /* Layout2.swift in Sources */,
+				3332219E2B6EE9CB00C1DC63 /* MatchedContent.swift in Sources */,
 				F738B7DCE656C80C7505BF48 /* MyDeck.swift in Sources */,
 				93912B3C4425A6203FC96450 /* SwiftDexExampleApp.swift in Sources */,
 				9EEC10946E592DFFAEA1B03A /* Title.swift in Sources */,
@@ -189,6 +208,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -196,6 +218,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hagmas.SwiftDexExample;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -321,6 +344,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -328,6 +354,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hagmas.SwiftDexExample;
 				SDKROOT = macosx;
 			};
 			name = Debug;
