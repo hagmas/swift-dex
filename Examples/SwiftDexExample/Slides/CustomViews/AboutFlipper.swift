@@ -18,7 +18,10 @@ struct AboutFlipper: StandardLayoutSlide {
                     "Scottish Fold"
                 }
                 .elementID(.bullets)
-                .frame(maxWidth: .infinity)
+                .frame(
+                    maxWidth: .infinity, 
+                    alignment: .leading
+                )
                 Flipper {
                     Image("bengal_cat")
                         .resizable()
