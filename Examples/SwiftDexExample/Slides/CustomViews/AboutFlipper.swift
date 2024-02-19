@@ -22,7 +22,10 @@ struct AboutFlipper: StandardLayoutSlide {
                     maxWidth: .infinity, 
                     alignment: .leading
                 )
-                Flipper {
+                Flipper(
+                    transition: .opacity,
+                    animation: .linear
+                ) {
                     Image("bengal_cat")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
@@ -46,8 +49,9 @@ struct AboutFlipper: StandardLayoutSlide {
     
     @ActionContainerBuilder
     var actionContainer: ActionContainer {
-        ApplyByItem(.fade, to: .bullets) & FlipByItem(.flipper) & Apply(.fade, to: .flipper)
-        
+        ApplyByItem(.fade, to: .bullets) 
+        & FlipByItem(.flipper)
+        & Apply(.fade, to: .flipper)
     }
 }
 
