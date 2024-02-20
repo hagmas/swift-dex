@@ -4,11 +4,17 @@ import SwiftUI
 import AppKit
 
 struct Layout2: StandardLayoutSlide {
+    
     @ViewBuilder
-    var body: some View {
+    var head: some View {
         "Background"
             .foregroundStyle(.white)
-            .textStyle(.title)
+    }
+    
+    @ViewBuilder
+    var body: some View {
+        "The background is positioned beneath the foreground elements and is displayed without any padding."
+            .foregroundStyle(.white)
     }
 
     var background: some View {

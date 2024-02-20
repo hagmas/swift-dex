@@ -3,20 +3,52 @@ import SwiftUI
 import SwiftDex
 
 struct AboutCode: StandardLayoutSlide {
+    @ViewBuilder
     var head: some View {
-        Text("Flipper")
+        "Code"
     }
 
     var body: some View {
-        Color(.yellow)
-    }
-    
-    var auxiliary: some View {
-        Color(.purple)
+        Code(
+            theme: DefaultDarkTheme(),
+            isScrollViewEnabled: true,
+            code:
+"""
+struct MyView: View {
+    var body: some View {
+        Text("Hello, Woooooooooooooooooooooooooooooooooooooooooooooooooooooooorld!")
     }
 }
 
-#Preview{
+struct MyView: View {
+    var body: some View {
+        Text("Hello, Woooooooooooooooooooooooooooooooooooooooooooooooooooooooorld!")
+    }
+}
+
+struct MyView: View {
+    var body: some View {
+        Text("Hello, Woooooooooooooooooooooooooooooooooooooooooooooooooooooooorld!")
+    }
+}
+
+struct MyView: View {
+    var body: some View {
+        Text("Hello, Woooooooooooooooooooooooooooooooooooooooooooooooooooooooorld!")
+    }
+}
+
+struct MyView: View {
+    var body: some View {
+        Text("Hello, Woooooooooooooooooooooooooooooooooooooooooooooooooooooooorld!")
+    }
+}
+"""
+        )
+    }
+}
+
+#Preview {
     SlidePreview(slide: AboutCode())
 }
 

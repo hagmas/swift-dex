@@ -90,4 +90,14 @@ public extension String {
         Text(self)
             .textScale(scale, isEnabled: isEnabled)
     }
+
+    func multilineTextAlignment(_ alignment: TextAlignment) -> some View {
+        Text(self)
+            .multilineTextAlignment(alignment)
+    }
+
+    func lineSpacing(_ lineSpacing: CGFloat) -> some View {
+        Text(self)
+            .lineSpacing(lineSpacing)
+    }
 }

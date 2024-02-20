@@ -6,10 +6,10 @@ where Head: View, Body: View, Auxiliary: View {
     private let head: Head
     private let body: Body
     private let auxiliary: Auxiliary
-    private let paddingForHeadTop: CGFloat = 40
+    private let paddingForHeadTop: CGFloat = 60
     private let paddingForHorizontal: CGFloat = 80
     private let paddingForVertical: CGFloat = 80
-    private let spaceForHeadAndBody: CGFloat = 40
+    private let spaceForHeadAndBody: CGFloat = 60
     private let spaceForHStack: CGFloat = 40
 
     /// Creates an instance.

@@ -3,13 +3,15 @@ import SwiftDex
 import SwiftUI
 
 struct Title: StandardLayoutSlide {
+    let title: String
+    
     @ViewBuilder
     var body: some View {
-        "Introducing SwiftDex"
+        title
             .textStyle(.title)
     }
 }
 
-#Preview{
-    SlidePreview(slide: Title())
+#Preview {
+    SlidePreview(slide: Title(title: "Introducing SwiftDex"))
 }

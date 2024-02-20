@@ -8,13 +8,21 @@ import SwiftUI
 public struct Code: View {
     private let theme: XcodeTheme
     private let lineGroup: LineGroup
+    private var viewModel: CodeViewModel
 
     /// Initializes a `Code` view with the specified theme and code string.
     ///
     /// - Parameters:
     ///   - theme: The `XcodeTheme` to be used for syntax highlighting. Defaults to `BasicTheme` if not specified.
+    ///   - fitWidthToParent: A Boolean indicating whether the content should scale to fit the parent view's width. When `true`, the view expands as much as possible in the parent view; otherwise, it sizes according to the content.
+    ///   - isScrollViewEnabled: A Boolean indicating if the content is placed on a `ScrollView`.
     ///   - code: The raw code string to be displayed and highlighted.
-    public init(theme: XcodeTheme = BasicTheme(), code: String) {
+    public init(
+        theme: XcodeTheme = BasicTheme(),
+        fitWidthToParent: Bool = false,
+        isScrollViewEnabled: Bool = false,
+        code: String
+    ) {
         self.theme = theme
         let grammer = SwiftGrammar()
         let syntaxHighlighter = SyntaxHighlighter(
@@ -22,17 +30,61 @@ public struct Code: View {
             grammar: grammer
         )
         self.lineGroup = syntaxHighlighter.highlight(code)
+        viewModel = CodeViewModel(
+            fitWidthToParent: fitWidthToParent,
+            isScrollViewEnabled: isScrollViewEnabled
+        )
     }
 
-    /// The content and behavior of the view.
+    /// The content of the view.
+    @ViewBuilder
     public var body: some View {
-        ScrollView([.horizontal, .vertical]) {
-            LineGroupView(theme: theme, lineGroup: lineGroup)
-                .font(.system(size: 36, weight: .regular, design: .monospaced))
-                .padding(24)
-                .background(
-                    theme.background
-                )
+        if viewModel.isScrollViewEnabled {
+            ScrollView(viewModel.scrollViewAxes) {
+                idealSizedContent
+            }
+        } else {
+            idealSizedContent
+        }
+    }
+}
+
+private extension Code {
+    @ViewBuilder
+    var idealSizedContent: some View {
+        if let idealSize = viewModel.idealSize {
+            content
+                .frame(width: idealSize.width, height: idealSize.height)
+        } else {
+            content
+        }
+    }
+    
+    private var content: some View {
+        GeometryReader { proxy in
+            Color.clear
+                .overlay {
+                    LineGroupView(theme: theme, lineGroup: lineGroup)
+                        .font(.system(size: 36, weight: .regular, design: .monospaced))
+                        .padding(24)
+                        .background(
+                            theme.background
+                        )
+                        .scaleEffect(CGSize(width: viewModel.ratio, height: viewModel.ratio), anchor: .center)
+                        .background(
+                            GeometryReader { proxy in
+                                Color.clear
+                                    .preference(key: ContentSizePreference.self, value: proxy.size)
+                                    .onPreferenceChange(ContentSizePreference.self) { value in
+                                        viewModel.set(contentSize: value)
+                                    }
+                            }
+                        )
+                }
+                .preference(key: ParentSizePreference.self, value: proxy.size)
+                .onPreferenceChange(ParentSizePreference.self) { value in
+                    viewModel.set(parentSize: value)
+                }
         }
     }
 }
@@ -56,6 +108,7 @@ private struct LineGroupView: View {
                 }
             }
         }
+        .fixedSize()
     }
 }
 
@@ -118,5 +171,27 @@ private extension XcodeTheme {
         case .custom(_):
             plainText
         }
+    }
+}
+
+private struct ContentSizePreference: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+
+    static func reduce(
+        value: inout CGSize,
+        nextValue: () -> CGSize
+    ) {
+        value = nextValue()
+    }
+}
+
+private struct ParentSizePreference: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+
+    static func reduce(
+        value: inout CGSize,
+        nextValue: () -> CGSize
+    ) {
+        value = nextValue()
     }
 }
