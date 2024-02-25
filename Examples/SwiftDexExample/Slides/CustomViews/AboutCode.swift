@@ -8,43 +8,38 @@ struct AboutCode: StandardLayoutSlide {
         "Code"
     }
 
+    @ViewBuilder
     var body: some View {
-        Code(
-            theme: DefaultDarkTheme(),
-            isScrollViewEnabled: true,
-            code:
-"""
-struct MyView: View {
-    var body: some View {
-        Text("Hello, Woooooooooooooooooooooooooooooooooooooooooooooooooooooooorld!")
+        VStack(alignment: .leading, spacing: 24) {
+            "Code displays code with syntax highlighting. It supports multiple Xcode Themes."
+            HStack(spacing: 40) {
+                code(name: "Default Dark", theme: DefaultDarkTheme())
+                code(name: "Sunset", theme: SunsetTheme())
+            }
+            .frame(maxHeight: .infinity)
+        }
     }
-}
+    
+    func code(name: String, theme: XcodeTheme) -> some View {
+        VStack(alignment: .center, spacing: 24) {
+            Code(
+                theme: theme,
+                code:
+    """
+    struct MyView: View {
+        var body: some View {
+            Text("Hello, World!")
+        }
+    }
+    """
+            )
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(theme.background)
+            .cornerRadius(16)
+            name
+        }
+        
 
-struct MyView: View {
-    var body: some View {
-        Text("Hello, Woooooooooooooooooooooooooooooooooooooooooooooooooooooooorld!")
-    }
-}
-
-struct MyView: View {
-    var body: some View {
-        Text("Hello, Woooooooooooooooooooooooooooooooooooooooooooooooooooooooorld!")
-    }
-}
-
-struct MyView: View {
-    var body: some View {
-        Text("Hello, Woooooooooooooooooooooooooooooooooooooooooooooooooooooooorld!")
-    }
-}
-
-struct MyView: View {
-    var body: some View {
-        Text("Hello, Woooooooooooooooooooooooooooooooooooooooooooooooooooooooorld!")
-    }
-}
-"""
-        )
     }
 }
 

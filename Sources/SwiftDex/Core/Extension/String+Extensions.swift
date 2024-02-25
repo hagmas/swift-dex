@@ -101,3 +101,11 @@ public extension String {
             .lineSpacing(lineSpacing)
     }
 }
+
+public func +(lhs: String, rhs: Text) -> Text {
+    Text(lhs) + rhs
+}
+
+public func +(lhs: Text, rhs: String) -> Text {
+    lhs + Text(rhs)
+}
