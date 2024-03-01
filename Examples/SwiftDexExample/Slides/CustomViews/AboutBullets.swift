@@ -19,7 +19,7 @@ struct AboutBullets: StandardLayoutSlide {
                 Image(systemName: "figure.curling")
             }
             Indent {
-                "Or an indent."
+                "or an indent."
             }
             "It can be animated using the " + "ApplyByItem".bold() + " Action."
         }
@@ -33,12 +33,12 @@ struct AboutBullets: StandardLayoutSlide {
 
     @ActionContainerBuilder
     var actionContainer: ActionContainer {
-        ApplyByItem(.custom, to: .bullets)
+        ApplyByItem(.fadeInFromUp, to: .bullets)
     }
 }
 
 private extension ElementTransition {
-    static let custom = ElementTransition(
+    static let fadeInFromUp = ElementTransition(
         animation: .bouncy,
         previous: .identity.opacity(0.0).offset(y: -20),
         current: .identity
