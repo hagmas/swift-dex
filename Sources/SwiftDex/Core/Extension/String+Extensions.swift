@@ -103,10 +103,12 @@ public extension String {
     }
 }
 
+/// Concatenates a `String` and a `Text` into a single `Text` instance.
 public func + (lhs: String, rhs: Text) -> Text {
     Text(lhs) + rhs
 }
 
+/// Concatenates a `Text` and a `String` into a single `Text` instance.
 public func + (lhs: Text, rhs: String) -> Text {
     lhs + Text(rhs)
 }
