@@ -1,6 +1,6 @@
 import SwiftUI
 
-@Observable 
+@Observable
 class CodeViewModel {
     let fitWidthToParent: Bool
     let isScrollViewEnabled: Bool
@@ -18,16 +18,17 @@ class CodeViewModel {
         self.contentSize = contentSize
         calculate()
     }
-    
+
     func set(parentSize: CGSize) {
         self.parentSize = parentSize
         calculate()
     }
-    
+
     var scrollViewAxes: Axis.Set {
         if fitWidthToParent {
             [.vertical]
-        } else {
+        }
+        else {
             [.vertical, .horizontal]
         }
     }
@@ -43,7 +44,8 @@ private extension CodeViewModel {
             let ratio = parentSize.width / contentSize.width
             idealSize = CGSize(width: parentSize.width, height: contentSize.height * ratio)
             self.ratio = ratio
-        } else {
+        }
+        else {
             idealSize = contentSize
         }
     }

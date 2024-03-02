@@ -1,7 +1,7 @@
+import AppKit
 import Foundation
 import SwiftDex
 import SwiftUI
-import AppKit
 
 struct AboutStandardLayout: StandardLayoutSlide {
     @ViewBuilder
@@ -20,6 +20,6 @@ struct AboutStandardLayout: StandardLayoutSlide {
     }
 }
 
-#Preview {
+#Preview{
     SlidePreview(slide: AboutStandardLayout())
 }

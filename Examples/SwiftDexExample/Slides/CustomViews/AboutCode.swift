@@ -1,6 +1,6 @@
 import Foundation
-import SwiftUI
 import SwiftDex
+import SwiftUI
 
 struct AboutCode: StandardLayoutSlide {
     @ViewBuilder
@@ -19,31 +19,29 @@ struct AboutCode: StandardLayoutSlide {
             .frame(maxHeight: .infinity)
         }
     }
-    
+
     func code(name: String, theme: XcodeTheme) -> some View {
         VStack(alignment: .center, spacing: 24) {
             Code(
                 theme: theme,
                 code:
-    """
-    struct MyView: View {
-        var body: some View {
-            Text("Hello, World!")
-        }
-    }
-    """
+                    """
+                    struct MyView: View {
+                        var body: some View {
+                            Text("Hello, World!")
+                        }
+                    }
+                    """
             )
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(theme.background)
             .cornerRadius(16)
             name
         }
-        
 
     }
 }
 
-#Preview {
+#Preview{
     SlidePreview(slide: AboutCode())
 }
-

@@ -6,17 +6,18 @@ public extension String {
             .elementID(elemenetID)
     }
 
-    func foregroundStyle<S>(_ style: S) -> some View where S : ShapeStyle {
+    func foregroundStyle<S>(_ style: S) -> some View where S: ShapeStyle {
         Text(self)
             .foregroundStyle(style)
     }
 
-    func foregroundStyle<S1, S2>(_ primary: S1, _ secondary: S2) -> some View where S1 : ShapeStyle, S2 : ShapeStyle {
+    func foregroundStyle<S1, S2>(_ primary: S1, _ secondary: S2) -> some View where S1: ShapeStyle, S2: ShapeStyle {
         Text(self)
             .foregroundStyle(primary, secondary)
     }
 
-    func foregroundStyle<S1, S2, S3>(_ primary: S1, _ secondary: S2, _ tertiary: S3) -> some View where S1 : ShapeStyle, S2 : ShapeStyle, S3 : ShapeStyle {
+    func foregroundStyle<S1, S2, S3>(_ primary: S1, _ secondary: S2, _ tertiary: S3) -> some View
+    where S1: ShapeStyle, S2: ShapeStyle, S3: ShapeStyle {
         Text(self)
             .foregroundStyle(primary, secondary, tertiary)
     }
@@ -102,10 +103,10 @@ public extension String {
     }
 }
 
-public func +(lhs: String, rhs: Text) -> Text {
+public func + (lhs: String, rhs: Text) -> Text {
     Text(lhs) + rhs
 }
 
-public func +(lhs: Text, rhs: String) -> Text {
+public func + (lhs: Text, rhs: String) -> Text {
     lhs + Text(rhs)
 }

@@ -1,6 +1,6 @@
 import Foundation
-import SwiftUI
 import SwiftDex
+import SwiftUI
 
 struct AboutFlipper: StandardLayoutSlide {
     var head: some View {
@@ -19,7 +19,7 @@ struct AboutFlipper: StandardLayoutSlide {
                 }
                 .elementID(.bullets)
                 .frame(
-                    maxWidth: .infinity, 
+                    maxWidth: .infinity,
                     alignment: .leading
                 )
                 Flipper(
@@ -50,12 +50,12 @@ struct AboutFlipper: StandardLayoutSlide {
         }
         .frame(maxWidth: .infinity)
     }
-    
+
     @ActionContainerBuilder
     var actionContainer: ActionContainer {
         ApplyByItem(.fadeInFromUp, to: .bullets)
-        & FlipByItem(.flipper)
-        & Apply(.fade, to: .flipper)
+            & FlipByItem(.flipper)
+            & Apply(.fade, to: .flipper)
     }
 }
 

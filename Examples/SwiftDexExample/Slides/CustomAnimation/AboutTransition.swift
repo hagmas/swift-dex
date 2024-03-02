@@ -14,18 +14,18 @@ struct AboutTransition: StandardLayoutSlide {
             Code(
                 theme: DefaultDarkTheme(),
                 code: """
-extension SlideTransition {
-    static func customPush(duration: TimeInterval = 0.5) -> SlideTransition {
-        SlideTransition(
-            transition: AnyTransition.asymmetric(
-                insertion: .move(edge: .trailing),
-                removal: AnyTransition(PushRemovalTransition())
-            ),
-            animation: .spring(duration: duration)
-        )
-    }
-}
-"""
+                    extension SlideTransition {
+                        static func customPush(duration: TimeInterval = 0.5) -> SlideTransition {
+                            SlideTransition(
+                                transition: AnyTransition.asymmetric(
+                                    insertion: .move(edge: .trailing),
+                                    removal: AnyTransition(PushRemovalTransition())
+                                ),
+                                animation: .spring(duration: duration)
+                            )
+                        }
+                    }
+                    """
             )
             .cornerRadius(16)
             Spacer()

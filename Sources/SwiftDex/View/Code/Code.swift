@@ -6,9 +6,9 @@ import SwiftUI
 /// This view takes in raw code as a string and applies syntax highlighting based on the specified `XcodeTheme`.
 /// It supports displaying the code in a scrollable view.
 ///
-/// If a line in the provided code exceeds the width of the view, it will not wrap to a new line; instead, it will be truncated due to the use of `.fixedSize()`. 
+/// If a line in the provided code exceeds the width of the view, it will not wrap to a new line; instead, it will be truncated due to the use of `.fixedSize()`.
 /// To display the entire content, consider using the `fitWidthToParent` or `isScrollViewEnabled` options.
-/// Note that if either of these options is set to `true`, the view will expand to fill the maximum available space within the parent view. 
+/// Note that if either of these options is set to `true`, the view will expand to fill the maximum available space within the parent view.
 /// If set to `false`, the view will size itself according to the content.
 public struct Code: View {
     private let theme: XcodeTheme
@@ -48,7 +48,8 @@ public struct Code: View {
             ScrollView(viewModel.scrollViewAxes) {
                 idealSizedContent
             }
-        } else {
+        }
+        else {
             idealSizedContent
         }
     }
@@ -60,11 +61,12 @@ private extension Code {
         if let idealSize = viewModel.idealSize {
             content
                 .frame(width: idealSize.width, height: idealSize.height)
-        } else {
+        }
+        else {
             content
         }
     }
-    
+
     private var content: some View {
         GeometryReader { proxy in
             Color.clear

@@ -22,14 +22,14 @@ private extension MyDeck {
             .next(AboutMatchedTransition0(), transition: .customPush())
             .next(AboutMatchedTransition1(), transition: .matched())
     }
-    
+
     var customViewsFlow: some Flow {
         Title(title: "Custom Views")
             .next(AboutBullets(), transition: .customPush())
             .next(AboutCode(), transition: .customPush())
             .next(AboutFlipper(), transition: .customPush())
     }
-    
+
     var layoutFlow: some Flow {
         Title(title: "Layout Flexibility")
             .next(AboutStandardLayout(), transition: .customPush())

@@ -32,7 +32,7 @@ struct AboutZoom: StandardLayoutSlide {
         }
         .frame(maxWidth: .infinity)
     }
-    
+
     @ActionContainerBuilder
     var actionContainer: ActionContainer {
         Zoom(.in(.element(0), ratio: 0.5))

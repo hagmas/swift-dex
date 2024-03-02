@@ -1,16 +1,16 @@
+import AppKit
 import Foundation
 import SwiftDex
 import SwiftUI
-import AppKit
 
 struct Layout2: StandardLayoutSlide {
-    
+
     @ViewBuilder
     var head: some View {
         "Background"
             .foregroundStyle(.white)
     }
-    
+
     @ViewBuilder
     var body: some View {
         "The background is positioned beneath the foreground elements and is displayed without any padding."
@@ -23,6 +23,6 @@ struct Layout2: StandardLayoutSlide {
     }
 }
 
-#Preview {
+#Preview{
     SlidePreview(slide: Layout2())
 }

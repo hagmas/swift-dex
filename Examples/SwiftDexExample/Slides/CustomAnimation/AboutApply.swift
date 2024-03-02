@@ -13,24 +13,28 @@ struct AboutApply: StandardLayoutSlide {
             Grid {
                 GridRow {
                     Spacer()
-                    iconView(title: "Fade") { Image(systemName: "fish").font(.system(size: 120))
+                    iconView(title: "Fade") {
+                        Image(systemName: "fish").font(.system(size: 120))
                             .elementID(.element(0))
                     }
                     Spacer()
                     Spacer()
-                    iconView(title: "Offset") { Image(systemName: "leaf").font(.system(size: 120))
+                    iconView(title: "Offset") {
+                        Image(systemName: "leaf").font(.system(size: 120))
                             .elementID(.element(1))
                     }
                     Spacer()
                 }
                 GridRow {
                     Spacer()
-                    iconView(title: "Blur") { Image(systemName: "bird").font(.system(size: 120))
+                    iconView(title: "Blur") {
+                        Image(systemName: "bird").font(.system(size: 120))
                             .elementID(.element(2))
                     }
                     Spacer()
                     Spacer()
-                    iconView(title: "Combination") { Image(systemName: "carrot").font(.system(size: 120))
+                    iconView(title: "Combination") {
+                        Image(systemName: "carrot").font(.system(size: 120))
                             .elementID(.element(3))
                     }
                     Spacer()
@@ -65,19 +69,19 @@ private extension ElementTransition {
         previous: .identity.opacity(0.0),
         current: .identity
     )
-    
+
     static let offset = ElementTransition(
         animation: .bouncy(duration: 1.2),
         previous: .identity.offset(x: -100).opacity(0.0),
         current: .identity
     )
-    
+
     static let blur = ElementTransition(
         animation: .bouncy(duration: 1.2),
         previous: .identity.blur(radius: 50).opacity(0.0),
         current: .identity
     )
-    
+
     static let combination = ElementTransition(
         animation: .bouncy(duration: 1.2),
         previous: .identity.opacity(0.0).blur(radius: 50).blur(radius: 50).offset(x: -100),

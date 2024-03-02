@@ -19,20 +19,24 @@ struct AboutAction: StandardLayoutSlide {
                     }
                 }
                 .frame(maxHeight: .infinity)
-                Code(theme: DefaultDarkTheme(), fitWidthToParent: true, code: """
-    struct SimpleSlide: StandardLayoutSlide {
-        @ViewBuilder
-        var body: some View {
-            "Target View"
-                .elementID(.element(0))
-        }
-        
-        @ActionContainerBuilder
-        var actionContainer: ActionContainer {
-            Apply(.fade, to: .element(0))
-        }
-    }
-    """)
+                Code(
+                    theme: DefaultDarkTheme(),
+                    fitWidthToParent: true,
+                    code: """
+                        struct SimpleSlide: StandardLayoutSlide {
+                            @ViewBuilder
+                            var body: some View {
+                                "Target View"
+                                    .elementID(.element(0))
+                            }
+                            
+                            @ActionContainerBuilder
+                            var actionContainer: ActionContainer {
+                                Apply(.fade, to: .element(0))
+                            }
+                        }
+                        """
+                )
                 .cornerRadius(16.0)
                 Spacer()
             }

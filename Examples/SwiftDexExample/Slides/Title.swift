@@ -4,7 +4,7 @@ import SwiftUI
 
 struct Title: StandardLayoutSlide {
     let title: String
-    
+
     @ViewBuilder
     var body: some View {
         title
@@ -12,6 +12,6 @@ struct Title: StandardLayoutSlide {
     }
 }
 
-#Preview {
+#Preview{
     SlidePreview(slide: Title(title: "Introducing SwiftDex"))
 }
