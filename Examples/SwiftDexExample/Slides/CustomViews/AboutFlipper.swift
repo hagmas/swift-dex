@@ -8,8 +8,8 @@ struct AboutFlipper: StandardLayoutSlide {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            "Flipper displays multiple views on the same place."
+        VStack(alignment: .leading, spacing: 32) {
+            "Flipper".bold() + " displays multiple views on the same place."
             HStack {
                 Bullets {
                     "Bengal Cat"
@@ -53,7 +53,7 @@ struct AboutFlipper: StandardLayoutSlide {
     
     @ActionContainerBuilder
     var actionContainer: ActionContainer {
-        ApplyByItem(.fade, to: .bullets) 
+        ApplyByItem(.fadeInFromUp, to: .bullets)
         & FlipByItem(.flipper)
         & Apply(.fade, to: .flipper)
     }

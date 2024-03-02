@@ -9,7 +9,7 @@ struct AboutBullets: StandardLayoutSlide {
 
     var body: some View {
         Bullets(style: .bullet) {
-            "Bullets is a view for displaying items in a bulleted list format."
+            "Bullets".bold() + " is a view for displaying items in a bulleted list format."
             "Bullet items can be text,"
             HStack {
                 "a SwiftUI view, "
@@ -35,14 +35,6 @@ struct AboutBullets: StandardLayoutSlide {
     var actionContainer: ActionContainer {
         ApplyByItem(.fadeInFromUp, to: .bullets)
     }
-}
-
-private extension ElementTransition {
-    static let fadeInFromUp = ElementTransition(
-        animation: .bouncy,
-        previous: .identity.opacity(0.0).offset(y: -20),
-        current: .identity
-    )
 }
 
 #Preview{

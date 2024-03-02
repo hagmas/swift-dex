@@ -9,33 +9,25 @@ struct Introduction: StandardLayoutSlide {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {
-            "`SwiftDex` is a framework for describing presentations in SwiftUI."
+            "SwiftDex".bold() + " is a framework for describing presentations in SwiftUI."
             Bullets {
-                "Supports animations."
-                "Supports custom views."
+                Text("Supports custom views, such as ") + "Buellts".bold() + ", " + "Code".bold() + ", or " + "Flipper".bold() + "."
+                "Supports animations with simple syntax."
+                "Flexible layouts."
             }
             .frame(
                 maxWidth: .infinity,
-                maxHeight: .infinity,
-                alignment: .topLeading
+                alignment: .leading
             )
             .elementID(.bullets)
+            Spacer()
         }
     }
 
     @ActionContainerBuilder
     var actionContainer: ActionContainer {
-        ApplyByItem(.custom, to: .bullets)
+        ApplyByItem(.fadeInFromUp, to: .bullets)
     }
-}
-
-private extension ElementTransition {
-    static let custom = ElementTransition(
-        animation: .bouncy,
-        previous: .identity.opacity(0.5).set(isHidden: true),
-        current: .identity.opacity(1.0).scaleEffect(CGSize(width: 1.2, height: 1.2)),
-        next: .identity.opacity(0.5)
-    )
 }
 
 #Preview{
