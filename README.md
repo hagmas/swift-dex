@@ -1,7 +1,8 @@
 # SwiftDex
 `SwiftDex` is a framework for describing presentations in SwiftUI.
 1. Supports custom views like `Bullets`, `Code` and `Flipper`.
-2. Supports animations.
+2. Supports animations with simple syntax.
+3. Flexible layouts.
 
 | Bullets | Code | Flipper |
 | --- | --- | --- |
