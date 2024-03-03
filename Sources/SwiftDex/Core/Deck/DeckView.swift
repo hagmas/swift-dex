@@ -62,6 +62,7 @@ private extension DeckView {
                     viewModel.forward()
                 }
             }
+            .clipped()
         }
     }
 

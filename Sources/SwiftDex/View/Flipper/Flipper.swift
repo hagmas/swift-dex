@@ -10,15 +10,24 @@ public struct Flipper: View {
 
     private let numberOfItems: Int
     private let content: [AnyView]
+    private let transition: AnyTransition
+    private let animation: Animation?
 
     /// Creates a new instance.
     ///
-    /// - Parameter content: A `@FlipperBuilder` closure returning an array of views to be displayed.
+    /// - Parameters:
+    ///     - transition: A `transition` applied to each items.
+    ///     - animation: An animation that is applied to the specified `transition`.
+    ///     - content: A `@FlipperBuilder` closure returning an array of views to be displayed.
     public init(
+        transition: AnyTransition = .identity,
+        animation: Animation? = nil,
         @FlipperBuilder content: @escaping () -> [AnyView]
     ) {
         self.content = content()
         self.numberOfItems = self.content.count
+        self.transition = transition
+        self.animation = animation
 
         let viewModel = FlipperViewModel(numberOfItems: numberOfItems)
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -27,9 +36,13 @@ public struct Flipper: View {
     /// The content and behavior of the view.
     public var body: some View {
         content[viewModel.step]
+            .id(viewModel.step)
+            .transition(transition)
             .onReceive(eventDispatcher.forward) { _ in
                 if isDynamic {
-                    viewModel.forward()
+                    withAnimation(animation) {
+                        viewModel.forward()
+                    }
                 }
             }
             .onChange(of: viewModel.step) { _, step in

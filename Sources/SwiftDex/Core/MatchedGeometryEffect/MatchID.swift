@@ -28,6 +28,14 @@ public extension View {
     }
 }
 
+public extension String {
+    /// Give a match ID to a view.
+    func matchID(_ id: MatchID) -> some View {
+        Text(self)
+            .modifier(MatchIDModifier(id: id))
+    }
+}
+
 private struct MatchIDModifier: ViewModifier {
     @Environment(\.namespaceID) var namespaceID
     @Environment(\.matchProperties) var matchProperties

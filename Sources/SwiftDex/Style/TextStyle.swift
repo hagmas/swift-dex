@@ -83,6 +83,13 @@ public extension View {
     }
 }
 
+public extension String {
+    func textStyle(_ textStyle: TextStyle) -> some View {
+        Text(self)
+            .modifier(TextStyleModifier(textStyle: textStyle))
+    }
+}
+
 private struct TextStyleModifier: ViewModifier {
     @Environment(\.fontStyle) var fontStyle
     @Environment(\.colorStyle) var colorStyle
@@ -95,6 +102,6 @@ private struct TextStyleModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .font(fontStyle.font(textStyle: textStyle))
-            .foregroundColor(colorStyle.textColor(textStyle: textStyle))
+            .foregroundStyle(colorStyle.textColor(textStyle: textStyle))
     }
 }

@@ -1,4 +1,6 @@
 name: SwiftDexExample
+options:
+  bundleIdPrefix: com.hagmas
 packages:
   SwiftDex:
     path: ../
@@ -8,6 +10,9 @@ targets:
     platform: macOS
     deploymentTarget: '14.0'
     settings:
+        CODE_SIGNING_REQUIRED: NO
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
         GENERATE_INFOPLIST_FILE: YES
     dependencies:
       - package: SwiftDex
