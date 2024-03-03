@@ -8,7 +8,6 @@ struct TapHandlerView<Content: View>: View {
     var body: some View {
         GeometryReader { proxy in
             content()
-                .contentShape(Rectangle())
                 .onTapGesture { location in
                     if location.x > proxy.size.width / 2 {
                         onRightTap()
@@ -16,6 +15,16 @@ struct TapHandlerView<Content: View>: View {
                     else {
                         onLeftTap()
                     }
+                }
+                .background {
+                    Button("") {
+                        onLeftTap()
+                    }
+                    .keyboardShortcut(.leftArrow, modifiers: [])
+                    Button("") {
+                        onRightTap()
+                    }
+                    .keyboardShortcut(.rightArrow, modifiers: [])
                 }
         }
     }
