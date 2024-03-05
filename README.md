@@ -4,7 +4,7 @@
 2. Supports animations with simple syntax.
 3. Flexible layouts.
 
-| Bullets | Flipper |
+| Bullets + Animation | Bullets + Flipper + Animation |
 | --- | --- |
 | <img src="https://github.com/hagmas/swift-dex/assets/7201608/9a9ec959-10ef-4385-8783-ec0911b899cb"> | <img src="https://github.com/hagmas/swift-dex/assets/7201608/c9ecbf05-d4cf-4ebb-b229-e6ce2ea4ace6"> |
 
