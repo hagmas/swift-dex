@@ -11,7 +11,7 @@
 # Installation
 
 # How to Use
-A Deck consists of multiple slides, and each slide is composed of Content, Background Views, and Actions.
+To create a presentation, you need to define a `Deck` that contains multiple slides with their transition information, and `Slide`s that define the content of each slide.
 
 ## 1. Defining a Slide
 Each slide can be defined as a type conforming to the `Slide` protocol.
