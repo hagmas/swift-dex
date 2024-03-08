@@ -9,6 +9,11 @@
 | <img src="https://github.com/hagmas/swift-dex/assets/7201608/9a9ec959-10ef-4385-8783-ec0911b899cb"> | <img src="https://github.com/hagmas/swift-dex/assets/7201608/c9ecbf05-d4cf-4ebb-b229-e6ce2ea4ace6"> |
 
 # Installation
+## Xcode Package Dependency
+Open `File` -> `Add Package Dependencies...` and search for this package with the URL below:
+```
+https://github.com/hagmas/swift-dex
+```
 
 # How to Use
 To create a presentation, you need to define a `Deck` that contains multiple slides with their transition information, and `Slide`s that define the content of each slide.
