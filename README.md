@@ -10,7 +10,7 @@
 
 # Installation
 ## Xcode Package Dependency
-File -> Add Package Dependencies... and search for this package with the URL below:
+Open `File` -> `Add Package Dependencies...` and search for this package with the URL below:
 ```
 https://github.com/hagmas/swift-dex
 ```
