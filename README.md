@@ -60,26 +60,28 @@ struct Slide01: StandardLayoutSlide {
 }
 ```
 ![Apply_Sample](https://github.com/hagmas/swift-dex/assets/7201608/ec94ab50-433a-4af1-9ec8-db31fea2d39b)
+
 It's possible to specify multiple `Action`s within a Slide. Advancing the slide (either by tapping on the left side of the slide view or pressing the left arrow key on the keyboard) triggers the actions sequentially, starting with the first one. There are several preset actions available, such as `ApplyByItem`, `Zoom`, and `FlipByItem`. Additionally, custom Actions can be created using custom views.
 
 ## 2. Defining a Deck
-A Deck can be defined from the types of each defined slide and information about transitions between slides.
-
-### `Flow` and `SlideTransition`
-`Flow` is a struct for specifying the sequence of slides and transition information. You can define the sequence of slides as follows:
+A Deck can be defined with the slide instances and information about transitions between slides.
 ```swift
-var flow: some Flow {
-    Slide01()
-        .next(Slide02(), transition: .push())
-        .next(Slide01(), transition: .matched())
+struct MyDeck: Deck {
+    var flow: some Flow {
+        Slide01()
+            .next(Slide02(), transition: .push())
+            .next(Slide01(), transition: .matched())
+    }
+
+    static var deckStyle: DeckStyle.Type {
+        CustomDeckStyle.self
+    }
 }
 ```
-
-### `DeckStyle`
-You can also specify a `DeckStyle` to be applied to the entire Deck. Define a type that conforms to the `DeckStyle` protocol and set it within the Deck.
+`Flow` is a struct for specifying the sequence of slides and transition information. You can also specify a `DeckStyle` to be applied to the entire Deck. Define a type that conforms to the `DeckStyle` protocol and set it within the Deck.
 
 ## 3. Displaying a Deck with `DeckView`
-A DeckView can be initialized from an instance of a Deck. The `DeckView` scales the slides while maintaining the aspect ratio to fit the size of the view.
+`DeckView` can be initialized from an instance of a Deck. The `DeckView` scales the slides while maintaining the aspect ratio to fit the size of the view.
 
 ## 4. Interacting with the Screen
 The `DeckView` can be clicked to advance the scenario set in the Deck (move the slide forward, execute an action). The left half of the screen is assigned the "backward" operation, and the right half is assigned the "forward" operation.
