@@ -17,18 +17,50 @@ To create a presentation, you need to define a `Deck` that contains multiple sli
 Each slide can be defined as a type conforming to the `Slide` protocol.
 ```swift
 struct Slide01: Slide {
+    var content: some View { ... }
+
+    var background: some View { ... }
 }
 ```
-The size of the slide is fixed at 1920x1080, and a ScaleEffect is applied to fit the size of the displayed view.
-
-### Custom Views
-There are custom views such as Bullets, Code, Flipper, etc.
+> [!NOTE]
+> Currently the size of the slide is fixed at 1920x1080, and a ScaleEffect is applied to fit the size of the displayed view.
 
 ### `StandardLayoutSlide`
-`Slide` can only set Foreground and Background and does not contain typical slide elements such as titles, contents, or layout information like padding. You can use these slide elements by using `StandardLayoutSlide`.
+`Slide` can only set Foreground and Background and does not contain any layout information or typical slide elements such as titles, contents, or layout information like padding. You can use these slide elements by using `StandardLayoutSlide`.
+```swift
+struct Slide01: StandardLayoutSlide {
+    var head: some View { ... }
+
+    var body: some View { ... }
+}
+```
+`StandardLayoutSlide` serves as a scaffold for foreground elements, positioning them at the forefront of the `Slide`.
+
+### Custom Views
+There are custom views such as `Bullets`, `Code`, `Flipper`, etc.
+- `Bullets`: A custom view for displaying text or views in a bulleted list format.
+- `Code`: A view that displays code with syntax highlighting.
+- `Flipper`: A view that displays multiple views split into steps.
 
 ### `Action`
-You can set `Action` on a slide. By executing an `Action`, animations can be applied to each element within the slide. You can use preset actions or create your own custom ones. For how to set up custom actions, please refer to ~~~.
+`Slide` is stateless, meaning its content cannot be dynamically changed using SwiftUI's property wrappers like `@State`. However, you can make the slide content dynamic by using `Action`. For instance, adding an `Apply` action allows animations to be applied to views identified by an `elementID`.
+```swift
+struct Slide01: StandardLayoutSlide {
+    @ViewBuilder
+    var body: some View {
+        "Title"
+            .textStyle(.title)
+            .elementID(.element(0))
+    }
+    
+    @ActionContainerBuilder
+    var actionContainer: ActionContainer {
+        Apply(.fade, to: .element(0))
+    }
+}
+```
+![Apply_Sample](https://github.com/hagmas/swift-dex/assets/7201608/ec94ab50-433a-4af1-9ec8-db31fea2d39b)
+It's possible to specify multiple `Action`s within a Slide. Advancing the slide (either by tapping on the left side of the slide view or pressing the left arrow key on the keyboard) triggers the actions sequentially, starting with the first one. There are several preset actions available, such as `ApplyByItem`, `Zoom`, and `FlipByItem`. Additionally, custom Actions can be created using custom views.
 
 ## 2. Defining a Deck
 A Deck can be defined from the types of each defined slide and information about transitions between slides.
