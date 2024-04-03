@@ -6,6 +6,10 @@ struct ElementViewModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
+            .rotationEffect(
+                elementModifier.rotationEffect.angle,
+                anchor: elementModifier.rotationEffect.anchor
+            )
             .scaleEffect(
                 elementModifier.scaleEffect.scale,
                 anchor: elementModifier.scaleEffect.anchor
@@ -13,6 +17,12 @@ struct ElementViewModifier: ViewModifier {
             .offset(
                 x: elementModifier.offset.x,
                 y: elementModifier.offset.y
+            )
+            .shadow(
+                color: elementModifier.shadow.color,
+                radius: elementModifier.shadow.radius,
+                x: elementModifier.shadow.x,
+                y: elementModifier.shadow.y
             )
             .opacity(elementModifier.opacity)
             .blur(

@@ -46,7 +46,7 @@ public extension ElementTransition {
     ///
     /// This transition starts with the element fully transparent and transitions to its defined state.
     static var appear: ElementTransition {
-        .init(previous: .identity.opacity(0))
+        .init(previous: .opacity(0))
     }
 
     /// A predefined `ElementTransition` with a fade-in effect.
@@ -55,7 +55,7 @@ public extension ElementTransition {
     static var fade: ElementTransition {
         .init(
             animation: .easeIn(duration: 0.3),
-            previous: .identity.opacity(0)
+            previous: .opacity(0)
         )
     }
 }
