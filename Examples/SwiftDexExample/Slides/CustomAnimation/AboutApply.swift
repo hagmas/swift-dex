@@ -66,26 +66,22 @@ private extension AboutApply {
 private extension ElementTransition {
     static let fadeIn = ElementTransition(
         animation: .bouncy(duration: 1.2),
-        previous: .identity.opacity(0.0),
-        current: .identity
+        previous: .opacity(0.0)
     )
 
     static let offset = ElementTransition(
         animation: .bouncy(duration: 1.2),
-        previous: .identity.offset(x: -100).opacity(0.0),
-        current: .identity
+        previous: .offset(x: -100).opacity(0.0)
     )
 
     static let blur = ElementTransition(
         animation: .bouncy(duration: 1.2),
-        previous: .identity.blur(radius: 50).opacity(0.0),
-        current: .identity
+        previous: .blur(radius: 50).opacity(0.0)
     )
 
     static let combination = ElementTransition(
         animation: .bouncy(duration: 1.2),
-        previous: .identity.opacity(0.0).blur(radius: 50).blur(radius: 50).offset(x: -100),
-        current: .identity
+        previous: .opacity(0.0).blur(radius: 50).blur(radius: 50).offset(x: -100)
     )
 }
 
