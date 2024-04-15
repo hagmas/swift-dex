@@ -46,6 +46,7 @@ struct SlideView<T>: View where T: Slide {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 slide.content
             }
+            HighlightView()
         }
         .environment(viewModel)
         .environmentObject(elementAnchors)

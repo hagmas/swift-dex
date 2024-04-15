@@ -43,6 +43,7 @@ struct AboutApply: StandardLayoutSlide {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
+
     @ActionContainerBuilder
     var actionContainer: ActionContainer {
         Apply(.fadeIn, to: .element(0))
