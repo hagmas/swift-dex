@@ -12,9 +12,9 @@ struct AboutStandardLayout: StandardLayoutSlide {
     @ViewBuilder
     var body: some View {
         Bullets {
-            "The " + "StandardLayoutSlide".bold() + " protocol allows you to write commonly used slide layouts."
-            "Includes layout information for the Head, Body, and Auxiliary sections, as well as details like padding."
-            "Using the " + "Slide".bold() + " protocol, you can also describe layouts from scratch."
+            "The **StandardLayoutSlide** protocol allows you to write commonly used slide layouts."
+            "Includes layout information for the **Head**, **Body**, and **Auxiliary** sections, as well as details like padding."
+            "Using the **Slide** protocol, you can also describe layouts from scratch."
         }
         .frame(maxHeight: .infinity, alignment: .top)
     }

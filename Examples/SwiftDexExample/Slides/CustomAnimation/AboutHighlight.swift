@@ -9,7 +9,7 @@ struct AboutHighlight: StandardLayoutSlide {
 
     var body: some View {
         VStack(alignment: .leading) {
-            "The " + "Highlight".bold() + " Action allows you to highlight an element by darkening or lightening the surrounding area."
+            "The **Highlight** Action allows you to highlight an element by darkening or lightening the surrounding area."
             VStack(alignment: .leading) {
                 "\"".textStyle(.subtitle)
                 Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")

@@ -9,7 +9,7 @@ struct AboutTransition: StandardLayoutSlide {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {
-            "Transitions between slides can be customized by defining a custom " + "SlideTransition".bold() + "."
+            "Transitions between slides can be customized by defining a custom **`SlideTransition`**."
             Spacer()
             Code(
                 theme: DefaultDarkTheme(),

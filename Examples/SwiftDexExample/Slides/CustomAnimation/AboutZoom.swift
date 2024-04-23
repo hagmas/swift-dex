@@ -9,7 +9,7 @@ struct AboutZoom: StandardLayoutSlide {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {
-            "The " + "Zoom".bold() + " Action is for zooming in or out on an Element."
+            "The **`Zoom`** Action is for zooming in or out on an Element."
             HStack {
                 Spacer()
                 Image(systemName: "circle.fill")
