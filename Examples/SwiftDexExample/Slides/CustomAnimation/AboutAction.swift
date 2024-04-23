@@ -9,12 +9,12 @@ struct AboutAction: StandardLayoutSlide {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {
-            "Slides with dynamic content can be created with " + "Actions".bold() + "."
+            "Slides with dynamic content can be created with **Actions**."
             HStack(spacing: 32) {
                 Bullets {
-                    Text("To use an ") + "Action:".bold()
+                    "To use an **Action:**"
                     Indent {
-                        "Assign an " + "ElementID".bold() + " to the target view."
+                        "Assign an **ElementID** to the target view."
                         "Specify the action using this ID in the action container."
                     }
                 }

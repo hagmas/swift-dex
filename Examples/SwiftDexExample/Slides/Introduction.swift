@@ -9,9 +9,9 @@ struct Introduction: StandardLayoutSlide {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {
-            "SwiftDex".bold() + " is a framework for describing presentations in SwiftUI."
+            "**SwiftDex** is a framework for describing presentations in SwiftUI."
             Bullets {
-                Text("Supports custom views, such as ") + "Buellts".bold() + ", " + "Code".bold() + ", or " + "Flipper".bold() + "."
+                "Supports custom views, such as **Buellts**, **Code**, or **Flipper**."
                 "Supports animations with simple syntax."
                 "Flexible layouts."
             }

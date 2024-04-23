@@ -9,8 +9,7 @@ struct AboutMatchedTransition0: StandardLayoutSlide {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            Text("The ") + ".matched()".bold() + Text(" transition lets you creating seamless animations with ") + "matchedGeometryEffect".bold()
-                + "."
+            "The **`.matched()`** transition lets you creating seamless animations with **`matchedGeometryEffect`**."
             Spacer()
             HStack {
                 Spacer()
@@ -44,8 +43,7 @@ struct AboutMatchedTransition1: StandardLayoutSlide {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {
-            Text("The ") + ".matched()".bold() + Text(" transition lets you creating seamless animations with ") + "matchedGeometryEffect".bold()
-                + "."
+            "The **`.matched()`** transition lets you creating seamless animations with **`matchedGeometryEffect`**."
             Spacer()
             HStack {
                 Spacer()

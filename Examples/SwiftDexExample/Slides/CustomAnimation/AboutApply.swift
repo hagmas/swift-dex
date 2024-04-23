@@ -9,7 +9,7 @@ struct AboutApply: StandardLayoutSlide {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {
-            "The " + "Apply".bold() + " Action allows you to apply various types of animations to elements within a slide."
+            "The **`Apply`** Action allows you to apply various types of animations to elements within a slide."
             Grid {
                 GridRow {
                     Spacer()

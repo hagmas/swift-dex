@@ -9,7 +9,7 @@ struct AboutBullets: StandardLayoutSlide {
 
     var body: some View {
         Bullets(style: .bullet) {
-            "Bullets".bold() + " is a view for displaying items in a bulleted list format."
+            "**Bullets** is a view for displaying items in a bulleted list format."
             "Bullet items can be text,"
             HStack {
                 "a SwiftUI view, "
@@ -21,7 +21,7 @@ struct AboutBullets: StandardLayoutSlide {
             Indent {
                 "or an indent."
             }
-            "It can be animated using the " + "ApplyByItem".bold() + " Action."
+            "It can be animated using the **ApplyByItem** Action."
         }
         .frame(
             maxWidth: .infinity,

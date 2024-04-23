@@ -107,7 +107,12 @@ private struct BulletsChildView: View {
                     if !isHidden(for: items[$0].index) {
                         HStack(alignment: .top) {
                             bulletView(for: item.itemNumber)
-                            Text(text)
+                            if let markdown = try? AttributedString(markdown: text) {
+                                Text(markdown)
+                            }
+                            else {
+                                Text(text)
+                            }
                         }
                         .apply(elementModifier(for: items[$0].index) ?? .identity)
                     }
