@@ -1,10 +1,10 @@
 import Foundation
 import SwiftUI
 
-class BulletsViewModel: ObservableObject {
+@Observable
+class BulletsViewModel {
     let items: [BulletItem]
     let numberOfItems: Int
-    @Published
     private(set) var step = 0
 
     init(items: [BulletItem]) {

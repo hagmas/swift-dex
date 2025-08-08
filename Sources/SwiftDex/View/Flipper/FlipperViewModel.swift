@@ -1,9 +1,9 @@
 import Foundation
 import SwiftUI
 
-class FlipperViewModel: ObservableObject {
+@Observable
+class FlipperViewModel {
     let numberOfItems: Int
-    @Published
     private(set) var step = 0
 
     init(numberOfItems: Int) {

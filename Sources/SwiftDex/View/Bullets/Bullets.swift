@@ -6,7 +6,7 @@ import SwiftUI
 public struct Bullets: View {
     let style: BulletStyle
     @EnvironmentObject var eventDispatcher: EventDispatcher
-    @StateObject var viewModel: BulletsViewModel
+    @State var viewModel: BulletsViewModel
     @ActionContext(ApplyByItem.self) var actionContext
 
     /// Creates an instance.
@@ -20,7 +20,7 @@ public struct Bullets: View {
     ) {
         self.style = style
         let viewModel = BulletsViewModel(items: items())
-        _viewModel = StateObject(wrappedValue: viewModel)
+        _viewModel = State(wrappedValue: viewModel)
     }
 
     /// The content and behavior of the view.
@@ -29,6 +29,7 @@ public struct Bullets: View {
             style: style,
             items: viewModel.items
         )
+        .environment(viewModel)
         .onReceive(eventDispatcher.forward) { _ in
             if isDynamic {
                 withAnimation(animation) {
@@ -59,7 +60,6 @@ public struct Bullets: View {
                 break
             }
         }
-        .environmentObject(viewModel)
         .animation(animation, value: actionContext.state)
         .animation(animation, value: viewModel.step)
     }
@@ -94,7 +94,7 @@ private extension Bullets {
 private struct BulletsChildView: View {
     let style: BulletStyle
     let items: [BulletItem]
-    @EnvironmentObject var viewModel: BulletsViewModel
+    @Environment(BulletsViewModel.self) var viewModel
     @ActionContext(ApplyByItem.self) var actionContext
 
     @ViewBuilder

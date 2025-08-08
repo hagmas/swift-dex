@@ -5,7 +5,7 @@ import SwiftUI
 /// Used in combination with the `FlipByItem` Action, it allows displaying multiple views provided as `content` in a "flip" manner.
 public struct Flipper: View {
     @EnvironmentObject var eventDispatcher: EventDispatcher
-    @StateObject var viewModel: FlipperViewModel
+    @State var viewModel: FlipperViewModel
     @ActionContext(FlipByItem.self) var actionContext
 
     private let numberOfItems: Int
@@ -30,7 +30,7 @@ public struct Flipper: View {
         self.animation = animation
 
         let viewModel = FlipperViewModel(numberOfItems: numberOfItems)
-        _viewModel = StateObject(wrappedValue: viewModel)
+        _viewModel = State(wrappedValue: viewModel)
     }
 
     /// The content and behavior of the view.
