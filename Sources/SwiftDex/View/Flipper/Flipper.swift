@@ -39,14 +39,14 @@ public struct Flipper: View {
             .id(viewModel.step)
             .transition(transition)
             .onReceive(eventDispatcher.forward) { _ in
-                if isDynamic {
+                if isActivated {
                     withAnimation(animation) {
                         viewModel.forward()
                     }
                 }
             }
             .onChange(of: viewModel.step) { _, step in
-                if isDynamic, viewModel.isReachedEnd, let actionID = actionContext.state?.actionID {
+                if isActivated, viewModel.isReachedEnd, let actionID = actionContext.state?.actionID {
                     actionContext.deactivate(actionID: actionID)
                 }
             }
@@ -77,8 +77,8 @@ public struct Flipper: View {
 }
 
 private extension Flipper {
-    var isDynamic: Bool {
-        actionContext.state?.isDynamic ?? false
+    var isActivated: Bool {
+        actionContext.state?.isActivated ?? false
     }
 
     var isAfterAction: Bool {

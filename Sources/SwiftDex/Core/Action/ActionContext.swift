@@ -113,8 +113,8 @@ public extension ActionState {
         }
     }
 
-    /// Indicates whether the action state is dynamic (i.e., whether it is in the activated state).
-    var isDynamic: Bool {
+    /// Indicates whether the action state is activated (i.e., whether it is in the activated state).
+    var isActivated: Bool {
         if case .activated(_) = self {
             return true
         }
