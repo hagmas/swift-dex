@@ -40,6 +40,16 @@ extension BulletItem {
             index
         }
     }
+
+    var numberOfItems: Int {
+        switch kind {
+        case .indent(let indent):
+            indent.items.reduce(0) { $0 + $1.numberOfItems }
+
+        default:
+            1
+        }
+    }
 }
 
 extension BulletItem: CustomDebugStringConvertible {
@@ -59,5 +69,11 @@ extension BulletItem: CustomDebugStringConvertible {
             ]
             """
         }
+    }
+}
+
+extension Array where Element == BulletItem {
+    var numberOfItems: Int {
+        reduce(0) { $0 + $1.numberOfItems }
     }
 }

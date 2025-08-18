@@ -27,14 +27,13 @@ public struct Bullets: View {
     public var body: some View {
         BulletsChildView(
             style: style,
-            items: viewModel.items
+            items: viewModel.items,
+            step: viewModel.step,
+            actionState: actionContext.state
         )
-        .environment(viewModel)
         .onReceive(eventDispatcher.forward) { _ in
             if isActivated {
-                withAnimation(animation) {
-                    viewModel.forward()
-                }
+                viewModel.forward()
             }
         }
         .onChange(of: viewModel.step) { _, step in
@@ -49,6 +48,7 @@ public struct Bullets: View {
 
             case .activated(let value):
                 viewModel.resetStep()
+                viewModel.forward()
                 if viewModel.numberOfItems == 1 {
                     actionContext.deactivate(actionID: value.actionID)
                 }
@@ -60,7 +60,6 @@ public struct Bullets: View {
                 break
             }
         }
-        .animation(animation, value: actionContext.state)
         .animation(animation, value: viewModel.step)
     }
 }
@@ -94,8 +93,8 @@ private extension Bullets {
 private struct BulletsChildView: View {
     let style: BulletStyle
     let items: [BulletItem]
-    @Environment(BulletsViewModel.self) var viewModel
-    @ActionContext(ApplyByItem.self) var actionContext
+    let step: Int
+    let actionState: ActionState<ApplyByItem>?
 
     @ViewBuilder
     var body: some View {
@@ -131,7 +130,9 @@ private struct BulletsChildView: View {
                         Text("\t\t")
                         BulletsChildView(
                             style: style,
-                            items: indent.items
+                            items: indent.items,
+                            step: step,
+                            actionState: actionState
                         )
                     }
                 }
@@ -163,15 +164,15 @@ private extension BulletsChildView {
     }
 
     func elementModifier(for index: Int) -> ElementModifier? {
-        switch actionContext.state {
+        switch actionState {
         case .static(let value):
             value.nearestElementModifier
 
         case .activated(let value):
-            if index < viewModel.step {
+            if index < step - 1 {
                 value.current.elementTransition.next ?? value.current.elementTransition.current
             }
-            else if index == viewModel.step {
+            else if index == step - 1 {
                 value.current.elementTransition.current
             }
             else {
@@ -179,7 +180,7 @@ private extension BulletsChildView {
             }
 
         case .deactivated(let value):
-            if index < viewModel.step {
+            if index < step - 1 {
                 value.current.elementTransition.next ?? value.current.elementTransition.current
             }
             else {
