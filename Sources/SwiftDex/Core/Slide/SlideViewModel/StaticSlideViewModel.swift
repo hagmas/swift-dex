@@ -40,7 +40,7 @@ final class StaticSlideViewModel: SlideViewModel {
                     step: step,
                     actionID: value.current.id,
                     current: value.current.action,
-                    previous: value.preivous?.action,
+                    previous: value.previous?.action,
                     next: value.next?.action
                 )
             )

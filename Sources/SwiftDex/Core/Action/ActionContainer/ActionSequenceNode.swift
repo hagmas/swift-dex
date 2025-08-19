@@ -7,7 +7,7 @@ enum ActionSequenceNode<A: Action> {
     }
 
     struct Dynamic {
-        let preivous: TaggedAction<A>?
+        let previous: TaggedAction<A>?
         let current: TaggedAction<A>
         let next: TaggedAction<A>?
     }

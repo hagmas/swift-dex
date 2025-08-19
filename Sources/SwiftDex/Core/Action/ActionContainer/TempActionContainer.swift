@@ -111,7 +111,7 @@ private struct ActionSequence<A: Action>: ActionSequenceNodeContainer {
                 next = actions[sortedSteps[i + 1]]
             }
             let newDynamicNode = ActionSequenceNode.Dynamic(
-                preivous: previous,
+                previous: previous,
                 current: current,
                 next: next
             )

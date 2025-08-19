@@ -43,7 +43,7 @@ final class DynamicSlideViewModel: SlideViewModel {
                         step: state.step,
                         actionID: value.current.id,
                         current: value.current.action,
-                        previous: value.preivous?.action,
+                        previous: value.previous?.action,
                         next: value.next?.action
                     )
                 )
@@ -54,7 +54,7 @@ final class DynamicSlideViewModel: SlideViewModel {
                         step: state.step,
                         actionID: value.current.id,
                         current: value.current.action,
-                        previous: value.preivous?.action,
+                        previous: value.previous?.action,
                         next: value.next?.action
                     )
                 )
