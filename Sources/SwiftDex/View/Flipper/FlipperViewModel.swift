@@ -11,7 +11,7 @@ class FlipperViewModel {
     }
 
     var isReachedEnd: Bool {
-        step == numberOfItems - 1
+        step == numberOfItems
     }
 
     func resetStep() {
@@ -19,7 +19,7 @@ class FlipperViewModel {
     }
 
     func setLastStep() {
-        step = numberOfItems - 1
+        step = numberOfItems
     }
 
     func forward() {

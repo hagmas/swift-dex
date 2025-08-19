@@ -20,7 +20,7 @@ public struct ActionContainer {
     }
 
     func actionIDs(for step: Int) -> Set<ActionID> {
-        guard 0 <= step && step <= step else {
+        guard 0 <= step && step <= actionIDs.count - 1 else {
             return .init()
         }
         return actionIDs[step]

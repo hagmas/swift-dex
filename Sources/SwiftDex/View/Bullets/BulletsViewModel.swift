@@ -9,16 +9,11 @@ class BulletsViewModel {
 
     init(items: [BulletItem]) {
         self.items = items
-        if let lastItemIndex = items.last?.lastItemIndex {
-            numberOfItems = lastItemIndex + 1
-        }
-        else {
-            numberOfItems = 0
-        }
+        numberOfItems = items.numberOfItems
     }
 
     var isReachedEnd: Bool {
-        step == numberOfItems - 1
+        step == numberOfItems
     }
 
     func resetStep() {
@@ -26,7 +21,7 @@ class BulletsViewModel {
     }
 
     func setLastStep() {
-        step = numberOfItems - 1
+        step = numberOfItems
     }
 
     func forward() {
