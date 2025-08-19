@@ -116,7 +116,7 @@ func assertActionSequenceNodeDynamic<A: Action & Equatable>(
 ) {
     switch node {
     case .dynamic(let node):
-        XCTAssertEqual(node.preivous?.action, previous, file: file, line: line)
+        XCTAssertEqual(node.previous?.action, previous, file: file, line: line)
         XCTAssertEqual(node.current.action, current, file: file, line: line)
         XCTAssertEqual(node.next?.action, next, file: file, line: line)
 

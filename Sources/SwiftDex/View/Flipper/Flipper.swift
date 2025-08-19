@@ -8,7 +8,6 @@ public struct Flipper: View {
     @State var viewModel: FlipperViewModel
     @ActionContext(FlipByItem.self) var actionContext
 
-    private let numberOfItems: Int
     private let content: [AnyView]
     private let transition: AnyTransition
     private let animation: Animation?
@@ -25,11 +24,10 @@ public struct Flipper: View {
         @FlipperBuilder content: @escaping () -> [AnyView]
     ) {
         self.content = content()
-        self.numberOfItems = self.content.count
         self.transition = transition
         self.animation = animation
 
-        let viewModel = FlipperViewModel(numberOfItems: numberOfItems)
+        let viewModel = FlipperViewModel(numberOfItems: self.content.count)
         _viewModel = State(wrappedValue: viewModel)
     }
 
