@@ -35,14 +35,12 @@ public struct Flipper: View {
 
     /// The content and behavior of the view.
     public var body: some View {
-        content[viewModel.step]
-            .id(viewModel.step)
+        content[max(viewModel.step-1, 0)]
+            .id(max(viewModel.step-1, 0))
             .transition(transition)
             .onReceive(eventDispatcher.forward) { _ in
                 if isActivated {
-                    withAnimation(animation) {
-                        viewModel.forward()
-                    }
+                    viewModel.forward()
                 }
             }
             .onChange(of: viewModel.step) { _, step in
@@ -62,6 +60,7 @@ public struct Flipper: View {
 
                 case .activated(let value):
                     viewModel.resetStep()
+                    viewModel.forward()
                     if viewModel.numberOfItems == 1 {
                         actionContext.deactivate(actionID: value.actionID)
                     }
@@ -73,6 +72,7 @@ public struct Flipper: View {
                     break
                 }
             }
+            .animation(animation, value: viewModel.step)
     }
 }
 
