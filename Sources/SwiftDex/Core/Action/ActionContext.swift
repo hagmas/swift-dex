@@ -14,20 +14,9 @@ public struct ActionContext<A: Action>: DynamicProperty {
     /// Initializes the `ActionContext` for a specific `Action` type.
     public init(_: A.Type) {}
 
-    /// The current `ActionContextValue`, containing the `elementID`, `slideViewModel`, and methods to interact with the action state.
-    public var wrappedValue: ActionContextValue<A> {
-        ActionContextValue(
-            elementID: elementID,
-            slideViewModel: slideViewModel
-        )
-    }
-}
-
-/// A container for managing the context of a specific action within a slide.
-public struct ActionContextValue<A: Action> {
-    let elementID: ElementID
-    let slideViewModel: AnySlideViewModel
-
+    /// Direct access to the ActionContext itself, eliminating the intermediate ActionContextValue layer.
+    public var wrappedValue: ActionContext<A> { self }
+    
     /// The current state of the action for the given element ID and action type.
     public var state: ActionState<A>? {
         slideViewModel.actionState(for: elementID, type: A.self)
