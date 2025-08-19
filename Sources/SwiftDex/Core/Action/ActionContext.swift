@@ -16,7 +16,7 @@ public struct ActionContext<A: Action>: DynamicProperty {
 
     /// Direct access to the ActionContext itself, eliminating the intermediate ActionContextValue layer.
     public var wrappedValue: ActionContext<A> { self }
-    
+
     /// The current state of the action for the given element ID and action type.
     public var state: ActionState<A>? {
         slideViewModel.actionState(for: elementID, type: A.self)
