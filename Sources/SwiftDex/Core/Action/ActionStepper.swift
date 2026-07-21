@@ -44,7 +44,12 @@ public struct ActionStepper<A: Action, Content: View>: View {
         content(progress)
             .onReceive(eventDispatcher.forward) { _ in
                 if isActive {
-                    step += 1
+                    // `withAnimation` is required for insertion/removal transitions
+                    // (e.g. Flipper's `.id` swap); the `.animation(_:value:)` modifier
+                    // below only reliably animates value changes, not structural ones.
+                    withAnimation(resolvedAnimation) {
+                        step += 1
+                    }
                 }
             }
             .onChange(of: step) { _, step in
