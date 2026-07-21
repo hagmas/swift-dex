@@ -5,9 +5,7 @@ import SwiftUI
 /// It allows for animations on each item using the `ApplyByItem` action, enabling dynamic visual effects for list presentations.
 public struct Bullets: View {
     let style: BulletStyle
-    @EnvironmentObject var eventDispatcher: EventDispatcher
-    @State var viewModel: BulletsViewModel
-    @ActionContext(ApplyByItem.self) var actionContext
+    private let items: [BulletItem]
 
     /// Creates an instance.
     ///
@@ -19,61 +17,21 @@ public struct Bullets: View {
         @BulletsBuilder items: () -> [BulletItem]
     ) {
         self.style = style
-        let viewModel = BulletsViewModel(items: items())
-        _viewModel = State(wrappedValue: viewModel)
+        self.items = items()
     }
 
     /// The content and behavior of the view.
     public var body: some View {
-        BulletsChildView(
-            style: style,
-            items: viewModel.items,
-            step: viewModel.step,
-            actionState: actionContext.state
-        )
-        .onReceive(eventDispatcher.forward) { _ in
-            if isActivated {
-                viewModel.forward()
-            }
+        ActionStepper(ApplyByItem.self, count: items.numberOfItems) { step, state in
+            BulletsChildView(
+                style: style,
+                items: items,
+                step: step,
+                actionState: state
+            )
+        } animation: { state in
+            state?.transitionAnimation
         }
-        .onChange(of: viewModel.step) { _, step in
-            if isActivated, viewModel.isReachedEnd, let actionID = actionContext.state?.actionID {
-                actionContext.deactivate(actionID: actionID)
-            }
-        }
-        .onChange(of: actionContext.state, initial: true) { _, state in
-            switch state {
-            case .static:
-                viewModel.resetStep()
-
-            case .activated(let value):
-                viewModel.resetStep()
-                viewModel.forward()
-                if viewModel.numberOfItems == 1 {
-                    actionContext.deactivate(actionID: value.actionID)
-                }
-
-            case .deactivated:
-                viewModel.setLastStep()
-
-            default:
-                break
-            }
-        }
-        .animation(animation, value: viewModel.step)
-    }
-}
-
-private extension Bullets {
-    var isActivated: Bool {
-        actionContext.state?.isActivated ?? false
-    }
-
-    var animation: Animation? {
-        guard actionContext.canBeAnimated else {
-            return nil
-        }
-        return actionContext.state?.transitionAnimation
     }
 }
 
