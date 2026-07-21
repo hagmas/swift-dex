@@ -4,10 +4,6 @@ import SwiftUI
 ///
 /// Used in combination with the `FlipByItem` Action, it allows displaying multiple views provided as `content` in a "flip" manner.
 public struct Flipper: View {
-    @EnvironmentObject var eventDispatcher: EventDispatcher
-    @State var viewModel: FlipperViewModel
-    @ActionContext(FlipByItem.self) var actionContext
-
     private let content: [AnyView]
     private let transition: AnyTransition
     private let animation: Animation?
@@ -26,72 +22,32 @@ public struct Flipper: View {
         self.content = content()
         self.transition = transition
         self.animation = animation
-
-        let viewModel = FlipperViewModel(numberOfItems: self.content.count)
-        _viewModel = State(wrappedValue: viewModel)
     }
 
     /// The content and behavior of the view.
     public var body: some View {
-        content[max(viewModel.step-1, 0)]
-            .id(max(viewModel.step-1, 0))
-            .transition(transition)
-            .onReceive(eventDispatcher.forward) { _ in
-                if isActivated {
-                    viewModel.forward()
-                }
-            }
-            .onChange(of: viewModel.step) { _, step in
-                if isActivated, viewModel.isReachedEnd, let actionID = actionContext.state?.actionID {
-                    actionContext.deactivate(actionID: actionID)
-                }
-            }
-            .onChange(of: actionContext.state, initial: true) { _, state in
-                switch state {
-                case .static:
-                    if isAfterAction {
-                        viewModel.setLastStep()
-                    }
-                    else {
-                        viewModel.resetStep()
-                    }
-
-                case .activated(let value):
-                    viewModel.resetStep()
-                    viewModel.forward()
-                    if viewModel.numberOfItems == 1 {
-                        actionContext.deactivate(actionID: value.actionID)
-                    }
-
-                case .deactivated:
-                    viewModel.setLastStep()
-
-                default:
-                    break
-                }
-            }
-            .animation(animation, value: viewModel.step)
+        ActionStepper(FlipByItem.self, count: content.count) { progress in
+            let index = currentIndex(for: progress)
+            content[index]
+                .id(index)
+                .transition(transition)
+        } animation: { _ in
+            animation
+        }
     }
 }
 
 private extension Flipper {
-    var isActivated: Bool {
-        actionContext.state?.isActivated ?? false
-    }
+    func currentIndex(for progress: ActionProgress<FlipByItem>) -> Int {
+        switch progress {
+        case .idle(let previous, _):
+            previous != nil ? content.count - 1 : 0
 
-    var isAfterAction: Bool {
-        switch actionContext.state {
-        case .static(let value):
-            value.previous != nil
+        case .active(_, let step):
+            max(step - 1, 0)
 
-        case .activated:
-            false
-
-        case .deactivated:
-            true
-
-        default:
-            false
+        case .completed:
+            content.count - 1
         }
     }
 }

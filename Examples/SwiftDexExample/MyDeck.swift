@@ -27,6 +27,7 @@ private extension MyDeck {
     var customViewsFlow: some Flow {
         Title(title: "Custom Views")
             .next(AboutBullets(), transition: .customPush())
+            .next(MultipleApplyByItem(), transition: .customPush())
             .next(AboutCode(), transition: .customPush())
             .next(AboutFlipper(), transition: .customPush())
     }

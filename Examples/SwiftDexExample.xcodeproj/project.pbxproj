@@ -19,6 +19,7 @@
 		338D153D2B9342D300ABB0F3 /* AboutMatchedTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338D153C2B9342D300ABB0F3 /* AboutMatchedTransition.swift */; };
 		338D153F2B937EB100ABB0F3 /* AboutAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338D153E2B937EB100ABB0F3 /* AboutAction.swift */; };
 		3C593253A72F7FD669328DEB /* AboutBullets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13B2BA426B1DF7981125E86F /* AboutBullets.swift */; };
+		AA10DEC0FFEE000000000002 /* MultipleApplyByItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10DEC0FFEE000000000001 /* MultipleApplyByItem.swift */; };
 		41EDA80C0FB3207CFE8ED445 /* Introduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F497EC9F50CC1B8B8B813C /* Introduction.swift */; };
 		74A3546B6459532D9FC788BB /* SwiftDex in Frameworks */ = {isa = PBXBuildFile; productRef = 901786E0D97D642D5C0CE960 /* SwiftDex */; };
 		75575BC4DABC455605E1C1DB /* AboutFlipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD973B5EC48E36BB81327C8D /* AboutFlipper.swift */; };
@@ -32,6 +33,7 @@
 
 /* Begin PBXFileReference section */
 		13B2BA426B1DF7981125E86F /* AboutBullets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutBullets.swift; sourceTree = "<group>"; };
+		AA10DEC0FFEE000000000001 /* MultipleApplyByItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipleApplyByItem.swift; sourceTree = "<group>"; };
 		1914BA586BA4C9DEEA1C1F1B /* SwiftDexExample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftDexExample.entitlements; sourceTree = "<group>"; };
 		1CF0C9952FE28D81CF2AAC16 /* SwiftDexExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftDexExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		336C5BC12BC1EE8D00EE756B /* AboutHighlight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutHighlight.swift; sourceTree = "<group>"; };
@@ -72,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				13B2BA426B1DF7981125E86F /* AboutBullets.swift */,
+				AA10DEC0FFEE000000000001 /* MultipleApplyByItem.swift */,
 				786503DAEC1B40E8FE92E4F3 /* AboutCode.swift */,
 				FD973B5EC48E36BB81327C8D /* AboutFlipper.swift */,
 			);
@@ -248,6 +251,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3C593253A72F7FD669328DEB /* AboutBullets.swift in Sources */,
+				AA10DEC0FFEE000000000002 /* MultipleApplyByItem.swift in Sources */,
 				338D14DF2B83B0B400ABB0F3 /* AboutStandardLayout.swift in Sources */,
 				274A715550012F0B44E78652 /* AboutCode.swift in Sources */,
 				75575BC4DABC455605E1C1DB /* AboutFlipper.swift in Sources */,

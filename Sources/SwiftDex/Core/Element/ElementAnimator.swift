@@ -3,42 +3,16 @@ import SwiftUI
 /// `ElementAnimator` is a `ViewModifier` for applying the `Apply` action to Views that have `.elementID()` applied.
 struct ElementAnimator: ViewModifier {
     let elementID: ElementID
-    @ActionContext(Apply.self) var actionContext
 
-    @ViewBuilder
     func body(content: Content) -> some View {
-        Group {
-            if !isHidden {
+        ActionStepper(Apply.self, count: 1) { progress in
+            let elementModifier = progress.elementModifier
+            if !(elementModifier?.isHidden ?? false) {
                 content.apply(elementModifier ?? .identity)
-                    .animation(animation, value: actionContext.state)
             }
+        } animation: { progress in
+            progress.transitionAnimation
         }
-        .onChange(of: actionContext.state?.actionID) { _, value in
-            guard let actionID = value else {
-                return
-            }
-            actionContext.deactivate(actionID: actionID)
-        }
-    }
-}
-
-extension ElementAnimator {
-    fileprivate var isHidden: Bool {
-        elementModifier?.isHidden ?? false
-    }
-
-    fileprivate var elementModifier: ElementModifier? {
-        guard let state = actionContext.state else {
-            return nil
-        }
-        return state.current?.elementTransition.current ?? state.nearestElementModifier
-    }
-
-    fileprivate var animation: Animation? {
-        guard actionContext.canBeAnimated else {
-            return nil
-        }
-        return actionContext.state?.transitionAnimation
     }
 }
 
