@@ -157,18 +157,18 @@ private extension BulletsChildView {
 
         case .activated(let value):
             if index < step - 1 {
-                value.current.elementTransition.next ?? value.current.elementTransition.current
+                value.current.elementTransition.after ?? value.current.elementTransition.current
             }
             else if index == step - 1 {
                 value.current.elementTransition.current
             }
             else {
-                value.current.elementTransition.previous
+                value.current.elementTransition.before
             }
 
         case .deactivated(let value):
             if index < step - 1 {
-                value.current.elementTransition.next ?? value.current.elementTransition.current
+                value.current.elementTransition.after ?? value.current.elementTransition.current
             }
             else {
                 value.current.elementTransition.current

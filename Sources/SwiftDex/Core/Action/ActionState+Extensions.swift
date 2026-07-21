@@ -55,11 +55,11 @@ public extension ActionState where A: TransitionAction {
 
     /// The `ElementModifier` resolved from neighboring actions when no action exists at this step.
     ///
-    /// Resolution order: the next action's `previous` state, the previous action's `next` state,
+    /// Resolution order: the next action's `before` state, the previous action's `after` state,
     /// then the previous action's `current` state.
     var nearestElementModifier: ElementModifier? {
-        next?.elementTransition.previous
-            ?? previous?.elementTransition.next
+        next?.elementTransition.before
+            ?? previous?.elementTransition.after
             ?? previous?.elementTransition.current
     }
 }
