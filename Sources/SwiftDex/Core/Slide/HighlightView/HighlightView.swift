@@ -64,29 +64,11 @@ private extension HighlightView {
 
 private extension ActionState<Highlight> {
     var color: NSColor? {
-        switch self {
-        case .static:
-            nil
-
-        case .activated(let value):
-            value.current.mode.color
-
-        case .deactivated(let value):
-            value.current.mode.color
-        }
+        current?.mode.color
     }
 
     var target: ElementID? {
-        switch self {
-        case .static:
-            nil
-
-        case .activated(let value):
-            value.current.target
-
-        case .deactivated(let value):
-            value.current.target
-        }
+        current?.target
     }
 }
 

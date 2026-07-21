@@ -1,7 +1,7 @@
 import Foundation
 
 /// An `Action` for applying `ElementTransition` to each item in the `Bullets`.
-public struct ApplyByItem: Action {
+public struct ApplyByItem: TransitionAction {
     /// The `ElementTransition` that will be applied to each items in the `Bullets`.
     public let elementTransition: ElementTransition
 

@@ -28,57 +28,17 @@ extension ElementAnimator {
     }
 
     fileprivate var elementModifier: ElementModifier? {
-        switch actionContext.state {
-        case .static(let value):
-            value.nearestElementModifier
-
-        case .activated(let value):
-            value.current.elementTransition.current
-
-        case .deactivated(let value):
-            value.current.elementTransition.current
-
-        default:
-            nil
+        guard let state = actionContext.state else {
+            return nil
         }
+        return state.current?.elementTransition.current ?? state.nearestElementModifier
     }
 
     fileprivate var animation: Animation? {
         guard actionContext.canBeAnimated else {
             return nil
         }
-
-        switch actionContext.state {
-        case .static(let value):
-            return value.previous?.elementTransition.animation
-
-        case .activated(let value):
-            return value.current.elementTransition.animation
-
-        case .deactivated(let value):
-            return value.current.elementTransition.animation
-
-        default:
-            return nil
-        }
-    }
-}
-
-extension ActionState.Static where A == Apply {
-    fileprivate var nearestElementModifier: ElementModifier? {
-        if let value = next?.elementTransition.previous {
-            return value
-        }
-
-        if let value = previous?.elementTransition.next {
-            return value
-        }
-
-        if let value = previous?.elementTransition.current {
-            return value
-        }
-
-        return nil
+        return actionContext.state?.transitionAnimation
     }
 }
 
