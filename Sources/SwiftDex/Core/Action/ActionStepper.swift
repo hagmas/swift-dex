@@ -53,11 +53,11 @@ public struct ActionStepper<A: Action, Content: View>: View {
                 }
             }
             .onChange(of: actionContext.state, initial: true) { _, state in
-                if case .activated(let value) = state {
-                    step = 1
-                    if count <= 1 {
-                        actionContext.deactivate(actionID: value.actionID)
-                    }
+                // Outside the activated state, `step` is kept at 1 so that the first
+                // render of a fresh activation never sees a stale sub-step.
+                step = 1
+                if case .activated(let value) = state, count <= 1 {
+                    actionContext.deactivate(actionID: value.actionID)
                 }
             }
             .animation(resolvedAnimation, value: AnimationKey(state: actionContext.state, step: step))
