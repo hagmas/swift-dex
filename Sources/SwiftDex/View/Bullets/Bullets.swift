@@ -73,20 +73,7 @@ private extension Bullets {
         guard actionContext.canBeAnimated else {
             return nil
         }
-
-        switch actionContext.state {
-        case .static(let value):
-            return value.previous?.elementTransition.animation
-
-        case .activated(let value):
-            return value.current.elementTransition.animation
-
-        case .deactivated(let value):
-            return value.current.elementTransition.animation
-
-        default:
-            return nil
-        }
+        return actionContext.state?.transitionAnimation
     }
 }
 
@@ -165,23 +152,23 @@ private extension BulletsChildView {
 
     func elementModifier(for index: Int) -> ElementModifier? {
         switch actionState {
-        case .static(let value):
-            value.nearestElementModifier
+        case .static:
+            actionState?.nearestElementModifier
 
         case .activated(let value):
             if index < step - 1 {
-                value.current.elementTransition.next ?? value.current.elementTransition.current
+                value.current.elementTransition.after ?? value.current.elementTransition.current
             }
             else if index == step - 1 {
                 value.current.elementTransition.current
             }
             else {
-                value.current.elementTransition.previous
+                value.current.elementTransition.before
             }
 
         case .deactivated(let value):
             if index < step - 1 {
-                value.current.elementTransition.next ?? value.current.elementTransition.current
+                value.current.elementTransition.after ?? value.current.elementTransition.current
             }
             else {
                 value.current.elementTransition.current
@@ -190,23 +177,5 @@ private extension BulletsChildView {
         default:
             nil
         }
-    }
-}
-
-private extension ActionState.Static where A == ApplyByItem {
-    var nearestElementModifier: ElementModifier? {
-        if let value = next?.elementTransition.previous {
-            return value
-        }
-
-        if let value = previous?.elementTransition.next {
-            return value
-        }
-
-        if let value = previous?.elementTransition.current {
-            return value
-        }
-
-        return nil
     }
 }

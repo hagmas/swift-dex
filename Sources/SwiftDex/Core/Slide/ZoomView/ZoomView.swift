@@ -74,28 +74,10 @@ private extension ZoomView {
 
 private extension ActionState<Zoom> {
     var elementID: ElementID? {
-        switch self {
-        case .static(let value):
-            value.previous?.operation.elementID
-
-        case .activated(let value):
-            value.current.operation.elementID
-
-        case .deactivated(let value):
-            value.current.operation.elementID
-        }
+        (current ?? previous)?.operation.elementID
     }
 
     var ratio: CGFloat? {
-        switch self {
-        case .static(let value):
-            value.previous?.ratio
-
-        case .activated(let value):
-            value.current.ratio
-
-        case .deactivated(let value):
-            value.current.ratio
-        }
+        (current ?? previous)?.ratio
     }
 }

@@ -8,36 +8,36 @@ public struct ElementTransition {
     /// The `Animation` value used when applying the specified `ElementModifier` to an Element.
     public let animation: Animation?
 
-    /// Optional, defines the state of an element before this value is applied.
+    /// Optional, defines the state of an element before this transition is applied.
     ///
     /// If not specified, a default value is applied.
-    public let previous: ElementModifier?
+    public let before: ElementModifier?
 
-    /// The value that defines the state of an element after this value is applied.
+    /// The value that defines the state of an element once this transition is applied.
     public let current: ElementModifier
 
-    /// Optional, defines the state of an element after this value is applied.
+    /// Optional, defines the state of an element after a subsequent action has superseded this transition.
     ///
     /// If not specified, the value of `current` is applied.
-    public let next: ElementModifier?
+    public let after: ElementModifier?
 
     /// Initializes a new `ElementTransition`.
     ///
     /// - Parameters:
     ///   - animation: The animation to be used during the transition.
-    ///   - previous: The state of the element before the transition.
+    ///   - before: The state of the element before the transition.
     ///   - current: The main state of the element during the transition.
-    ///   - next: The state of the element after the transition.
+    ///   - after: The state of the element after the transition has been superseded.
     public init(
         animation: Animation? = nil,
-        previous: ElementModifier? = nil,
+        before: ElementModifier? = nil,
         current: ElementModifier = .identity,
-        next: ElementModifier? = nil
+        after: ElementModifier? = nil
     ) {
         self.animation = animation
-        self.previous = previous
+        self.before = before
         self.current = current
-        self.next = next
+        self.after = after
     }
 }
 
@@ -46,7 +46,7 @@ public extension ElementTransition {
     ///
     /// This transition starts with the element fully transparent and transitions to its defined state.
     static var appear: ElementTransition {
-        .init(previous: .opacity(0))
+        .init(before: .opacity(0))
     }
 
     /// A predefined `ElementTransition` with a fade-in effect.
@@ -55,7 +55,7 @@ public extension ElementTransition {
     static var fade: ElementTransition {
         .init(
             animation: .easeIn(duration: 0.3),
-            previous: .opacity(0)
+            before: .opacity(0)
         )
     }
 }

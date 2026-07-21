@@ -1,7 +1,7 @@
 import Foundation
 
 /// An `Action` for applying `ElementTransition` to an Element.
-public struct Apply: Action {
+public struct Apply: TransitionAction {
     /// The `ElementTransition` that will be applied to the target.
     public let elementTransition: ElementTransition
 
