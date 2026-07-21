@@ -26,12 +26,28 @@ public struct Flipper: View {
 
     /// The content and behavior of the view.
     public var body: some View {
-        ActionStepper(FlipByItem.self, count: content.count) { step, _ in
-            content[max(step - 1, 0)]
-                .id(max(step - 1, 0))
+        ActionStepper(FlipByItem.self, count: content.count) { progress in
+            let index = currentIndex(for: progress)
+            content[index]
+                .id(index)
                 .transition(transition)
         } animation: { _ in
             animation
+        }
+    }
+}
+
+private extension Flipper {
+    func currentIndex(for progress: ActionProgress<FlipByItem>) -> Int {
+        switch progress {
+        case .idle(let previous, _):
+            previous != nil ? content.count - 1 : 0
+
+        case .active(_, let step):
+            max(step - 1, 0)
+
+        case .completed:
+            content.count - 1
         }
     }
 }

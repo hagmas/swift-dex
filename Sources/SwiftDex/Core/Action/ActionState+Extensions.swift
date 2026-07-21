@@ -43,23 +43,3 @@ public extension ActionState {
         }
     }
 }
-
-public extension ActionState where A: TransitionAction {
-    /// The animation for the current state.
-    ///
-    /// Returns the current action's animation, falling back to the previous action's
-    /// animation when no action exists at this step.
-    var transitionAnimation: Animation? {
-        (current ?? previous)?.elementTransition.animation
-    }
-
-    /// The `ElementModifier` resolved from neighboring actions when no action exists at this step.
-    ///
-    /// Resolution order: the next action's `before` state, the previous action's `after` state,
-    /// then the previous action's `current` state.
-    var nearestElementModifier: ElementModifier? {
-        next?.elementTransition.before
-            ?? previous?.elementTransition.after
-            ?? previous?.elementTransition.current
-    }
-}

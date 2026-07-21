@@ -22,15 +22,15 @@ public struct Bullets: View {
 
     /// The content and behavior of the view.
     public var body: some View {
-        ActionStepper(ApplyByItem.self, count: items.numberOfItems) { step, state in
+        ActionStepper(ApplyByItem.self, count: items.numberOfItems) { progress in
             BulletsChildView(
                 style: style,
                 items: items,
-                step: step,
-                actionState: state
+                numberOfItems: items.numberOfItems,
+                progress: progress
             )
-        } animation: { state in
-            state?.transitionAnimation
+        } animation: { progress in
+            progress.transitionAnimation
         }
     }
 }
@@ -38,8 +38,8 @@ public struct Bullets: View {
 private struct BulletsChildView: View {
     let style: BulletStyle
     let items: [BulletItem]
-    let step: Int
-    let actionState: ActionState<ApplyByItem>?
+    let numberOfItems: Int
+    let progress: ActionProgress<ApplyByItem>
 
     @ViewBuilder
     var body: some View {
@@ -76,8 +76,8 @@ private struct BulletsChildView: View {
                         BulletsChildView(
                             style: style,
                             items: indent.items,
-                            step: step,
-                            actionState: actionState
+                            numberOfItems: numberOfItems,
+                            progress: progress
                         )
                     }
                 }
@@ -109,31 +109,30 @@ private extension BulletsChildView {
     }
 
     func elementModifier(for index: Int) -> ElementModifier? {
-        switch actionState {
-        case .static:
-            actionState?.nearestElementModifier
+        switch progress {
+        case .idle:
+            return progress.elementModifier
 
-        case .activated(let value):
+        case .active(let current, let step):
+            let transition = current.elementTransition
             if index < step - 1 {
-                value.current.elementTransition.after ?? value.current.elementTransition.current
+                return transition.after ?? transition.current
             }
             else if index == step - 1 {
-                value.current.elementTransition.current
+                return transition.current
             }
             else {
-                value.current.elementTransition.before
+                return transition.before
             }
 
-        case .deactivated(let value):
-            if index < step - 1 {
-                value.current.elementTransition.after ?? value.current.elementTransition.current
+        case .completed(let current):
+            let transition = current.elementTransition
+            if index < numberOfItems - 1 {
+                return transition.after ?? transition.current
             }
             else {
-                value.current.elementTransition.current
+                return transition.current
             }
-
-        default:
-            nil
         }
     }
 }

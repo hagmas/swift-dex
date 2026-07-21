@@ -1,37 +1,38 @@
 import SwiftUI
 
-/// A view that drives the step-by-step lifecycle of an `Action` that completes over multiple sub-steps.
+/// A view that drives the lifecycle of an `Action` and renders content from its `ActionProgress`.
 ///
-/// `ActionStepper` owns the entire lifecycle of a step-driven action: it advances the current
-/// step each time the slide moves forward, follows `ActionState` changes (resetting or
-/// fast-forwarding the step as needed), and notifies the slide that the action is complete
-/// once all sub-steps have been shown. A custom `View` only needs to render its content
-/// from the current step and `ActionState`.
+/// `ActionStepper` owns the entire lifecycle of an action: it advances the current sub-step
+/// each time the slide moves forward, follows `ActionState` changes, and notifies the slide
+/// that the action is complete once all sub-steps have been shown. A custom `View` only
+/// needs to render its content from the `ActionProgress` it receives.
 ///
-/// The step starts at `0` (nothing shown), advances to `1` when the action is activated,
-/// and completes when it reaches `count`.
+/// A step-driven action (`count > 1`) progresses through `active(current:step:)` with the
+/// sub-step counting from `1` to `count`, then completes. A one-shot action (`count == 1`)
+/// completes immediately upon activation.
 public struct ActionStepper<A: Action, Content: View>: View {
     @EnvironmentObject private var eventDispatcher: EventDispatcher
     @ActionContext(A.self) private var actionContext
-    @State private var step = 0
+    @State private var step = 1
 
     private let count: Int
-    private let content: (_ step: Int, _ state: ActionState<A>?) -> Content
-    private let animation: ((ActionState<A>?) -> Animation?)?
+    private let content: (ActionProgress<A>) -> Content
+    private let animation: ((ActionProgress<A>) -> Animation?)?
 
     /// Creates a new instance.
     ///
     /// - Parameters:
     ///   - type: The `Action` type this view responds to.
     ///   - count: The number of sub-steps required to complete the action.
-    ///   - content: A closure that renders the content for the current step and `ActionState`.
-    ///   - animation: An optional closure that resolves the `Animation` used when the step
-    ///     changes. The animation is suppressed when the slide state does not allow animations.
+    ///   - content: A closure that renders the content for the current `ActionProgress`.
+    ///   - animation: An optional closure that resolves the `Animation` used when the
+    ///     progress changes. The animation is suppressed when the slide state does not
+    ///     allow animations.
     public init(
         _ type: A.Type,
         count: Int,
-        @ViewBuilder content: @escaping (_ step: Int, _ state: ActionState<A>?) -> Content,
-        animation: ((ActionState<A>?) -> Animation?)? = nil
+        @ViewBuilder content: @escaping (ActionProgress<A>) -> Content,
+        animation: ((ActionProgress<A>) -> Animation?)? = nil
     ) {
         self.count = count
         self.content = content
@@ -40,41 +41,52 @@ public struct ActionStepper<A: Action, Content: View>: View {
 
     /// The content and behavior of the view.
     public var body: some View {
-        content(step, actionContext.state)
+        content(progress)
             .onReceive(eventDispatcher.forward) { _ in
-                if isActivated {
+                if isActive {
                     step += 1
                 }
             }
             .onChange(of: step) { _, step in
-                if isActivated, step == count, let actionID = actionContext.state?.actionID {
+                if isActive, step >= count, let actionID = actionContext.state?.actionID {
                     actionContext.deactivate(actionID: actionID)
                 }
             }
             .onChange(of: actionContext.state, initial: true) { _, state in
-                switch state {
-                case .static:
-                    step = state?.previous != nil ? count : 0
-
-                case .activated(let value):
+                if case .activated(let value) = state {
                     step = 1
-                    if count == 1 {
+                    if count <= 1 {
                         actionContext.deactivate(actionID: value.actionID)
                     }
-
-                case .deactivated:
-                    step = count
-
-                default:
-                    break
                 }
             }
-            .animation(resolvedAnimation, value: step)
+            .animation(resolvedAnimation, value: AnimationKey(state: actionContext.state, step: step))
     }
 }
 
 private extension ActionStepper {
-    var isActivated: Bool {
+    struct AnimationKey: Equatable {
+        let state: ActionState<A>?
+        let step: Int
+    }
+
+    var progress: ActionProgress<A> {
+        switch actionContext.state {
+        case .static(let value):
+            .idle(previous: value.previous, next: value.next)
+
+        case .activated(let value):
+            .active(current: value.current, step: step)
+
+        case .deactivated(let value):
+            .completed(current: value.current)
+
+        case nil:
+            .idle(previous: nil, next: nil)
+        }
+    }
+
+    var isActive: Bool {
         actionContext.state?.isActivated ?? false
     }
 
@@ -82,6 +94,6 @@ private extension ActionStepper {
         guard actionContext.canBeAnimated else {
             return nil
         }
-        return animation?(actionContext.state)
+        return animation?(progress)
     }
 }
