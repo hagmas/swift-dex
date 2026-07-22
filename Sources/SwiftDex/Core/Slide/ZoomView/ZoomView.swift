@@ -54,20 +54,3 @@ private extension ZoomView {
         return rect.insetBy(dx: -xInset, dy: -yInset)
     }
 }
-
-private extension ActionProgress {
-    /// The action that currently defines the element's appearance: the running or
-    /// completed action, or the most recently completed one when idle.
-    var nearestAction: A? {
-        switch self {
-        case .idle(let previous, _):
-            previous
-
-        case .active(let current, _):
-            current
-
-        case .completed(let current):
-            current
-        }
-    }
-}

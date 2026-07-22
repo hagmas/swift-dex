@@ -44,21 +44,11 @@ private extension HighlightView {
     }
 
     func targetRect(for progress: ActionProgress<Highlight>, proxy: GeometryProxy) -> CGRect? {
-        // Resolved from the previous action while idle so the cutout keeps its
-        // position during the fade-out.
-        let highlight: Highlight? =
-            switch progress {
-            case .idle(let previous, _):
-                previous
-
-            case .active(let current, _):
-                current
-
-            case .completed(let current):
-                current
-            }
-
-        guard let target = highlight?.target, let anchor = elementAnchors.value[target] else {
+        // Resolved via `nearestAction` so the cutout keeps its position during
+        // the fade-out after the action has passed.
+        guard let target = progress.nearestAction?.target,
+            let anchor = elementAnchors.value[target]
+        else {
             return nil
         }
         return proxy[anchor]

@@ -34,6 +34,21 @@ public extension ActionProgress {
             current
         }
     }
+
+    /// The action that currently defines the element's appearance: the running or
+    /// completed action, or the most recently completed one when idle.
+    var nearestAction: A? {
+        switch self {
+        case .idle(let previous, _):
+            previous
+
+        case .active(let current, _):
+            current
+
+        case .completed(let current):
+            current
+        }
+    }
 }
 
 public extension ActionProgress where A: TransitionAction {
