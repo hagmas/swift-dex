@@ -13,7 +13,8 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "SwiftDex"
+            name: "SwiftDex",
+            resources: [.process("Shader/Dissolve.metal")]
         ),
         .testTarget(
             name: "SwiftDexTests",
