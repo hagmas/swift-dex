@@ -46,6 +46,12 @@ public struct ElementModifier {
         static let identity = Shadow(color: .clear, radius: 0, x: 0, y: 0)
     }
 
+    struct Dissolve: Equatable {
+        let progress: Double
+        let cellSize: CGFloat
+        static let identity = Dissolve(progress: 1, cellSize: 8)
+    }
+
     var isHidden: Bool = false
     var scaleEffect: ScaleEffect = .identity
     var rotationEffect: RotationEffect = .identity
@@ -53,6 +59,7 @@ public struct ElementModifier {
     var opacity: Double = 1
     var blur: Blur = .identity
     var shadow: Shadow = .identity
+    var dissolve: Dissolve = .identity
 }
 
 public extension ElementModifier {
@@ -237,6 +244,36 @@ public extension ElementModifier {
     ) -> ElementModifier {
         var `self` = self
         self.shadow = Shadow(color: color, radius: radius, x: x, y: y)
+        return self
+    }
+
+    /// Returns an `ElementModifier` that applies a shader-based dissolve effect.
+    ///
+    /// - Parameters:
+    ///   - progress: The dissolve progress; `0` is fully dissolved (invisible)
+    ///     and `1` is fully visible.
+    ///   - cellSize: The size of the dissolve grain, in points.
+    /// - Returns: An `ElementModifier` with the dissolve effect applied.
+    static func dissolve(
+        _ progress: Double,
+        cellSize: CGFloat = 8
+    ) -> ElementModifier {
+        .identity.dissolve(progress, cellSize: cellSize)
+    }
+
+    /// Add a shader-based dissolve effect to the `ElementModifier`.
+    ///
+    /// - Parameters:
+    ///   - progress: The dissolve progress; `0` is fully dissolved (invisible)
+    ///     and `1` is fully visible.
+    ///   - cellSize: The size of the dissolve grain, in points.
+    /// - Returns: An `ElementModifier` with the dissolve effect applied.
+    func dissolve(
+        _ progress: Double,
+        cellSize: CGFloat = 8
+    ) -> ElementModifier {
+        var `self` = self
+        self.dissolve = Dissolve(progress: progress, cellSize: cellSize)
         return self
     }
 }

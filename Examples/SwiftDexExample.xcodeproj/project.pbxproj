@@ -14,6 +14,7 @@
 		32EB5D9C7CA555D972C8AA19 /* AboutStandardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = B727C7891235FBB7D368C4A9 /* AboutStandardLayout.swift */; };
 		41EDA80C0FB3207CFE8ED445 /* Introduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F497EC9F50CC1B8B8B813C /* Introduction.swift */; };
 		5E3C4AA34F26864C37D057F6 /* AboutApply.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93EE49FF7DB4060675933EB /* AboutApply.swift */; };
+		6DAC5E01973E1F8E896894D8 /* AboutDissolve.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4C63A66F76B9F61A2B37970 /* AboutDissolve.swift */; };
 		74A3546B6459532D9FC788BB /* SwiftDex in Frameworks */ = {isa = PBXBuildFile; productRef = 901786E0D97D642D5C0CE960 /* SwiftDex */; };
 		7B8070A3DC8BFF06CF1A9C70 /* AboutZoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6189BF1512A381102BFFF88 /* AboutZoom.swift */; };
 		7C59F47B5CE1149B8F6AC137 /* AboutHighlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475CCF49FCB2BA35E7BCCDE9 /* AboutHighlight.swift */; };
@@ -46,6 +47,7 @@
 		87F497EC9F50CC1B8B8B813C /* Introduction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Introduction.swift; sourceTree = "<group>"; };
 		AAC5BDDB4254D1D61F5EAEE8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B1F9F0DDDBC33B4282CCF9D7 /* Title.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Title.swift; sourceTree = "<group>"; };
+		B4C63A66F76B9F61A2B37970 /* AboutDissolve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutDissolve.swift; sourceTree = "<group>"; };
 		B6189BF1512A381102BFFF88 /* AboutZoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutZoom.swift; sourceTree = "<group>"; };
 		B727C7891235FBB7D368C4A9 /* AboutStandardLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutStandardLayout.swift; sourceTree = "<group>"; };
 		C0A17BC3CB6C02ADB509A76B /* Layout2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layout2.swift; sourceTree = "<group>"; };
@@ -84,6 +86,7 @@
 			children = (
 				F33E50F3C38B6DA824A966BB /* AboutAction.swift */,
 				C93EE49FF7DB4060675933EB /* AboutApply.swift */,
+				B4C63A66F76B9F61A2B37970 /* AboutDissolve.swift */,
 				475CCF49FCB2BA35E7BCCDE9 /* AboutHighlight.swift */,
 				66442CB29C6A6B619C5D500B /* AboutMatchedTransition.swift */,
 				C2C23E7D5C1B84F8C87E8CC6 /* AboutTransition.swift */,
@@ -259,6 +262,7 @@
 				5E3C4AA34F26864C37D057F6 /* AboutApply.swift in Sources */,
 				FF553C08AE1066CD81EEC06A /* AboutBullets.swift in Sources */,
 				1BFBA7EA6EB6F6A3B5274EA5 /* AboutCode.swift in Sources */,
+				6DAC5E01973E1F8E896894D8 /* AboutDissolve.swift in Sources */,
 				FA85639F5460A873A20083FC /* AboutFlipper.swift in Sources */,
 				7C59F47B5CE1149B8F6AC137 /* AboutHighlight.swift in Sources */,
 				1E24A3EAE77A431FCD1CB195 /* AboutMatchedTransition.swift in Sources */,
