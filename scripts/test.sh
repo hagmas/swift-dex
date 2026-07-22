@@ -2,4 +2,4 @@
 
 set -eu
 
-xcodebuild test -scheme swift-dex -destination platform="macos"
+xcodebuild test -scheme swift-dex -destination "platform=macOS"
