@@ -45,6 +45,6 @@ struct AboutAction: StandardLayoutSlide {
     }
 }
 
-#Preview{
+#Preview {
     SlidePreview(slide: AboutAction())
 }

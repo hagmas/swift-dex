@@ -42,6 +42,6 @@ struct AboutCode: StandardLayoutSlide {
     }
 }
 
-#Preview{
+#Preview {
     SlidePreview(slide: AboutCode())
 }

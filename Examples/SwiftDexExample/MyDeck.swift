@@ -40,6 +40,6 @@ private extension MyDeck {
     }
 }
 
-#Preview{
+#Preview {
     DeckPreview(deck: MyDeck())
 }

@@ -30,6 +30,6 @@ struct Introduction: StandardLayoutSlide {
     }
 }
 
-#Preview{
+#Preview {
     SlidePreview(slide: Introduction())
 }

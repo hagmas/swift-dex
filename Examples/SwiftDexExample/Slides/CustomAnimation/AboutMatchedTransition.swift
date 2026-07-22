@@ -69,6 +69,6 @@ struct AboutMatchedTransition1: StandardLayoutSlide {
     }
 }
 
-#Preview{
+#Preview {
     SlidePreview(slide: AboutMatchedTransition1())
 }

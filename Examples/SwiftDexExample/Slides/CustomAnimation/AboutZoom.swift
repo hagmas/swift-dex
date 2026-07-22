@@ -42,6 +42,6 @@ struct AboutZoom: StandardLayoutSlide {
     }
 }
 
-#Preview{
+#Preview {
     SlidePreview(slide: AboutZoom())
 }

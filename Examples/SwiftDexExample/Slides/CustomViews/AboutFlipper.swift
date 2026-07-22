@@ -59,6 +59,6 @@ struct AboutFlipper: StandardLayoutSlide {
     }
 }
 
-#Preview{
+#Preview {
     SlidePreview(slide: AboutFlipper())
 }

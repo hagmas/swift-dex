@@ -7,8 +7,8 @@ proj:
 
 .PHONY: format
 format:
-	$(TOOL) swift-format format -i -p -r $(SWIFT_FILE_PATHS)
+	swift format format -i -p -r $(SWIFT_FILE_PATHS)
 
 .PHONY: lint
 lint:
-	$(TOOL) swift-format lint -s -p -r $(SWIFT_FILE_PATHS)
+	swift format lint -s -p -r $(SWIFT_FILE_PATHS)
