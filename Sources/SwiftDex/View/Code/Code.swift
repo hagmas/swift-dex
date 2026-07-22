@@ -1,4 +1,3 @@
-import Splash
 import SwiftUI
 
 /// A view that displays code with syntax highlighting.
@@ -29,12 +28,7 @@ public struct Code: View {
         code: String
     ) {
         self.theme = theme
-        let grammer = SwiftGrammar()
-        let syntaxHighlighter = SyntaxHighlighter(
-            format: CodeOutputFormat(),
-            grammar: grammer
-        )
-        self.lineGroup = syntaxHighlighter.highlight(code)
+        self.lineGroup = CodeTokenizer(language: .swift).lineGroup(for: code)
         viewModel = CodeViewModel(
             fitWidthToParent: fitWidthToParent,
             isScrollViewEnabled: isScrollViewEnabled
@@ -132,6 +126,7 @@ private struct LineView: View {
                 case .token(let text, let tokenType):
                     Text(.init(text))
                         .foregroundStyle(theme.color(for: tokenType))
+                        .fontWeight(tokenType == .keyword ? theme.keywordWeight : nil)
 
                 case .plainText(let text):
                     Text(.init(text))
@@ -174,9 +169,6 @@ private extension XcodeTheme {
 
         case .preprocessing:
             preprocessing
-
-        case .custom(_):
-            plainText
         }
     }
 }

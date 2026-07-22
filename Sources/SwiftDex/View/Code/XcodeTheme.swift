@@ -37,6 +37,15 @@ public protocol XcodeTheme {
 
     /// Color for text selection.
     var selection: Color { get }
+
+    /// Font weight for keywords. Defaults to `.bold`, matching Xcode.
+    var keywordWeight: Font.Weight { get }
+}
+
+public extension XcodeTheme {
+    var keywordWeight: Font.Weight {
+        .bold
+    }
 }
 
 /// Basic Theme.

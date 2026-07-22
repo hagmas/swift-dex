@@ -11,13 +11,9 @@ let package = Package(
     products: [
         .library(name: "SwiftDex", targets: ["SwiftDex"])
     ],
-    dependencies: [
-        .package(url: "https://github.com/JohnSundell/Splash", exact: "0.16.0")
-    ],
     targets: [
         .target(
-            name: "SwiftDex",
-            dependencies: ["Splash"]
+            name: "SwiftDex"
         ),
         .testTarget(
             name: "SwiftDexTests",
