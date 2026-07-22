@@ -2,8 +2,6 @@ import SwiftUI
 
 struct ZoomView<Content: View>: View {
     @EnvironmentObject private var elementAnchors: ElementAnchors
-    @State private var targetRect: CGRect?
-    @ActionContext(Zoom.self) private var actionContext
 
     private let content: () -> Content
 
@@ -11,73 +9,65 @@ struct ZoomView<Content: View>: View {
         self.content = content
     }
 
-    @ViewBuilder
     var body: some View {
         GeometryReader { proxy in
-            content()
-                .onChange(of: actionContext.state) { _, state in
-                    let animation: Animation?
-                    let actionID: ActionID?
-                    switch state {
-                    case .activated(let value):
-                        animation = .spring()
-                        actionID = value.actionID
-
-                    default:
-                        animation = nil
-                        actionID = nil
-                    }
-
-                    withAnimation(animation) {
-                        targetRect = getTargetRect(
-                            proxy: proxy
-                        )
-                    }
-
-                    if let actionID {
-                        actionContext.deactivate(actionID: actionID)
-                    }
+            ActionStepper(Zoom.self, count: 1) { progress in
+                ZStack(alignment: .topLeading) {
+                    content()
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .modifier(
+                    // `ignoredByLayout` keeps the zoom transform out of layout, so
+                    // anchors keep resolving in untransformed slide coordinates and a
+                    // later zoom target is not distorted by the current zoom.
+                    ZoomEffect(
+                        baseRect: CGRect(x: 0, y: 0, width: 1920, height: 1080),
+                        targetRect: targetRect(for: progress, proxy: proxy)
+                    )
+                    .ignoredByLayout()
+                )
+            } animation: { progress in
+                progress.current != nil ? .spring() : nil
+            }
         }
-        .modifier(
-            ZoomEffect(
-                baseRect: CGRect(x: 0, y: 0, width: 1920, height: 1080),
-                targetRect: targetRect
-            )
-        )
         .clipped()
     }
 }
 
 private extension ZoomView {
-    func getTargetRect(proxy: GeometryProxy) -> CGRect? {
-        guard let actionState = actionContext.state else {
+    func targetRect(for progress: ActionProgress<Zoom>, proxy: GeometryProxy) -> CGRect? {
+        guard let zoom = progress.nearestAction else {
             return nil
         }
-        let elementID = actionState.elementID ?? .none
-        let ratio = actionState.ratio ?? 1.0
 
         let rect: CGRect
-        if let anchor = elementAnchors.value[elementID] {
+        if let anchor = elementAnchors.value[zoom.operation.elementID] {
             rect = proxy[anchor]
         }
         else {
             rect = CGRect(x: 0, y: 0, width: 1920, height: 1080)
         }
 
-        let xInset = (rect.width / ratio - rect.width) / 2
-        let yInset = (rect.height / ratio - rect.height) / 2
+        let xInset = (rect.width / zoom.ratio - rect.width) / 2
+        let yInset = (rect.height / zoom.ratio - rect.height) / 2
 
         return rect.insetBy(dx: -xInset, dy: -yInset)
     }
 }
 
-private extension ActionState<Zoom> {
-    var elementID: ElementID? {
-        (current ?? previous)?.operation.elementID
-    }
+private extension ActionProgress {
+    /// The action that currently defines the element's appearance: the running or
+    /// completed action, or the most recently completed one when idle.
+    var nearestAction: A? {
+        switch self {
+        case .idle(let previous, _):
+            previous
 
-    var ratio: CGFloat? {
-        (current ?? previous)?.ratio
+        case .active(let current, _):
+            current
+
+        case .completed(let current):
+            current
+        }
     }
 }

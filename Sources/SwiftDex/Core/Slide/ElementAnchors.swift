@@ -12,7 +12,7 @@ struct ElementAnchorsPreference: PreferenceKey {
 }
 
 class ElementAnchors: ObservableObject {
-    private(set) var value: [ElementID: Anchor<CGRect>] = [:]
+    @Published private(set) var value: [ElementID: Anchor<CGRect>] = [:]
 
     func update(value: [ElementID: Anchor<CGRect>]) {
         self.value = value
