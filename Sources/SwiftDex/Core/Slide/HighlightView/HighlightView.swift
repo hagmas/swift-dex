@@ -2,73 +2,56 @@ import SwiftUI
 
 struct HighlightView: View {
     @EnvironmentObject private var elementAnchors: ElementAnchors
-    @State private var targetRect: CGRect?
-    @ActionContext(Highlight.self) private var actionContext
 
-    @ViewBuilder
     var body: some View {
         GeometryReader { proxy in
-            Group {
-                if let targetRect, let color = actionContext.state?.color {
-                    ZStack {
-                        Color(color)
-                        RoundedRectangle(cornerRadius: 20)
-                            .frame(width: targetRect.width + 40, height: targetRect.height + 40)
-                            .position(x: targetRect.midX, y: targetRect.midY)
-                            .blur(radius: 10)
-                            .blendMode(.destinationOut)
-                    }
-                    .compositingGroup()
-                }
-                else {
-                    EmptyView()
-                }
-            }
-            .onChange(of: actionContext.state) { _, state in
-                withAnimation(animation) {
-                    targetRect = getTargetRect(
-                        proxy: proxy
-                    )
-                }
-                switch state {
-                case .activated(let value):
-                    actionContext.deactivate(actionID: value.actionID)
-
-                default:
-                    break
-                }
+            ActionStepper(Highlight.self, count: 1) { progress in
+                overlayView(for: progress, proxy: proxy)
+            } animation: { _ in
+                .linear
             }
         }
     }
 }
 
 private extension HighlightView {
-    func getTargetRect(proxy: GeometryProxy) -> CGRect? {
-        guard let actionState = actionContext.state else {
-            return nil
-        }
+    // The overlay is always in the hierarchy and driven by opacity, so both its
+    // appearance and disappearance animate reliably.
+    func overlayView(for progress: ActionProgress<Highlight>, proxy: GeometryProxy) -> some View {
+        let color = progress.current?.mode.color
+        let targetRect = targetRect(for: progress, proxy: proxy)
 
-        let target = actionState.target ?? .none
-        if let anchor = elementAnchors.value[target] {
-            return proxy[anchor]
+        return ZStack {
+            Color(color ?? .black)
+            RoundedRectangle(cornerRadius: 20)
+                .frame(
+                    width: (targetRect?.width ?? 0) + 40,
+                    height: (targetRect?.height ?? 0) + 40
+                )
+                .position(
+                    x: targetRect?.midX ?? 0,
+                    y: targetRect?.midY ?? 0
+                )
+                // The cutout must snap to its target; only the fade (the opacity
+                // below) is meant to animate.
+                .transaction { $0.animation = nil }
+                .blur(radius: 10)
+                .blendMode(.destinationOut)
         }
+        .compositingGroup()
+        .opacity(color != nil && targetRect != nil ? 1 : 0)
+        .allowsHitTesting(false)
+    }
+
+    func targetRect(for progress: ActionProgress<Highlight>, proxy: GeometryProxy) -> CGRect? {
+        // Resolved via `nearestAction` so the cutout keeps its position during
+        // the fade-out after the action has passed.
+        guard let target = progress.nearestAction?.target,
+            let anchor = elementAnchors.value[target]
         else {
             return nil
         }
-    }
-
-    var animation: Animation? {
-        actionContext.canBeAnimated ? .linear : nil
-    }
-}
-
-private extension ActionState<Highlight> {
-    var color: NSColor? {
-        current?.mode.color
-    }
-
-    var target: ElementID? {
-        current?.target
+        return proxy[anchor]
     }
 }
 
