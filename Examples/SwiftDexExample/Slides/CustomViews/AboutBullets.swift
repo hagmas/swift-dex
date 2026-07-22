@@ -37,6 +37,6 @@ struct AboutBullets: StandardLayoutSlide {
     }
 }
 
-#Preview{
+#Preview {
     SlidePreview(slide: AboutBullets())
 }

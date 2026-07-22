@@ -12,6 +12,6 @@ struct Title: StandardLayoutSlide {
     }
 }
 
-#Preview{
+#Preview {
     SlidePreview(slide: Title(title: "Introducing SwiftDex"))
 }

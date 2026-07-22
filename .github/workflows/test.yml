@@ -1,4 +1,4 @@
-# https://github.com/actions/virtual-environments
+# https://github.com/actions/runner-images
 
 name: test
 
@@ -10,30 +10,26 @@ on:
   workflow_dispatch:
 
 env:
-  DEVELOPER_DIR: /Applications/Xcode_15.0.app
+  DEVELOPER_DIR: /Applications/Xcode_26.3.app
 
 jobs:
   test:
     name: Test
-    runs-on: macos-14
+    runs-on: macos-26
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Test library
         run: scripts/test.sh
 
   validation:
     name: Validation
-    runs-on: macos-14
+    runs-on: macos-26
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Show environments
         run: |
           swift --version
           xcodebuild -version
-      - uses: actions/cache@v3
-        with:
-          path: bin
-          key: spm-${{ runner.os }}-${{env.DEVELOPER_DIR}}-${{ hashFiles('Package.swift') }}-${{ github.job }}
       - name: Validate lint
         run: make lint
       - name: Validate format

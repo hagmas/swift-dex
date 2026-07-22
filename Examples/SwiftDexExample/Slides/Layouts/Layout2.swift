@@ -23,6 +23,6 @@ struct Layout2: StandardLayoutSlide {
     }
 }
 
-#Preview{
+#Preview {
     SlidePreview(slide: Layout2())
 }

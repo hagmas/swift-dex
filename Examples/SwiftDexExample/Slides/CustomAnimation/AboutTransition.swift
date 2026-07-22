@@ -34,6 +34,6 @@ struct AboutTransition: StandardLayoutSlide {
     }
 }
 
-#Preview{
+#Preview {
     SlidePreview(slide: AboutTransition())
 }

@@ -35,6 +35,6 @@ struct AboutHighlight: StandardLayoutSlide {
     }
 }
 
-#Preview{
+#Preview {
     SlidePreview(slide: AboutHighlight())
 }

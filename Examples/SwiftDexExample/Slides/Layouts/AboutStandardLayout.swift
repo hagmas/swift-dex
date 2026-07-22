@@ -20,6 +20,6 @@ struct AboutStandardLayout: StandardLayoutSlide {
     }
 }
 
-#Preview{
+#Preview {
     SlidePreview(slide: AboutStandardLayout())
 }

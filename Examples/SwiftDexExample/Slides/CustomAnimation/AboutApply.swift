@@ -86,6 +86,6 @@ private extension ElementTransition {
     )
 }
 
-#Preview{
+#Preview {
     SlidePreview(slide: AboutApply())
 }
