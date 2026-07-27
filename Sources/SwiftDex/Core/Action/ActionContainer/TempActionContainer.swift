@@ -6,9 +6,11 @@ import Foundation
 public struct TempActionContainer {
     private var collections: [ElementID: ActionSequenceCollection] = [:]
     private var actionIDs: [Set<ActionID>] = [.init()]
+    private var lineActions: [[ClickCountKey]] = [[]]
 
     mutating func increaseCapacity() {
         actionIDs.append(.init())
+        lineActions.append([])
     }
 
     mutating func add<A: Action>(action: A) {
@@ -20,6 +22,9 @@ public struct TempActionContainer {
         }
         collections[action.elementID] = sequenceCollection
         actionIDs[actionIDs.count - 1].insert(actionID)
+        lineActions[lineActions.count - 1].append(
+            ClickCountKey(elementID: action.elementID, actionType: A.self)
+        )
     }
 
     mutating func finalize() -> ActionContainer {
@@ -30,7 +35,11 @@ public struct TempActionContainer {
                 result[elementID] = collection
             }
         }
-        return ActionContainer(collections: result, actionIDs: actionIDs)
+        return ActionContainer(
+            collections: result,
+            actionIDs: actionIDs,
+            lineActions: lineActions
+        )
     }
 }
 

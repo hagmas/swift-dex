@@ -3,75 +3,45 @@ import XCTest
 
 @testable import SwiftDex
 
-func assertActionStateActivated<A: Action & Equatable>(
-    actionState: ActionState<A>?,
-    previous: A? = nil,
-    current: A,
-    next: A? = nil,
+func assertIdle<A: Action & Equatable>(
+    progress: ActionProgress<A>?,
+    previous: A?,
+    next: A?,
     file: StaticString = #filePath,
     line: UInt = #line
 ) {
-    switch actionState {
-    case .activated(let value):
-        XCTAssertEqual(value.previous, previous, file: file, line: line)
-        XCTAssertEqual(value.current, current, file: file, line: line)
-        XCTAssertEqual(value.next, next, file: file, line: line)
-
-    case .static:
-        XCTFail("The actionState is static.", file: file, line: line)
-
-    case .deactivated:
-        XCTFail("The actionState is deactivated.", file: file, line: line)
-
-    case nil:
-        XCTFail("The actionState is nil.", file: file, line: line)
+    guard case .idle(let actualPrevious, let actualNext) = progress else {
+        XCTFail("Expected .idle but got \(String(describing: progress))", file: file, line: line)
+        return
     }
+    XCTAssertEqual(actualPrevious, previous, file: file, line: line)
+    XCTAssertEqual(actualNext, next, file: file, line: line)
 }
 
-func assertActionStateDeactivated<A: Action & Equatable>(
-    actionState: ActionState<A>?,
-    previous: A? = nil,
+func assertActive<A: Action & Equatable>(
+    progress: ActionProgress<A>?,
     current: A,
-    next: A? = nil,
+    step: Int,
     file: StaticString = #filePath,
     line: UInt = #line
 ) {
-    switch actionState {
-    case .deactivated(let value):
-        XCTAssertEqual(value.previous, previous, file: file, line: line)
-        XCTAssertEqual(value.current, current, file: file, line: line)
-        XCTAssertEqual(value.next, next, file: file, line: line)
-
-    case .activated:
-        XCTFail("The actionState is activated.", file: file, line: line)
-
-    case .static:
-        XCTFail("The actionState is static.", file: file, line: line)
-
-    case nil:
-        XCTFail("The actionState is nil.", file: file, line: line)
+    guard case .active(let actualCurrent, let actualStep) = progress else {
+        XCTFail("Expected .active but got \(String(describing: progress))", file: file, line: line)
+        return
     }
+    XCTAssertEqual(actualCurrent, current, file: file, line: line)
+    XCTAssertEqual(actualStep, step, file: file, line: line)
 }
 
-func assertActionStateStatic<A: Action & Equatable>(
-    actionState: ActionState<A>?,
-    previous: A? = nil,
-    next: A? = nil,
+func assertCompleted<A: Action & Equatable>(
+    progress: ActionProgress<A>?,
+    current: A,
     file: StaticString = #filePath,
     line: UInt = #line
 ) {
-    switch actionState {
-    case .static(let value):
-        XCTAssertEqual(value.previous, previous, file: file, line: line)
-        XCTAssertEqual(value.next, next, file: file, line: line)
-
-    case .activated:
-        XCTFail("The actionState is activated.", file: file, line: line)
-
-    case .deactivated:
-        XCTFail("The actionState is deactivated.", file: file, line: line)
-
-    case nil:
-        XCTFail("The actionState is nil.", file: file, line: line)
+    guard case .completed(let actualCurrent) = progress else {
+        XCTFail("Expected .completed but got \(String(describing: progress))", file: file, line: line)
+        return
     }
+    XCTAssertEqual(actualCurrent, current, file: file, line: line)
 }

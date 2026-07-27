@@ -5,7 +5,7 @@ struct ElementAnimator: ViewModifier {
     let elementID: ElementID
 
     func body(content: Content) -> some View {
-        ActionStepper(Apply.self, count: 1) { progress in
+        ActionReader(Apply.self, clicks: 1) { progress in
             let elementModifier = progress.elementModifier
             if !(elementModifier?.isHidden ?? false) {
                 content.apply(elementModifier ?? .identity)

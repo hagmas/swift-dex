@@ -24,7 +24,7 @@ struct SlideView<T>: View where T: Slide {
         self.slide = slide
 
         let viewModel = StaticSlideViewModel(
-            step: step,
+            index: step,
             actionContainer: slide.actionContainer
         )
         self.viewModel = AnySlideViewModel(viewModel)
@@ -33,7 +33,7 @@ struct SlideView<T>: View where T: Slide {
     init(slide: T) {
         self.slide = slide
         let viewModel = StaticSlideViewModel(
-            step: 0,
+            index: 0,
             actionContainer: ActionContainer.empty
         )
         self.viewModel = AnySlideViewModel(viewModel)

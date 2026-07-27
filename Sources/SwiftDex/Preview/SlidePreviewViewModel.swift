@@ -1,8 +1,7 @@
 import SwiftUI
 
 @Observable class SlidePreviewViewModel {
-    let eventDispatcher = EventDispatcher()
-    var state = SlideState(step: 0)
+    var state = SlideState()
     let actionContainer: ActionContainer
     @ObservationIgnored var imageCache = [Int: NSImage]()
 
@@ -12,28 +11,40 @@ import SwiftUI
 
     func forward() {
         state.latestUserOperation = .forward
-        if state.step < actionContainer.capacity {
-            state.step += 1
-            let actionIDs = actionContainer.actionIDs(for: state.step - 1)
-            state.activate(actionIDs: actionIDs)
+        let click = state.position.resolved(total: totalClicks)
+        if click < totalClicks {
+            state.position = .click(click + 1)
         }
     }
 
     func backward() {
         state.latestUserOperation = .backward
-        if 0 < state.step {
-            state.step -= 1
-            state.activate(actionIDs: [])
+        let click = state.position.resolved(total: totalClicks)
+        if click > 0 {
+            state.position = .click(click - 1)
         }
     }
 
-    func randomAccess(step: Int) {
-        guard step != state.step else {
+    /// The line-boundary index of the current position, used for thumbnail selection.
+    var boundaryIndex: Int {
+        let click = state.position.resolved(total: totalClicks)
+        return actionContainer.position(at: click, clickCounts: state.clickCounts).index
+    }
+
+    /// Jumps to the click at which every line before `index` has completed.
+    func randomAccess(boundary index: Int) {
+        guard index != boundaryIndex else {
             return
         }
         state.latestUserOperation = .randomAccess
-        state.step = step
-        let actionIDs = actionContainer.actionIDs(for: state.step - 1)
-        state.activate(actionIDs: actionIDs)
+        state.position = .click(
+            actionContainer.click(atBoundary: index, clickCounts: state.clickCounts)
+        )
+    }
+}
+
+private extension SlidePreviewViewModel {
+    var totalClicks: Int {
+        actionContainer.totalClicks(clickCounts: state.clickCounts)
     }
 }
