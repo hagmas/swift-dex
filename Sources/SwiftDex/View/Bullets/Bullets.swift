@@ -22,7 +22,7 @@ public struct Bullets: View {
 
     /// The content and behavior of the view.
     public var body: some View {
-        ActionStepper(ApplyByItem.self, count: items.numberOfItems) { progress in
+        ActionReader(ApplyByItem.self, clicks: items.numberOfItems) { progress in
             BulletsChildView(
                 style: style,
                 items: items,

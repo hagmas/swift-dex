@@ -77,7 +77,6 @@ private extension DeckPreview {
                 .background {
                     Color(T.deckStyle.colorStyle.backgroundColor)
                 }
-                .environmentObject(EventDispatcher())
                 .environment(\.fontStyle, T.deckStyle.fontStyle.self)
                 .environment(\.colorStyle, T.deckStyle.colorStyle.self)
         }

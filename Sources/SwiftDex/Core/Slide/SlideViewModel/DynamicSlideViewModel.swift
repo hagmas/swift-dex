@@ -10,54 +10,51 @@ final class DynamicSlideViewModel: SlideViewModel {
         self.actionContainer = actionContainer
     }
 
-    func deactivate(actionID: ActionID) {
-        state.deactivate(actionID: actionID)
-    }
-
     var canBeAnimated: Bool {
         state.latestUserOperation == .forward
     }
 
-    func actionState<A: Action>(
+    var currentClick: Int {
+        state.position.resolved(
+            total: actionContainer.totalClicks(clickCounts: state.clickCounts)
+        )
+    }
+
+    func register<A: Action>(clicks: Int, for elementID: ElementID, type: A.Type) {
+        let key = ClickCountKey(elementID: elementID, actionType: A.self)
+        guard state.clickCounts[key] != clicks else {
+            return
+        }
+        state.register(clicks: clicks, for: key)
+    }
+
+    func actionProgress<A: Action>(
         for elementID: ElementID,
         type: A.Type
-    ) -> ActionState<A>? {
-        guard let node: ActionSequenceNode<A> = actionContainer[elementID, state.step] else {
+    ) -> ActionProgress<A>? {
+        let position = actionContainer.position(
+            at: currentClick,
+            clickCounts: state.clickCounts
+        )
+        guard let node: ActionSequenceNode<A> = actionContainer[elementID, position.index] else {
             return nil
         }
 
         switch node {
         case .static(let value):
-            return .static(
-                .init(
-                    step: state.step,
-                    previous: value.previous?.action,
-                    next: value.next?.action
-                )
+            return .idle(
+                previous: value.previous?.action,
+                next: value.next?.action
             )
 
         case .dynamic(let value):
-            if state.activeActionIDs.contains(value.current.id) {
-                return .activated(
-                    .init(
-                        step: state.step,
-                        actionID: value.current.id,
-                        current: value.current.action,
-                        previous: value.previous?.action,
-                        next: value.next?.action
-                    )
-                )
+            let key = ClickCountKey(elementID: elementID, actionType: A.self)
+            let clicks = state.clickCounts[key] ?? 1
+            if position.offset < clicks {
+                return .active(current: value.current.action, step: position.offset + 1)
             }
             else {
-                return .deactivated(
-                    .init(
-                        step: state.step,
-                        actionID: value.current.id,
-                        current: value.current.action,
-                        previous: value.previous?.action,
-                        next: value.next?.action
-                    )
-                )
+                return .completed(current: value.current.action)
             }
         }
     }

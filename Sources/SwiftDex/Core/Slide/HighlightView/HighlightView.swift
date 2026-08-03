@@ -5,7 +5,7 @@ struct HighlightView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            ActionStepper(Highlight.self, count: 1) { progress in
+            ActionReader(Highlight.self, clicks: 1) { progress in
                 overlayView(for: progress, proxy: proxy)
             } animation: { _ in
                 .linear

@@ -35,7 +35,6 @@ public struct SlidePreview<T: Slide, S: DeckStyle>: View {
             }
         } detail: {
             content
-                .environmentObject(viewModel.eventDispatcher)
                 .environment(\.fontStyle, deckStyle.fontStyle.self)
                 .environment(\.colorStyle, deckStyle.colorStyle.self)
         }
@@ -45,9 +44,9 @@ public struct SlidePreview<T: Slide, S: DeckStyle>: View {
 private extension SlidePreview {
     var selection: Binding<Int> {
         Binding {
-            viewModel.state.step
+            viewModel.boundaryIndex
         } set: { newValue in
-            viewModel.randomAccess(step: newValue)
+            viewModel.randomAccess(boundary: newValue)
         }
     }
 
@@ -69,12 +68,7 @@ private extension SlidePreview {
             } onLeftTap: {
                 viewModel.backward()
             } onRightTap: {
-                if viewModel.state.isActive {
-                    viewModel.eventDispatcher.forward.send()
-                }
-                else {
-                    viewModel.forward()
-                }
+                viewModel.forward()
             }
         }
     }
@@ -123,7 +117,6 @@ private extension SlidePreview {
             .background {
                 Color(deckStyle.colorStyle.backgroundColor)
             }
-            .environmentObject(viewModel.eventDispatcher)
             .environment(\.fontStyle, deckStyle.fontStyle.self)
             .environment(\.colorStyle, deckStyle.colorStyle.self)
         }

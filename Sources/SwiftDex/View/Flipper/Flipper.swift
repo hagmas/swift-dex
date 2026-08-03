@@ -4,6 +4,9 @@ import SwiftUI
 ///
 /// Used in combination with the `FlipByItem` Action, it allows displaying multiple views provided as `content` in a "flip" manner.
 public struct Flipper: View {
+    @Environment(AnySlideViewModel.self) private var slideViewModel
+    @State private var index: Int?
+
     private let content: [AnyView]
     private let transition: AnyTransition
     private let animation: Animation?
@@ -25,14 +28,24 @@ public struct Flipper: View {
     }
 
     /// The content and behavior of the view.
+    ///
+    /// The displayed index mirrors the model-derived index through local state so the
+    /// change happens inside a `withAnimation` transaction — insertion/removal
+    /// transitions do not animate reliably from `.animation(_:value:)` alone.
+    /// Contexts that never fire `onChange` (thumbnail rendering) fall back to the
+    /// derived index directly.
     public var body: some View {
-        ActionStepper(FlipByItem.self, count: content.count) { progress in
-            let index = currentIndex(for: progress)
-            content[index]
-                .id(index)
+        ActionReader(FlipByItem.self, clicks: content.count) { progress in
+            let targetIndex = currentIndex(for: progress)
+            let displayIndex = index ?? targetIndex
+            content[displayIndex]
+                .id(displayIndex)
                 .transition(transition)
-        } animation: { _ in
-            animation
+                .onChange(of: targetIndex, initial: true) { _, newIndex in
+                    withAnimation(slideViewModel.canBeAnimated ? animation : nil) {
+                        index = newIndex
+                    }
+                }
         }
     }
 }

@@ -11,7 +11,7 @@ struct ZoomView<Content: View>: View {
 
     var body: some View {
         GeometryReader { proxy in
-            ActionStepper(Zoom.self, count: 1) { progress in
+            ActionReader(Zoom.self, clicks: 1) { progress in
                 ZStack(alignment: .topLeading) {
                     content()
                 }

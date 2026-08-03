@@ -30,7 +30,6 @@ public struct DeckView<T: Deck>: View {
     /// The body of the `DeckView` view.
     public var body: some View {
         content
-            .environmentObject(viewModel.eventDispatcher)
             .environment(\.namespaceID, deckNameSpace)
             .environment(\.matchProperties, matchedProperties)
             .environment(\.fontStyle, T.deckStyle.fontStyle)
@@ -55,12 +54,7 @@ private extension DeckView {
             } onLeftTap: {
                 viewModel.backward()
             } onRightTap: {
-                if viewModel.state.isActive {
-                    viewModel.eventDispatcher.forward.send()
-                }
-                else {
-                    viewModel.forward()
-                }
+                viewModel.forward()
             }
             .clipped()
         }

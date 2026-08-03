@@ -6,26 +6,35 @@ import XCTest
 
 final class StaticSlideViewModelTests: XCTestCase {
     func test_canBeAnimated() {
-        let ac = createActionContainer()
-        let viewModel = StaticSlideViewModel(step: 1, actionContainer: ac)
-
-        // For StaticSlideViewModel, `canBeAnimated` should be always `false`
+        let viewModel = StaticSlideViewModel(index: 0, actionContainer: createActionContainer())
         XCTAssertFalse(viewModel.canBeAnimated)
+    }
+
+    func test_actionProgress() {
+        let container = createActionContainer()
+
+        // Index 0 is before every line.
+        let before = StaticSlideViewModel(index: 0, actionContainer: container)
+        assertIdle(
+            progress: before.actionProgress(for: .element(0), type: FakeAction.self),
+            previous: nil,
+            next: FakeAction(elementID: .element(0))
+        )
+
+        // A line index renders its action as completed, never animating.
+        let at = StaticSlideViewModel(index: 1, actionContainer: container)
+        assertCompleted(
+            progress: at.actionProgress(for: .element(0), type: FakeAction.self),
+            current: FakeAction(elementID: .element(0))
+        )
     }
 }
 
 private extension StaticSlideViewModelTests {
     func createActionContainer() -> ActionContainer {
-        let first = FakeAction(elementID: .element(0))
-        let second = FakeAction(elementID: .element(0))
-        let third = FakeAction(elementID: .element(0))
-
         @ActionContainerBuilder func actionContainer() -> ActionContainer {
-            first
-            second
-            third
+            FakeAction(elementID: .element(0))
         }
-
         return actionContainer()
     }
 }

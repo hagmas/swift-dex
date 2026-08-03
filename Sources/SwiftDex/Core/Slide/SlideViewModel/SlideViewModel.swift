@@ -1,13 +1,21 @@
-import Combine
 import SwiftUI
 
 protocol SlideViewModel {
-    func deactivate(actionID: ActionID)
     var canBeAnimated: Bool { get }
-    func actionState<A: Action>(
+
+    /// The resolved click index of the slide, for keying animations.
+    var currentClick: Int { get }
+
+    /// Registers how many clicks the action of the given type on the given element consumes.
+    ///
+    /// Called by `ActionReader` when its view appears. Until a registration arrives,
+    /// the timeline treats the action as consuming one click.
+    func register<A: Action>(clicks: Int, for elementID: ElementID, type: A.Type)
+
+    func actionProgress<A: Action>(
         for elementID: ElementID,
         type: A.Type
-    ) -> ActionState<A>?
+    ) -> ActionProgress<A>?
 }
 
 @Observable class AnySlideViewModel: SlideViewModel {
@@ -17,21 +25,22 @@ protocol SlideViewModel {
         self.wrappedViewModel = wrappedViewModel
     }
 
-    func deactivate(actionID: ActionID) {
-        wrappedViewModel.deactivate(actionID: actionID)
-    }
-
     var canBeAnimated: Bool {
         wrappedViewModel.canBeAnimated
     }
 
-    func actionState<A>(
+    var currentClick: Int {
+        wrappedViewModel.currentClick
+    }
+
+    func register<A: Action>(clicks: Int, for elementID: ElementID, type: A.Type) {
+        wrappedViewModel.register(clicks: clicks, for: elementID, type: type)
+    }
+
+    func actionProgress<A: Action>(
         for elementID: ElementID,
         type: A.Type
-    ) -> ActionState<A>? where A: Action {
-        wrappedViewModel.actionState(
-            for: elementID,
-            type: type
-        )
+    ) -> ActionProgress<A>? {
+        wrappedViewModel.actionProgress(for: elementID, type: type)
     }
 }
