@@ -25,10 +25,10 @@ import SwiftUI
         }
     }
 
-    /// The line-boundary index of the current position, used for thumbnail selection.
+    /// The beat-boundary index of the current position, used for thumbnail selection.
     var boundaryIndex: Int {
         let click = state.position.resolved(total: totalClicks)
-        return actionContainer.position(at: click, clickCounts: state.clickCounts).index
+        return actionContainer.beatIndex(at: click, clickCounts: state.clickCounts)
     }
 
     /// Jumps to the click at which every line before `index` has completed.

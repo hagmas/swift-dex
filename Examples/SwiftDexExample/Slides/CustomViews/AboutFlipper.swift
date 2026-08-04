@@ -53,9 +53,10 @@ struct AboutFlipper: StandardLayoutSlide {
 
     @ActionContainerBuilder
     var actionContainer: ActionContainer {
+        // The bullets reveal in parallel with a serial timeline on the flipper:
+        // fade it in first, then flip through the cats.
         ApplyByItem(.fadeInFromUp, to: .bullets)
-            & FlipByItem(.flipper)
-            & Apply(.fade, to: .flipper)
+            & Apply(.fade, to: .flipper).then(FlipByItem(.flipper))
     }
 }
 

@@ -29,13 +29,17 @@ public struct Flipper: View {
 
     /// The content and behavior of the view.
     ///
+    /// The first item is the resting state, so `FlipByItem` consumes one click per
+    /// *transition*: N items flip in N − 1 clicks, and every click produces a
+    /// visible change.
+    ///
     /// The displayed index mirrors the model-derived index through local state so the
     /// change happens inside a `withAnimation` transaction — insertion/removal
     /// transitions do not animate reliably from `.animation(_:value:)` alone.
     /// Contexts that never fire `onChange` (thumbnail rendering) fall back to the
     /// derived index directly.
     public var body: some View {
-        ActionReader(FlipByItem.self, clicks: content.count) { progress in
+        ActionReader(FlipByItem.self, clicks: max(1, content.count - 1)) { progress in
             let targetIndex = currentIndex(for: progress)
             let displayIndex = index ?? targetIndex
             content[displayIndex]
@@ -57,7 +61,7 @@ private extension Flipper {
             previous != nil ? content.count - 1 : 0
 
         case .active(_, let step):
-            max(step - 1, 0)
+            min(step, content.count - 1)
 
         case .completed:
             content.count - 1
