@@ -50,10 +50,42 @@ struct SlideState {
     }
 }
 
+extension SlideState: Equatable {
+    // The action container is constant for the state's lifetime, so equality is
+    // defined by the mutable parts only.
+    static func == (lhs: SlideState, rhs: SlideState) -> Bool {
+        lhs.position == rhs.position
+            && lhs.clickCounts == rhs.clickCounts
+            && lhs.latestUserOperation == rhs.latestUserOperation
+    }
+}
+
+// MARK: - Timeline
+
 extension SlideState {
+    /// The active span of a single action occurrence on the timeline.
+    struct ActionInterval: Equatable {
+        /// The first click of the action.
+        let start: Int
+        /// The number of clicks the action consumes.
+        let clicks: Int
+        /// The first click after the enclosing top-level beat; the action renders
+        /// as completed until then, and as idle afterwards.
+        let beatEnd: Int
+    }
+
+    /// The number of clicks each top-level beat consumes.
+    ///
+    /// Serial compositions add up; parallel compositions take the maximum.
+    /// Unregistered actions fall back to one click, which keeps the timeline
+    /// deadlock-free and matches one-shot actions.
+    var beatDurations: [Int] {
+        actionContainer.beats.map { max(1, duration(of: $0)) }
+    }
+
     /// The total number of clicks this slide consumes, given current registrations.
     var totalClicks: Int {
-        actionContainer.totalClicks(clickCounts: clickCounts)
+        beatDurations.reduce(0, +)
     }
 
     /// The resolved click index of the current position.
@@ -63,34 +95,113 @@ extension SlideState {
 
     /// The beat position of the current click: `0` before every beat, `i + 1` while beat `i` runs.
     var currentBeatIndex: Int {
-        actionContainer.beatIndex(at: currentClick, clickCounts: clickCounts)
+        beatIndex(at: currentClick)
+    }
+
+    /// The beat position of a click.
+    func beatIndex(at click: Int) -> Int {
+        guard click > 0 else {
+            return 0
+        }
+        var start = 1
+        for (i, duration) in beatDurations.enumerated() {
+            if click < start + duration {
+                return i + 1
+            }
+            start += duration
+        }
+        return actionContainer.beats.count
     }
 
     /// The click at which every beat before `index` has completed.
     func click(atBoundary index: Int) -> Int {
-        actionContainer.click(atBoundary: index, clickCounts: clickCounts)
+        beatDurations.prefix(index).reduce(0, +)
+    }
+
+    /// Resolves the interval of every action occurrence.
+    func intervals() -> [ActionID: ActionInterval] {
+        var result = [ActionID: ActionInterval]()
+        var start = 1
+
+        func walk(_ node: TimelineNode, start: Int, beatEnd: Int) {
+            switch node {
+            case .action(let key, let id):
+                result[id] = ActionInterval(
+                    start: start,
+                    clicks: max(1, clickCounts[key] ?? 1),
+                    beatEnd: beatEnd
+                )
+
+            case .serial(let children):
+                var childStart = start
+                for child in children {
+                    walk(child, start: childStart, beatEnd: beatEnd)
+                    childStart += duration(of: child)
+                }
+
+            case .parallel(let children):
+                for child in children {
+                    walk(child, start: start, beatEnd: beatEnd)
+                }
+            }
+        }
+
+        for beat in actionContainer.beats {
+            let duration = max(1, duration(of: beat))
+            walk(beat, start: start, beatEnd: start + duration)
+            start += duration
+        }
+        return result
     }
 
     /// Derives the progress of the given element's action of the given type.
+    ///
+    /// Returns `nil` when the element has no action of that type. Otherwise the
+    /// element's occurrences are ordered by their interval starts, and the latest
+    /// one at or before the current click determines the progress: active within
+    /// its interval, completed until its beat ends, idle in between and outside.
     func actionProgress<A: Action>(
         for elementID: ElementID,
         type: A.Type
     ) -> ActionProgress<A>? {
-        actionContainer.actionProgress(
-            for: elementID,
-            type: type,
-            at: currentClick,
-            clickCounts: clickCounts
-        )
-    }
-}
+        guard let chain: [TaggedAction<A>] = actionContainer.chains[elementID]?[A.self],
+            !chain.isEmpty
+        else {
+            return nil
+        }
 
-extension SlideState: Equatable {
-    // The action container is constant for the state's lifetime, so equality is
-    // defined by the mutable parts only.
-    static func == (lhs: SlideState, rhs: SlideState) -> Bool {
-        lhs.position == rhs.position
-            && lhs.clickCounts == rhs.clickCounts
-            && lhs.latestUserOperation == rhs.latestUserOperation
+        let click = currentClick
+        let intervals = intervals()
+        let sorted =
+            chain
+            .compactMap { tagged in intervals[tagged.id].map { (tagged, $0) } }
+            .sorted { $0.1.start < $1.1.start }
+
+        guard let index = sorted.lastIndex(where: { $0.1.start <= click }) else {
+            return .idle(previous: nil, next: sorted.first?.0.action)
+        }
+
+        let (tagged, interval) = sorted[index]
+        if click < interval.start + interval.clicks {
+            return .active(current: tagged.action, step: click - interval.start + 1)
+        }
+        if click < interval.beatEnd {
+            return .completed(current: tagged.action)
+        }
+        let next = index + 1 < sorted.count ? sorted[index + 1].0.action : nil
+        return .idle(previous: tagged.action, next: next)
+    }
+
+    private func duration(of node: TimelineNode) -> Int {
+        switch node {
+        case .action(let key, _):
+            max(1, clickCounts[key] ?? 1)
+
+        case .serial(let children):
+            children.reduce(0) { $0 + duration(of: $1) }
+
+        case .parallel(let children):
+            max(1, children.map { duration(of: $0) }.max() ?? 1)
+        }
     }
 }

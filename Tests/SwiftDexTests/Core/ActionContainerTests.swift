@@ -19,24 +19,14 @@ final class ActionContainerTests: XCTestCase {
 
         // Click 0: before everything.
         assertIdle(
-            progress: container.actionProgress(
-                for: .element(0),
-                type: FakeAction2.self,
-                at: 0,
-                clickCounts: [:]
-            ),
+            progress: state(container, at: 0).actionProgress(for: .element(0), type: FakeAction2.self),
             previous: nil,
             next: first
         )
 
         // Click 1: the first action runs.
         assertActive(
-            progress: container.actionProgress(
-                for: .element(0),
-                type: FakeAction2.self,
-                at: 1,
-                clickCounts: [:]
-            ),
+            progress: state(container, at: 1).actionProgress(for: .element(0), type: FakeAction2.self),
             current: first,
             step: 1
         )
@@ -44,12 +34,7 @@ final class ActionContainerTests: XCTestCase {
         // Click 2: the second action runs; `first` is its previous neighbor
         // when idle in between (verified via a three-line container below).
         assertActive(
-            progress: container.actionProgress(
-                for: .element(0),
-                type: FakeAction2.self,
-                at: 2,
-                clickCounts: [:]
-            ),
+            progress: state(container, at: 2).actionProgress(for: .element(0), type: FakeAction2.self),
             current: second,
             step: 1
         )
@@ -69,24 +54,14 @@ final class ActionContainerTests: XCTestCase {
 
         // Click 2 runs `other`; element 0 is idle between its two actions.
         assertIdle(
-            progress: container.actionProgress(
-                for: .element(0),
-                type: FakeAction2.self,
-                at: 2,
-                clickCounts: [:]
-            ),
+            progress: state(container, at: 2).actionProgress(for: .element(0), type: FakeAction2.self),
             previous: first,
             next: second
         )
 
         // Click 3: past everything, idle after the last action.
         assertActive(
-            progress: container.actionProgress(
-                for: .element(1),
-                type: FakeAction1.self,
-                at: 2,
-                clickCounts: [:]
-            ),
+            progress: state(container, at: 2).actionProgress(for: .element(1), type: FakeAction1.self),
             current: other,
             step: 1
         )
@@ -104,22 +79,12 @@ final class ActionContainerTests: XCTestCase {
         XCTAssertEqual(container.capacity, 1)
 
         assertActive(
-            progress: container.actionProgress(
-                for: .element(0),
-                type: FakeAction.self,
-                at: 1,
-                clickCounts: [:]
-            ),
+            progress: state(container, at: 1).actionProgress(for: .element(0), type: FakeAction.self),
             current: fake,
             step: 1
         )
         assertActive(
-            progress: container.actionProgress(
-                for: .element(1),
-                type: FakeAction1.self,
-                at: 1,
-                clickCounts: [:]
-            ),
+            progress: state(container, at: 1).actionProgress(for: .element(1), type: FakeAction1.self),
             current: fake1,
             step: 1
         )
@@ -131,27 +96,18 @@ final class ActionContainerTests: XCTestCase {
 
         @ActionContainerBuilder func build() -> ActionContainer {
             first & duplicate
+            FakeAction1(elementID: .element(1))
         }
         let container = build()
 
         assertActive(
-            progress: container.actionProgress(
-                for: .element(0),
-                type: FakeAction2.self,
-                at: 1,
-                clickCounts: [:]
-            ),
+            progress: state(container, at: 1).actionProgress(for: .element(0), type: FakeAction2.self),
             current: first,
             step: 1
         )
         // The dropped duplicate does not linger anywhere on the timeline.
         assertIdle(
-            progress: container.actionProgress(
-                for: .element(0),
-                type: FakeAction2.self,
-                at: 2,
-                clickCounts: [:]
-            ),
+            progress: state(container, at: 2).actionProgress(for: .element(0), type: FakeAction2.self),
             previous: first,
             next: nil
         )
@@ -168,22 +124,12 @@ final class ActionContainerTests: XCTestCase {
 
         XCTAssertEqual(container.capacity, 1)
         assertActive(
-            progress: container.actionProgress(
-                for: .element(0),
-                type: FakeAction2.self,
-                at: 1,
-                clickCounts: [:]
-            ),
+            progress: state(container, at: 1).actionProgress(for: .element(0), type: FakeAction2.self),
             current: first,
             step: 1
         )
         assertActive(
-            progress: container.actionProgress(
-                for: .element(0),
-                type: FakeAction2.self,
-                at: 2,
-                clickCounts: [:]
-            ),
+            progress: state(container, at: 2).actionProgress(for: .element(0), type: FakeAction2.self),
             current: second,
             step: 1
         )
@@ -193,12 +139,11 @@ final class ActionContainerTests: XCTestCase {
         let container = ActionContainer.empty
         XCTAssertEqual(container.capacity, 0)
         XCTAssertNil(
-            container.actionProgress(
-                for: .element(0),
-                type: FakeAction.self,
-                at: 0,
-                clickCounts: [:]
-            )
+            state(container, at: 0).actionProgress(for: .element(0), type: FakeAction.self)
         )
     }
+}
+
+private func state(_ container: ActionContainer, at click: Int) -> SlideState {
+    SlideState(actionContainer: container, position: .click(click))
 }
