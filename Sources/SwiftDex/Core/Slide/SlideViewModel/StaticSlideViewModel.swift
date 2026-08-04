@@ -7,12 +7,12 @@ import SwiftUI
 /// rendering happens off-screen where `onAppear` never fires), and every action at
 /// or before the current position renders as completed, without animation.
 final class StaticSlideViewModel: SlideViewModel {
-    let index: Int
-    let actionContainer: ActionContainer
+    private let state: SlideState
 
     init(index: Int, actionContainer: ActionContainer) {
-        self.index = index
-        self.actionContainer = actionContainer
+        var state = SlideState(actionContainer: actionContainer)
+        state.position = .click(state.click(atBoundary: index))
+        self.state = state
     }
 
     var canBeAnimated: Bool {
@@ -20,7 +20,7 @@ final class StaticSlideViewModel: SlideViewModel {
     }
 
     var currentClick: Int {
-        actionContainer.click(atBoundary: index, clickCounts: [:])
+        state.currentClick
     }
 
     func register<A: Action>(clicks: Int, for elementID: ElementID, type: A.Type) {}
@@ -29,12 +29,7 @@ final class StaticSlideViewModel: SlideViewModel {
         for elementID: ElementID,
         type: A.Type
     ) -> ActionProgress<A>? {
-        let progress = actionContainer.actionProgress(
-            for: elementID,
-            type: type,
-            at: currentClick,
-            clickCounts: [:]
-        )
+        let progress = state.actionProgress(for: elementID, type: type)
 
         // Previews never animate mid-action states; an action at the current
         // position renders as completed.

@@ -8,15 +8,11 @@ struct SlideView<T>: View where T: Slide {
 
     init(
         slide: T,
-        state: Binding<SlideState>,
-        actionContainer: ActionContainer
+        state: Binding<SlideState>
     ) {
         self.slide = slide
 
-        let viewModel = DynamicSlideViewModel(
-            state: state,
-            actionContainer: actionContainer
-        )
+        let viewModel = DynamicSlideViewModel(state: state)
         self.viewModel = AnySlideViewModel(viewModel)
     }
 

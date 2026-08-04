@@ -3,11 +3,9 @@ import SwiftUI
 
 final class DynamicSlideViewModel: SlideViewModel {
     @Binding var state: SlideState
-    let actionContainer: ActionContainer
 
-    init(state: Binding<SlideState>, actionContainer: ActionContainer) {
+    init(state: Binding<SlideState>) {
         self._state = state
-        self.actionContainer = actionContainer
     }
 
     var canBeAnimated: Bool {
@@ -15,9 +13,7 @@ final class DynamicSlideViewModel: SlideViewModel {
     }
 
     var currentClick: Int {
-        state.position.resolved(
-            total: actionContainer.totalClicks(clickCounts: state.clickCounts)
-        )
+        state.currentClick
     }
 
     func register<A: Action>(clicks: Int, for elementID: ElementID, type: A.Type) {
@@ -32,11 +28,6 @@ final class DynamicSlideViewModel: SlideViewModel {
         for elementID: ElementID,
         type: A.Type
     ) -> ActionProgress<A>? {
-        actionContainer.actionProgress(
-            for: elementID,
-            type: type,
-            at: currentClick,
-            clickCounts: state.clickCounts
-        )
+        state.actionProgress(for: elementID, type: type)
     }
 }

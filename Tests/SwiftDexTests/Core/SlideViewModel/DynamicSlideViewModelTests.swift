@@ -6,10 +6,10 @@ import XCTest
 
 final class DynamicSlideViewModelTests: XCTestCase {
     func test_canBeAnimated() {
-        var value = SlideState()
+        var value = SlideState(actionContainer: createActionContainer())
         value.latestUserOperation = .forward
         let binding = Binding(get: { value }, set: { value = $0 })
-        let viewModel = DynamicSlideViewModel(state: binding, actionContainer: createActionContainer())
+        let viewModel = DynamicSlideViewModel(state: binding)
 
         XCTAssertTrue(viewModel.canBeAnimated)
 
@@ -21,9 +21,9 @@ final class DynamicSlideViewModelTests: XCTestCase {
     }
 
     func test_register() {
-        var value = SlideState()
+        var value = SlideState(actionContainer: createActionContainer())
         let binding = Binding(get: { value }, set: { value = $0 })
-        let viewModel = DynamicSlideViewModel(state: binding, actionContainer: createActionContainer())
+        let viewModel = DynamicSlideViewModel(state: binding)
 
         viewModel.register(clicks: 3, for: .element(0), type: FakeAction.self)
 
@@ -32,9 +32,9 @@ final class DynamicSlideViewModelTests: XCTestCase {
     }
 
     func test_actionProgress_nil() {
-        var value = SlideState()
+        var value = SlideState(actionContainer: createActionContainer())
         let binding = Binding(get: { value }, set: { value = $0 })
-        let viewModel = DynamicSlideViewModel(state: binding, actionContainer: createActionContainer())
+        let viewModel = DynamicSlideViewModel(state: binding)
 
         let progress0: ActionProgress<FakeAction1>? = viewModel.actionProgress(
             for: .element(0),
@@ -50,9 +50,9 @@ final class DynamicSlideViewModelTests: XCTestCase {
     }
 
     func test_actionProgress_idle_before_and_after() {
-        var value = SlideState()
+        var value = SlideState(actionContainer: createActionContainer())
         let binding = Binding(get: { value }, set: { value = $0 })
-        let viewModel = DynamicSlideViewModel(state: binding, actionContainer: createActionContainer())
+        let viewModel = DynamicSlideViewModel(state: binding)
 
         // Before everything.
         assertIdle(
@@ -72,9 +72,9 @@ final class DynamicSlideViewModelTests: XCTestCase {
     }
 
     func test_actionProgress_active_substeps() {
-        var value = SlideState()
+        var value = SlideState(actionContainer: createActionContainer())
         let binding = Binding(get: { value }, set: { value = $0 })
-        let viewModel = DynamicSlideViewModel(state: binding, actionContainer: createActionContainer())
+        let viewModel = DynamicSlideViewModel(state: binding)
 
         viewModel.register(clicks: 3, for: .element(0), type: FakeAction.self)
 
@@ -111,9 +111,9 @@ final class DynamicSlideViewModelTests: XCTestCase {
             fake & fake1
         }
 
-        var value = SlideState()
+        var value = SlideState(actionContainer: actionContainer())
         let binding = Binding(get: { value }, set: { value = $0 })
-        let viewModel = DynamicSlideViewModel(state: binding, actionContainer: actionContainer())
+        let viewModel = DynamicSlideViewModel(state: binding)
 
         viewModel.register(clicks: 3, for: .element(0), type: FakeAction1.self)
 
@@ -131,9 +131,9 @@ final class DynamicSlideViewModelTests: XCTestCase {
     }
 
     func test_currentClick_resolvesEndPosition() {
-        var value = SlideState(position: .end)
+        var value = SlideState(actionContainer: createActionContainer(), position: .end)
         let binding = Binding(get: { value }, set: { value = $0 })
-        let viewModel = DynamicSlideViewModel(state: binding, actionContainer: createActionContainer())
+        let viewModel = DynamicSlideViewModel(state: binding)
 
         // Three unregistered lines -> three clicks in total.
         XCTAssertEqual(viewModel.currentClick, 3)
