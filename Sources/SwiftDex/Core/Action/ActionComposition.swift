@@ -26,11 +26,39 @@ public extension Action {
     }
 }
 
+/// A ResultBuilder that collects the children of a `Serial` or `Parallel` composition.
+@resultBuilder
+public struct ActionCompositionBuilder {
+    /// Collects each line of the block as one child of the composition.
+    public static func buildBlock(_ components: any ActionComposable...) -> [any ActionComposable] {
+        components
+    }
+}
+
 /// Actions that run at the same time.
 ///
-/// Produced by the `&` operator.
+/// Produced by the `&` operator, or written as a block:
+///
+/// ```swift
+/// Parallel {
+///     ApplyByItem(.fadeInFromUp, to: .bullets)
+///     Serial {
+///         Apply(.fade, to: .flipper)
+///         FlipByItem(.flipper)
+///     }
+/// }
+/// ```
 public struct Parallel: ActionComposable {
     let children: [any ActionComposable]
+
+    /// Creates a parallel composition; each line of the block runs at the same time.
+    public init(@ActionCompositionBuilder _ children: () -> [any ActionComposable]) {
+        self.children = children()
+    }
+
+    init(children: [any ActionComposable]) {
+        self.children = children
+    }
 
     /// The maximum of the children's structural durations.
     public var structuralDuration: Int {
@@ -49,9 +77,25 @@ public struct Parallel: ActionComposable {
 
 /// Actions that run one after another.
 ///
-/// Produced by the `then(_:)` method.
+/// Produced by the `then(_:)` method, or written as a block:
+///
+/// ```swift
+/// Serial {
+///     Apply(.fade, to: .flipper)
+///     FlipByItem(.flipper)
+/// }
+/// ```
 public struct Serial: ActionComposable {
     let children: [any ActionComposable]
+
+    /// Creates a serial composition; each line of the block runs after the previous one.
+    public init(@ActionCompositionBuilder _ children: () -> [any ActionComposable]) {
+        self.children = children()
+    }
+
+    init(children: [any ActionComposable]) {
+        self.children = children
+    }
 
     /// The sum of the children's structural durations.
     public var structuralDuration: Int {
