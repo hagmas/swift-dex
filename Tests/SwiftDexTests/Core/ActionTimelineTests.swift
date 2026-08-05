@@ -140,4 +140,50 @@ final class ActionTimelineTests: XCTestCase {
         XCTAssertEqual(state.totalClicks, 0)
         XCTAssertEqual(state.beatIndex(at: 0), 0)
     }
+    func test_builderComposition_matchesOperators() {
+        let fade = FakeAction(elementID: .element(0))
+        let flip = FakeAction1(elementID: .element(0))
+        let bullets = FakeAction2(elementID: .element(1))
+
+        @ActionContainerBuilder func build() -> ActionContainer {
+            Parallel {
+                bullets
+                Serial {
+                    fade
+                    flip
+                }
+            }
+        }
+        var state = SlideState(actionContainer: build())
+        state.register(
+            clicks: 4,
+            for: ClickCountKey(elementID: .element(1), actionType: FakeAction2.self)
+        )
+        state.register(
+            clicks: 3,
+            for: ClickCountKey(elementID: .element(0), actionType: FakeAction1.self)
+        )
+
+        // Identical timeline to `bullets & fade.then(flip)`.
+        XCTAssertEqual(state.beatDurations, [4])
+
+        state.position = .click(1)
+        assertActive(
+            progress: state.actionProgress(for: .element(0), type: FakeAction.self),
+            current: fade,
+            step: 1
+        )
+
+        state.position = .click(3)
+        assertActive(
+            progress: state.actionProgress(for: .element(0), type: FakeAction1.self),
+            current: flip,
+            step: 2
+        )
+        assertActive(
+            progress: state.actionProgress(for: .element(1), type: FakeAction2.self),
+            current: bullets,
+            step: 3
+        )
+    }
 }
