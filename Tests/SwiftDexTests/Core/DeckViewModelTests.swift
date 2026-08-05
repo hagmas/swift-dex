@@ -131,12 +131,12 @@ final class DeckViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.state.position, .click(0))
         XCTAssertEqual(viewModel.slideNumber, 1)
         // The action container follows the slide.
-        XCTAssertEqual(viewModel.actionContainer.capacity, 0)
+        XCTAssertEqual(viewModel.state.actionContainer.capacity, 0)
 
         viewModel.randomAccess(slideNumber: 0)
         XCTAssertEqual(viewModel.state.position, .click(0))
         XCTAssertEqual(viewModel.slideNumber, 0)
-        XCTAssertEqual(viewModel.actionContainer.capacity, 2)
+        XCTAssertEqual(viewModel.state.actionContainer.capacity, 2)
     }
 }
 

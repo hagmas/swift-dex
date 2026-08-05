@@ -1,40 +1,25 @@
 import Foundation
 
 /// A ResultBuilder for creating `ActionContainer`.
+///
+/// Each line of the builder is a beat on the slide timeline, executed in order.
+/// Within a line, compose actions with `&` (parallel) and `then(_:)` (serial).
 @resultBuilder
 public struct ActionContainerBuilder {
-    /// Builds an initial `TempActionContainer` from a single action.
-    public static func buildPartialBlock<A: Action>(first: A) -> TempActionContainer {
+    /// Builds an initial `TempActionContainer` from the first line.
+    public static func buildPartialBlock(first: some ActionComposable) -> TempActionContainer {
         var container = TempActionContainer()
-        container.add(action: first)
+        container.addLine(first)
         return container
     }
 
-    /// Builds an initial `TempActionContainer` from an action tuple.
-    public static func buildPartialBlock<A: ActionTupleElement, B: ActionTupleElement>(
-        first: ActionTuple<A, B>
-    ) -> TempActionContainer {
-        var container = TempActionContainer()
-        first.visit(with: &container)
-        return container
-    }
-
-    /// Adds a new action to an existing `TempActionContainer`.
-    public static func buildPartialBlock<A: Action>(accumulated: TempActionContainer, next: A) -> TempActionContainer {
-        var accumulated = accumulated
-        accumulated.increaseCapacity()
-        accumulated.add(action: next)
-        return accumulated
-    }
-
-    /// Adds a new action tuple to an existing `TempActionContainer`.
-    public static func buildPartialBlock<A: ActionTupleElement, B: ActionTupleElement>(
+    /// Adds a new line to an existing `TempActionContainer`.
+    public static func buildPartialBlock(
         accumulated: TempActionContainer,
-        next: ActionTuple<A, B>
+        next: some ActionComposable
     ) -> TempActionContainer {
         var accumulated = accumulated
-        accumulated.increaseCapacity()
-        next.visit(with: &accumulated)
+        accumulated.addLine(next)
         return accumulated
     }
 

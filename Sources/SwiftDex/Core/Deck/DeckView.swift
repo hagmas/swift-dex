@@ -61,12 +61,9 @@ private extension DeckView {
     }
 
     var currentView: some View {
-        flow[viewModel.slideNumber].0.createView(
-            state: $viewModel.state,
-            actionContainer: viewModel.actionContainer
-        )
-        .transition(transition)
-        .id(viewModel.slideID)
+        flow[viewModel.slideNumber].0.createView(state: $viewModel.state)
+            .transition(transition)
+            .id(viewModel.slideID)
     }
 
     var slideNumber: Int {

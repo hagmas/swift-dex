@@ -35,15 +35,11 @@ public extension Slide {
 }
 
 extension Slide {
-    func createView(
-        state: Binding<SlideState>,
-        actionContainer: ActionContainer
-    ) -> AnyView {
+    func createView(state: Binding<SlideState>) -> AnyView {
         AnyView(
             SlideView(
                 slide: self,
-                state: state,
-                actionContainer: actionContainer
+                state: state
             )
         )
     }

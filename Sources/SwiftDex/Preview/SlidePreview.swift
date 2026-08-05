@@ -44,14 +44,14 @@ public struct SlidePreview<T: Slide, S: DeckStyle>: View {
 private extension SlidePreview {
     var selection: Binding<Int> {
         Binding {
-            viewModel.boundaryIndex
+            viewModel.state.currentBeatIndex
         } set: { newValue in
             viewModel.randomAccess(boundary: newValue)
         }
     }
 
     var numberOfSteps: Int {
-        viewModel.actionContainer.capacity
+        viewModel.state.actionContainer.capacity
     }
 
     var content: some View {
@@ -59,8 +59,7 @@ private extension SlidePreview {
             TapHandlerView {
                 SlideView(
                     slide: slide,
-                    state: $viewModel.state,
-                    actionContainer: viewModel.actionContainer
+                    state: $viewModel.state
                 )
                 .background {
                     Color(deckStyle.colorStyle.backgroundColor)
