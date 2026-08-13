@@ -2,29 +2,47 @@ import SwiftUI
 
 /// `DeckView` is a View for displaying a Deck.
 ///
-/// It manages the state of the Deck and handles input from the user.
+/// It renders the deck's slides and handles input from the user. The presentation
+/// state lives in a `DeckController`: pass your own instance to share one
+/// presentation between multiple views (or windows), or use the convenience
+/// initializer to let the view create a private controller.
 public struct DeckView<T: Deck>: View {
     var deck: T
     @Namespace var deckNameSpace
-    @Bindable var viewModel: DeckViewModel
+    @Bindable var controller: DeckController
     @Binding var slideNumberBinding: Int
 
     /// Initializes a `DeckView` with the specified deck.
     ///
-    /// This initializer creates a `DeckView` instance with the specified deck.
+    /// This initializer creates a `DeckView` instance with a private controller.
     /// - Parameter deck: The deck to be displayed in this view.
     public init(deck: T) {
         self.init(deck: deck, slideNumberBinding: Binding(get: { 0 }, set: { _ in }))
     }
 
+    /// Initializes a `DeckView` driven by the given controller.
+    ///
+    /// Multiple views observing the same controller stay in sync: advancing the
+    /// presentation in one advances all of them.
+    ///
+    /// - Parameters:
+    ///   - deck: The deck to be displayed in this view. Must be the deck the
+    ///     controller was created with.
+    ///   - controller: The presentation state to observe and drive.
+    public init(deck: T, controller: DeckController) {
+        self.deck = deck
+        self._controller = Bindable(wrappedValue: controller)
+        self._slideNumberBinding = Binding(get: { 0 }, set: { _ in })
+    }
+
     init(deck: T, slideNumberBinding: Binding<Int>) {
         self.deck = deck
         _slideNumberBinding = slideNumberBinding
-        let viewModel = DeckViewModel(
+        let controller = DeckController(
             deck: deck,
             slideNumber: slideNumberBinding.wrappedValue
         )
-        self._viewModel = Bindable(wrappedValue: viewModel)
+        self._controller = Bindable(wrappedValue: controller)
     }
 
     /// The body of the `DeckView` view.
@@ -34,11 +52,11 @@ public struct DeckView<T: Deck>: View {
             .environment(\.matchProperties, matchedProperties)
             .environment(\.fontStyle, T.deckStyle.fontStyle)
             .environment(\.colorStyle, T.deckStyle.colorStyle)
-            .onChange(of: viewModel.slideNumber) { _, newValue in
+            .onChange(of: controller.slideNumber) { _, newValue in
                 slideNumberBinding = newValue
             }
             .onChange(of: slideNumberBinding) { _, newValue in
-                viewModel.randomAccess(slideNumber: newValue)
+                controller.randomAccess(slideNumber: newValue)
             }
     }
 }
@@ -52,26 +70,26 @@ private extension DeckView {
                         T.deckStyle.colorStyle.backgroundColor
                     }
             } onLeftTap: {
-                viewModel.backward()
+                controller.backward()
             } onRightTap: {
-                viewModel.forward()
+                controller.forward()
             }
             .clipped()
         }
     }
 
     var currentView: some View {
-        flow[viewModel.slideNumber].0.createView(state: $viewModel.state)
+        flow[controller.slideNumber].0.createView(state: $controller.state)
             .transition(transition)
-            .id(viewModel.slideID)
+            .id(controller.slideID)
     }
 
     var slideNumber: Int {
-        viewModel.slideNumber
+        controller.slideNumber
     }
 
     var flow: [(any Slide, SlideTransition)] {
-        viewModel.flow
+        controller.flow
     }
 
     var transition: AnyTransition {
