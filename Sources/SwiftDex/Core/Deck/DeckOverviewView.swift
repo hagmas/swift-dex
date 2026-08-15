@@ -1,25 +1,21 @@
 import SwiftUI
 
-/// Reports each overview cell's bounds so the deck surface can dock the live
-/// presentation layer onto the current slide's cell.
-struct OverviewCellAnchorsKey: PreferenceKey {
-    static var defaultValue: [Int: Anchor<CGRect>] = [:]
-
-    static func reduce(
-        value: inout [Int: Anchor<CGRect>],
-        nextValue: () -> [Int: Anchor<CGRect>]
-    ) {
-        value.merge(nextValue()) { $1 }
-    }
+/// The identifier pairing the live presentation with the current slide's grid
+/// cell for the overview's matched-geometry transition.
+enum OverviewMatchID {
+    case current
 }
 
 /// The grid overview presented on a deck surface.
 ///
-/// Shows every slide as a thumbnail; tapping one reports the selection to the
-/// deck surface, which jumps there and dismisses the overview. Thumbnails are
-/// rendered lazily with `ImageRenderer` and cached.
+/// Shows every slide as a thumbnail; tapping one jumps there and dismisses the
+/// overview. The current slide's cell carries the matched-geometry identifier,
+/// so the live presentation shrinks into it on entry and expands from the
+/// selected cell on exit. Thumbnails are rendered lazily with `ImageRenderer`
+/// and cached.
 struct DeckOverviewView<T: Deck>: View {
     let controller: DeckController
+    let namespace: Namespace.ID
     let onSelect: (Int) -> Void
 
     @State private var thumbnails = [Int: NSImage]()
@@ -57,7 +53,9 @@ struct DeckOverviewView<T: Deck>: View {
 
 private extension DeckOverviewView {
     @MainActor
+    @ViewBuilder
     func cell(index: Int) -> some View {
+        let isCurrent = index == controller.slideNumber
         Button {
             onSelect(index)
         } label: {
@@ -75,9 +73,8 @@ private extension DeckOverviewView {
             .overlay {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(
-                        index == controller.slideNumber
-                            ? Color.accentColor : Color.primary.opacity(0.15),
-                        lineWidth: index == controller.slideNumber ? 6 : 1
+                        isCurrent ? Color.accentColor : Color.primary.opacity(0.15),
+                        lineWidth: isCurrent ? 6 : 1
                     )
             }
             .overlay(alignment: .bottomLeading) {
@@ -87,9 +84,7 @@ private extension DeckOverviewView {
                     .padding(10)
             }
             .shadow(radius: 8, y: 4)
-            .anchorPreference(key: OverviewCellAnchorsKey.self, value: .bounds) {
-                [index: $0]
-            }
+            .modifier(CurrentCellMatch(isCurrent: isCurrent, namespace: namespace))
         }
         .buttonStyle(.plain)
     }
@@ -117,5 +112,20 @@ private extension DeckOverviewView {
         }
         thumbnails[index] = image
         return image
+    }
+}
+
+/// Applies the matched-geometry identifier to the current slide's cell only.
+private struct CurrentCellMatch: ViewModifier {
+    let isCurrent: Bool
+    let namespace: Namespace.ID
+
+    func body(content: Content) -> some View {
+        if isCurrent {
+            content.matchedGeometryEffect(id: OverviewMatchID.current, in: namespace)
+        }
+        else {
+            content
+        }
     }
 }

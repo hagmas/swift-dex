@@ -17,10 +17,7 @@ public struct DeckView<T: Deck>: View {
     private let externalController: DeckController?
     @State private var ownedController: DeckController?
 
-    // Overview docking state lives in an @Observable box so that per-frame
-    // geometry updates (scroll tracking) only invalidate the views that read
-    // them — the live layer — instead of the whole deck surface.
-    @State private var docking = OverviewDockingModel()
+    @Namespace var overviewNamespace
 
     var controller: DeckController {
         externalController ?? ownedController ?? DeckController(deck: deck)
@@ -81,35 +78,19 @@ public struct DeckView<T: Deck>: View {
 private extension DeckView {
     var content: some View {
         ScaleEffectView(width: 1920, height: 1080) {
-            GeometryReader { proxy in
-                ZStack {
-                    if controller.isOverviewPresented {
-                        DeckOverviewView<T>(controller: controller) { index in
-                            // Expand from the selected cell: teleport there first,
-                            // unanimated, then the dismissal animates back to full.
-                            docking.presentationFrame = docking.cellFrames[index]
-                            controller.select(slideNumber: index)
-                        }
+            ZStack {
+                if controller.isOverviewPresented {
+                    DeckOverviewView<T>(
+                        controller: controller,
+                        namespace: overviewNamespace
+                    ) { index in
+                        controller.select(slideNumber: index)
                     }
-
-                    DockedPresentationLayer(docking: docking) {
-                        presentation
-                    }
+                    .transition(.opacity)
                 }
-                .onPreferenceChange(OverviewCellAnchorsKey.self) { anchors in
-                    let resolved = anchors.mapValues { proxy[$0] }
-                    guard resolved != docking.cellFrames else {
-                        return
-                    }
-                    docking.cellFrames = resolved
-                    if controller.isOverviewPresented {
-                        // The first arrival of the cell's frame animates the
-                        // docking; later changes (scrolling) track it directly.
-                        docking.dock(
-                            to: controller.slideNumber,
-                            animated: docking.presentationFrame == nil
-                        )
-                    }
+                else {
+                    presentation
+                        .matchedGeometryEffect(id: OverviewMatchID.current, in: overviewNamespace)
                 }
             }
             .background {
@@ -122,28 +103,23 @@ private extension DeckView {
                         controller.toggleOverview()
                     }
                     .keyboardShortcut(.cancelAction)
+                    // While the overview is open, the presentation (and its
+                    // arrow-key handlers) is unmounted; arrows move the
+                    // selection between slides instead.
+                    Button("") {
+                        controller.randomAccess(slideNumber: controller.slideNumber - 1)
+                    }
+                    .keyboardShortcut(.leftArrow, modifiers: [])
+                    Button("") {
+                        controller.randomAccess(slideNumber: controller.slideNumber + 1)
+                    }
+                    .keyboardShortcut(.rightArrow, modifiers: [])
                 }
-            }
-            .onChange(of: controller.isOverviewPresented) { _, isPresented in
-                if isPresented {
-                    docking.dock(to: controller.slideNumber, animated: true)
-                }
-                else {
-                    docking.undock()
-                }
-            }
-            .onChange(of: controller.slideNumber) { _, _ in
-                guard controller.isOverviewPresented else {
-                    return
-                }
-                // Moving through slides while the overview is open hops the
-                // live layer between cells.
-                docking.dock(to: controller.slideNumber, animated: true)
             }
         }
     }
 
-    /// The live presentation content, independent of docking geometry.
+    /// The live presentation surface.
     var presentation: some View {
         ScaleEffectView(width: 1920, height: 1080) {
             TapHandlerView {
@@ -158,7 +134,6 @@ private extension DeckView {
             }
             .clipped()
         }
-        .allowsHitTesting(!controller.isOverviewPresented)
     }
 
     var currentView: some View {
