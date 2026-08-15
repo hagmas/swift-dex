@@ -138,6 +138,25 @@ final class DeckControllerTests: XCTestCase {
         XCTAssertEqual(controller.slideNumber, 0)
         XCTAssertEqual(controller.state.actionContainer.capacity, 2)
     }
+    func test_overview() {
+        let controller = DeckController(deck: OverviewDeck())
+        XCTAssertFalse(controller.isOverviewPresented)
+
+        controller.toggleOverview()
+        XCTAssertTrue(controller.isOverviewPresented)
+
+        // Selecting a slide jumps there and dismisses the overview.
+        controller.select(slideNumber: 2)
+        XCTAssertFalse(controller.isOverviewPresented)
+        XCTAssertEqual(controller.slideNumber, 2)
+        XCTAssertEqual(controller.state.latestUserOperation, .randomAccess)
+
+        // Selecting the current slide still dismisses.
+        controller.toggleOverview()
+        controller.select(slideNumber: 2)
+        XCTAssertFalse(controller.isOverviewPresented)
+        XCTAssertEqual(controller.slideNumber, 2)
+    }
 }
 
 private struct MyDeck: Deck {
@@ -178,5 +197,13 @@ private struct Slide03: Slide {
     var actionContainer: ActionContainer {
         FakeAction(elementID: .element(0))
         FakeAction1(elementID: .element(0))
+    }
+}
+
+private struct OverviewDeck: Deck {
+    var flow: some Flow {
+        Slide02()
+            .next(Slide02())
+            .next(Slide02())
     }
 }

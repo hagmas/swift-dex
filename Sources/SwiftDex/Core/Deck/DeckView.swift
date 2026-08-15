@@ -9,8 +9,22 @@ import SwiftUI
 public struct DeckView<T: Deck>: View {
     var deck: T
     @Namespace var deckNameSpace
-    @Bindable var controller: DeckController
     @Binding var slideNumberBinding: Int
+
+    // A view's init runs on every parent body evaluation, so a privately owned
+    // controller must live in @State to survive; an external one is held as a
+    // plain reference.
+    private let externalController: DeckController?
+    @State private var ownedController: DeckController?
+
+    // Overview docking state lives in an @Observable box so that per-frame
+    // geometry updates (scroll tracking) only invalidate the views that read
+    // them — the live layer — instead of the whole deck surface.
+    @State private var docking = OverviewDockingModel()
+
+    var controller: DeckController {
+        externalController ?? ownedController ?? DeckController(deck: deck)
+    }
 
     /// Initializes a `DeckView` with the specified deck.
     ///
@@ -31,18 +45,21 @@ public struct DeckView<T: Deck>: View {
     ///   - controller: The presentation state to observe and drive.
     public init(deck: T, controller: DeckController) {
         self.deck = deck
-        self._controller = Bindable(wrappedValue: controller)
+        self.externalController = controller
+        self._ownedController = State(initialValue: nil)
         self._slideNumberBinding = Binding(get: { 0 }, set: { _ in })
     }
 
     init(deck: T, slideNumberBinding: Binding<Int>) {
         self.deck = deck
         _slideNumberBinding = slideNumberBinding
-        let controller = DeckController(
-            deck: deck,
-            slideNumber: slideNumberBinding.wrappedValue
+        self.externalController = nil
+        self._ownedController = State(
+            initialValue: DeckController(
+                deck: deck,
+                slideNumber: slideNumberBinding.wrappedValue
+            )
         )
-        self._controller = Bindable(wrappedValue: controller)
     }
 
     /// The body of the `DeckView` view.
@@ -64,6 +81,71 @@ public struct DeckView<T: Deck>: View {
 private extension DeckView {
     var content: some View {
         ScaleEffectView(width: 1920, height: 1080) {
+            GeometryReader { proxy in
+                ZStack {
+                    if controller.isOverviewPresented {
+                        DeckOverviewView<T>(controller: controller) { index in
+                            // Expand from the selected cell: teleport there first,
+                            // unanimated, then the dismissal animates back to full.
+                            docking.presentationFrame = docking.cellFrames[index]
+                            controller.select(slideNumber: index)
+                        }
+                    }
+
+                    DockedPresentationLayer(docking: docking) {
+                        presentation
+                    }
+                }
+                .onPreferenceChange(OverviewCellAnchorsKey.self) { anchors in
+                    let resolved = anchors.mapValues { proxy[$0] }
+                    guard resolved != docking.cellFrames else {
+                        return
+                    }
+                    docking.cellFrames = resolved
+                    if controller.isOverviewPresented {
+                        // The first arrival of the cell's frame animates the
+                        // docking; later changes (scrolling) track it directly.
+                        docking.dock(
+                            to: controller.slideNumber,
+                            animated: docking.presentationFrame == nil
+                        )
+                    }
+                }
+            }
+            .background {
+                Button("") {
+                    controller.toggleOverview()
+                }
+                .keyboardShortcut("g", modifiers: [])
+                if controller.isOverviewPresented {
+                    Button("") {
+                        controller.toggleOverview()
+                    }
+                    .keyboardShortcut(.cancelAction)
+                }
+            }
+            .onChange(of: controller.isOverviewPresented) { _, isPresented in
+                if isPresented {
+                    docking.dock(to: controller.slideNumber, animated: true)
+                }
+                else {
+                    docking.undock()
+                }
+            }
+            .onChange(of: controller.slideNumber) { _, _ in
+                guard controller.isOverviewPresented else {
+                    return
+                }
+                // Moving through slides while the overview is open hops the
+                // live layer between cells.
+                docking.dock(to: controller.slideNumber, animated: true)
+            }
+        }
+    }
+
+    /// The live presentation content, independent of docking geometry.
+    var presentation: some View {
+        ScaleEffectView(width: 1920, height: 1080) {
             TapHandlerView {
                 currentView
                     .background {
@@ -76,10 +158,12 @@ private extension DeckView {
             }
             .clipped()
         }
+        .allowsHitTesting(!controller.isOverviewPresented)
     }
 
     var currentView: some View {
-        flow[controller.slideNumber].0.createView(state: $controller.state)
+        @Bindable var controller = controller
+        return flow[controller.slideNumber].0.createView(state: $controller.state)
             .transition(transition)
             .id(controller.slideID)
     }
