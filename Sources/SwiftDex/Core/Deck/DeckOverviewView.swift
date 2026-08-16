@@ -11,7 +11,9 @@ enum OverviewMatchID: Hashable {
 }
 
 /// The grid overview presented on a deck surface.
-struct DeckOverviewView<T: Deck>: View {
+struct DeckOverviewView: View {
+    @Environment(\.colorStyle) private var colorStyle
+
     let controller: DeckController
     let namespace: Namespace.ID
     let onSelect: (Int) -> Void
@@ -63,7 +65,7 @@ struct DeckOverviewView<T: Deck>: View {
             }
         }
         .background(
-            Color(T.deckStyle.colorStyle.backgroundColor).opacity(0.92)
+            Color(colorStyle.backgroundColor).opacity(0.92)
         )
     }
 
