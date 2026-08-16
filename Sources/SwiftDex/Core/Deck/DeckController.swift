@@ -24,15 +24,34 @@ public final class DeckController {
     /// The index of the slide currently being presented.
     public private(set) var slideNumber: Int = 0
 
+    /// Cached slide thumbnails, generated once at init.
+    @ObservationIgnored private(set) var thumbnails: [Int: NSImage] = [:]
+
     /// Creates a controller for the given deck.
     ///
     /// - Parameters:
     ///   - deck: The deck to present.
     ///   - slideNumber: The slide to start on. Defaults to the first slide.
+    @MainActor
     public init<T: Deck>(deck: T, slideNumber: Int = 0) {
         self.flow = deck.flow.flatten()
         self.slideNumber = min(max(0, slideNumber), flow.count - 1)
         state = SlideState(actionContainer: flow[self.slideNumber].0.actionContainer)
+
+        for (index, (slide, _)) in flow.enumerated() {
+            let renderer = ImageRenderer(
+                content: ScaleEffectView(width: 1920, height: 1080) {
+                    slide.createStaticView()
+                        .background {
+                            Color(T.deckStyle.colorStyle.backgroundColor)
+                        }
+                        .environment(\.fontStyle, T.deckStyle.fontStyle.self)
+                        .environment(\.colorStyle, T.deckStyle.colorStyle.self)
+                }
+                .frame(width: 192 * 3, height: 108 * 3)
+            )
+            thumbnails[index] = renderer.nsImage
+        }
     }
 
     /// The number of slides in the deck.
@@ -95,10 +114,36 @@ public final class DeckController {
         state = SlideState(actionContainer: flow[slideNumber].0.actionContainer)
         state.latestUserOperation = .randomAccess
     }
+
+    /// Whether the grid overview is currently presented on the deck's surfaces.
+    ///
+    /// The overview is a performance state, not chrome: it is shown to the
+    /// audience intentionally (e.g. jumping to a slide during Q&A), and every
+    /// view observing this controller presents it in sync.
+    public private(set) var isOverviewPresented = false
+
+    /// Presents or dismisses the grid overview.
+    public func toggleOverview() {
+        withAnimation(overviewAnimation) {
+            isOverviewPresented.toggle()
+        }
+    }
+
+    /// Jumps to the given slide and dismisses the grid overview.
+    public func select(slideNumber: Int) {
+        randomAccess(slideNumber: slideNumber)
+        withAnimation(overviewAnimation) {
+            isOverviewPresented = false
+        }
+    }
 }
 
 extension DeckController {
     fileprivate var transitionAnimation: Animation? {
         slideNumber + 1 < flow.count ? flow[slideNumber + 1].1.animation : nil
+    }
+
+    var overviewAnimation: Animation {
+        .spring(duration: 0.4)
     }
 }
