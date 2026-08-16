@@ -11,35 +11,24 @@ public struct DeckView<T: Deck>: View {
     @Namespace var deckNameSpace
     @Binding var slideNumberBinding: Int
 
-    // A view's init runs on every parent body evaluation, so a privately owned
-    // controller must live in @State to survive; an external one is held as a
-    // plain reference.
     private let externalController: DeckController?
     @State private var ownedController: DeckController?
 
     @Namespace var overviewNamespace
+
+    @State private var isDummyLayerVisible = true
+    @State private var isPresentationVisible = true
 
     var controller: DeckController {
         externalController ?? ownedController ?? DeckController(deck: deck)
     }
 
     /// Initializes a `DeckView` with the specified deck.
-    ///
-    /// This initializer creates a `DeckView` instance with a private controller.
-    /// - Parameter deck: The deck to be displayed in this view.
     public init(deck: T) {
         self.init(deck: deck, slideNumberBinding: Binding(get: { 0 }, set: { _ in }))
     }
 
     /// Initializes a `DeckView` driven by the given controller.
-    ///
-    /// Multiple views observing the same controller stay in sync: advancing the
-    /// presentation in one advances all of them.
-    ///
-    /// - Parameters:
-    ///   - deck: The deck to be displayed in this view. Must be the deck the
-    ///     controller was created with.
-    ///   - controller: The presentation state to observe and drive.
     public init(deck: T, controller: DeckController) {
         self.deck = deck
         self.externalController = controller
@@ -79,18 +68,44 @@ private extension DeckView {
     var content: some View {
         ScaleEffectView(width: 1920, height: 1080) {
             ZStack {
-                if controller.isOverviewPresented {
-                    DeckOverviewView<T>(
-                        controller: controller,
-                        namespace: overviewNamespace
-                    ) { index in
-                        controller.select(slideNumber: index)
+                DeckOverviewView<T>(
+                    controller: controller,
+                    namespace: overviewNamespace
+                ) { index in
+                    controller.select(slideNumber: index)
+                }
+
+                // While the overview is closed the cells all carry inactive
+                // ids, so this is a source with no followers — completely
+                // inert during normal slide navigation.
+                dummyLayer
+                    .matchedGeometryEffect(
+                        id: OverviewMatchID.slide(controller.slideNumber),
+                        in: overviewNamespace,
+                        isSource: !controller.isOverviewPresented
+                    )
+                    .allowsHitTesting(!controller.isOverviewPresented)
+                    .opacity(isDummyLayerVisible ? 1 : 0)
+            }
+            .onChange(of: controller.isOverviewPresented) { _, isPresented in
+                if isPresented {
+                    // Slide → Overview: let MGE animate, then hide dummy
+                    withAnimation(controller.overviewAnimation) {
+                        isPresentationVisible = false
+                    } completion: {
+                        withAnimation {
+                            isDummyLayerVisible = false
+                        }
                     }
-                    .transition(.opacity)
                 }
                 else {
-                    presentation
-                        .matchedGeometryEffect(id: OverviewMatchID.current, in: overviewNamespace)
+                    // Overview → Slide: show dummy (thumbnail visible,
+                    // presentation still alpha 0), then fade presentation in
+                    isDummyLayerVisible = true
+                    isPresentationVisible = false
+                    withAnimation(controller.overviewAnimation) {
+                        isPresentationVisible = true
+                    }
                 }
             }
             .background {
@@ -103,9 +118,6 @@ private extension DeckView {
                         controller.toggleOverview()
                     }
                     .keyboardShortcut(.cancelAction)
-                    // While the overview is open, the presentation (and its
-                    // arrow-key handlers) is unmounted; arrows move the
-                    // selection between slides instead.
                     Button("") {
                         controller.randomAccess(slideNumber: controller.slideNumber - 1)
                     }
@@ -119,7 +131,20 @@ private extension DeckView {
         }
     }
 
-    /// The live presentation surface.
+    var dummyLayer: some View {
+        ZStack {
+            if let image = controller.thumbnails[controller.slideNumber] {
+                Image(nsImage: image)
+                    .resizable()
+            }
+            presentation
+                .opacity(isPresentationVisible ? 1 : 0)
+        }
+        .clipShape(
+            RoundedRectangle(cornerRadius: controller.isOverviewPresented ? 12 : 0)
+        )
+    }
+
     var presentation: some View {
         ScaleEffectView(width: 1920, height: 1080) {
             TapHandlerView {

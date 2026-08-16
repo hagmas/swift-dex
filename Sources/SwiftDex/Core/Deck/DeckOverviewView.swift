@@ -1,37 +1,43 @@
 import SwiftUI
 
-/// The identifier pairing the live presentation with the current slide's grid
-/// cell for the overview's matched-geometry transition.
-enum OverviewMatchID {
-    case current
+/// Identifies each slide's grid cell for the overview's matched-geometry transition.
+///
+/// `inactive` ids pair with nothing: they neutralize the effect while the
+/// overview is fully closed, so normal slide navigation never touches
+/// matched-geometry bookkeeping.
+enum OverviewMatchID: Hashable {
+    case slide(Int)
+    case inactive(Int)
 }
 
 /// The grid overview presented on a deck surface.
-///
-/// Shows every slide as a thumbnail; tapping one jumps there and dismisses the
-/// overview. The current slide's cell carries the matched-geometry identifier,
-/// so the live presentation shrinks into it on entry and expands from the
-/// selected cell on exit. Thumbnails are rendered lazily with `ImageRenderer`
-/// and cached.
 struct DeckOverviewView<T: Deck>: View {
     let controller: DeckController
     let namespace: Namespace.ID
     let onSelect: (Int) -> Void
 
-    @State private var thumbnails = [Int: NSImage]()
-
-    private let columns = [GridItem](
-        repeating: GridItem(.flexible(), spacing: 48),
-        count: 4
-    )
+    private let columnCount = 4
 
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVGrid(columns: columns, spacing: 48) {
+                LazyVGrid(
+                    columns: [GridItem](
+                        repeating: GridItem(.flexible(), spacing: 64),
+                        count: columnCount
+                    ),
+                    spacing: 64
+                ) {
                     ForEach(0..<controller.slideCount, id: \.self) { index in
-                        cell(index: index)
-                            .id(index)
+                        CellView(
+                            index: index,
+                            isCurrent: index == controller.slideNumber,
+                            image: controller.thumbnails[index],
+                            namespace: namespace,
+                            isSource: controller.isOverviewPresented,
+                            onSelect: onSelect
+                        )
+                        .id(index)
                     }
                 }
                 .padding(64)
@@ -39,7 +45,18 @@ struct DeckOverviewView<T: Deck>: View {
             .onAppear {
                 proxy.scrollTo(controller.slideNumber, anchor: .center)
             }
+            .onChange(of: controller.isOverviewPresented) { _, isPresented in
+                // Jump to the current slide the moment the overview engages.
+                if isPresented {
+                    proxy.scrollTo(controller.slideNumber, anchor: .center)
+                }
+            }
             .onChange(of: controller.slideNumber) { _, newValue in
+                // The grid stays mounted while presenting; never do scroll
+                // work unless the overview is actually on screen.
+                guard controller.isOverviewPresented else {
+                    return
+                }
                 withAnimation(.spring(duration: 0.35)) {
                     proxy.scrollTo(newValue, anchor: .center)
                 }
@@ -49,18 +66,27 @@ struct DeckOverviewView<T: Deck>: View {
             Color(T.deckStyle.colorStyle.backgroundColor).opacity(0.92)
         )
     }
+
 }
 
-private extension DeckOverviewView {
-    @MainActor
-    @ViewBuilder
-    func cell(index: Int) -> some View {
-        let isCurrent = index == controller.slideNumber
+/// A single grid cell.
+///
+/// Extracted as a struct so it only re-evaluates when its own inputs change,
+/// not when another cell's `isCurrent` flips.
+private struct CellView: View {
+    let index: Int
+    let isCurrent: Bool
+    let image: NSImage?
+    let namespace: Namespace.ID
+    let isSource: Bool
+    let onSelect: (Int) -> Void
+
+    var body: some View {
         Button {
             onSelect(index)
         } label: {
             Group {
-                if let image = thumbnail(index: index) {
+                if let image {
                     Image(nsImage: image)
                         .resizable()
                 }
@@ -72,10 +98,7 @@ private extension DeckOverviewView {
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay {
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(
-                        isCurrent ? Color.accentColor : Color.primary.opacity(0.15),
-                        lineWidth: isCurrent ? 6 : 1
-                    )
+                    .stroke(Color.primary.opacity(0.15), lineWidth: 1)
             }
             .overlay(alignment: .bottomLeading) {
                 Text("\(index + 1)")
@@ -84,48 +107,20 @@ private extension DeckOverviewView {
                     .padding(10)
             }
             .shadow(radius: 8, y: 4)
-            .modifier(CurrentCellMatch(isCurrent: isCurrent, namespace: namespace))
+            .overlay(alignment: .bottom) {
+                if isCurrent {
+                    Text("・")
+                        .font(.system(size: 48))
+                        .foregroundStyle(.black)
+                        .offset(y: 48)
+                }
+            }
+            .matchedGeometryEffect(
+                id: isSource ? OverviewMatchID.slide(index) : OverviewMatchID.inactive(index),
+                in: namespace,
+                isSource: isSource
+            )
         }
         .buttonStyle(.plain)
-    }
-
-    @MainActor
-    func thumbnail(index: Int) -> NSImage? {
-        if let image = thumbnails[index] {
-            return image
-        }
-
-        let renderer = ImageRenderer(
-            content: ScaleEffectView(width: 1920, height: 1080) {
-                controller.flow[index].0.createStaticView()
-                    .background {
-                        Color(T.deckStyle.colorStyle.backgroundColor)
-                    }
-                    .environment(\.fontStyle, T.deckStyle.fontStyle.self)
-                    .environment(\.colorStyle, T.deckStyle.colorStyle.self)
-            }
-            .frame(width: 192 * 3, height: 108 * 3)
-        )
-
-        guard let image = renderer.nsImage else {
-            return nil
-        }
-        thumbnails[index] = image
-        return image
-    }
-}
-
-/// Applies the matched-geometry identifier to the current slide's cell only.
-private struct CurrentCellMatch: ViewModifier {
-    let isCurrent: Bool
-    let namespace: Namespace.ID
-
-    func body(content: Content) -> some View {
-        if isCurrent {
-            content.matchedGeometryEffect(id: OverviewMatchID.current, in: namespace)
-        }
-        else {
-            content
-        }
     }
 }

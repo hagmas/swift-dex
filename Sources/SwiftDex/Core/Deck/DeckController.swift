@@ -24,15 +24,34 @@ public final class DeckController {
     /// The index of the slide currently being presented.
     public private(set) var slideNumber: Int = 0
 
+    /// Cached slide thumbnails, generated once at init.
+    @ObservationIgnored private(set) var thumbnails: [Int: NSImage] = [:]
+
     /// Creates a controller for the given deck.
     ///
     /// - Parameters:
     ///   - deck: The deck to present.
     ///   - slideNumber: The slide to start on. Defaults to the first slide.
+    @MainActor
     public init<T: Deck>(deck: T, slideNumber: Int = 0) {
         self.flow = deck.flow.flatten()
         self.slideNumber = min(max(0, slideNumber), flow.count - 1)
         state = SlideState(actionContainer: flow[self.slideNumber].0.actionContainer)
+
+        for (index, (slide, _)) in flow.enumerated() {
+            let renderer = ImageRenderer(
+                content: ScaleEffectView(width: 1920, height: 1080) {
+                    slide.createStaticView()
+                        .background {
+                            Color(T.deckStyle.colorStyle.backgroundColor)
+                        }
+                        .environment(\.fontStyle, T.deckStyle.fontStyle.self)
+                        .environment(\.colorStyle, T.deckStyle.colorStyle.self)
+                }
+                .frame(width: 192 * 3, height: 108 * 3)
+            )
+            thumbnails[index] = renderer.nsImage
+        }
     }
 
     /// The number of slides in the deck.
@@ -124,7 +143,7 @@ extension DeckController {
         slideNumber + 1 < flow.count ? flow[slideNumber + 1].1.animation : nil
     }
 
-    fileprivate var overviewAnimation: Animation {
-        .spring(duration: 0.35)
+    var overviewAnimation: Animation {
+        .spring(duration: 0.4)
     }
 }

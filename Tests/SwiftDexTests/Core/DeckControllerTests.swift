@@ -4,6 +4,7 @@ import XCTest
 
 @testable import SwiftDex
 
+@MainActor
 final class DeckControllerTests: XCTestCase {
     func test_initialize() {
         let controller = DeckController(deck: MyDeck())
