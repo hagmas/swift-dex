@@ -121,6 +121,7 @@ private extension SlidePreview {
             .environment(\.fontStyle, deckStyle.fontStyle.self)
             .environment(\.colorStyle, deckStyle.colorStyle.self)
             .environment(\.slideSize, size)
+            .environment(\.isStaticRendering, true)
         }
         .frame(width: 192 * 3, height: 108 * 3)
     }

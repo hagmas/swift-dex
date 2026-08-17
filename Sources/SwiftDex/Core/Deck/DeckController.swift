@@ -49,6 +49,7 @@ public final class DeckController {
                         .environment(\.fontStyle, T.deckStyle.fontStyle.self)
                         .environment(\.colorStyle, T.deckStyle.colorStyle.self)
                         .environment(\.slideSize, size)
+                        .environment(\.isStaticRendering, true)
                 }
                 .frame(width: 192 * 3, height: 108 * 3)
             )

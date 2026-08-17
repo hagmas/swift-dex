@@ -31,6 +31,7 @@ private extension MyDeck {
             .next(MultipleApplyByItem(), transition: .customPush())
             .next(AboutCode(), transition: .customPush())
             .next(AboutFlipper(), transition: .customPush())
+            .next(AboutGif(), transition: .customPush())
     }
 
     var layoutFlow: some Flow {
