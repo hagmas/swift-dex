@@ -48,7 +48,7 @@ public struct DeckView<T: Deck>: View {
 
     /// The body of the `DeckView` view.
     public var body: some View {
-        ScaleEffectView(width: 1920, height: 1080) {
+        ScaleEffectView(size: T.deckStyle.slideSize) {
             OverviewStage(controller: controller) {
                 presentation
             }
@@ -57,6 +57,7 @@ public struct DeckView<T: Deck>: View {
         .environment(\.matchProperties, matchedProperties)
         .environment(\.fontStyle, T.deckStyle.fontStyle)
         .environment(\.colorStyle, T.deckStyle.colorStyle)
+        .environment(\.slideSize, T.deckStyle.slideSize)
     }
 }
 
@@ -66,7 +67,7 @@ private extension DeckView {
     /// The live presentation surface: the current slide with tap and arrow-key
     /// navigation, transitioning between slides.
     var presentation: some View {
-        ScaleEffectView(width: 1920, height: 1080) {
+        ScaleEffectView(size: T.deckStyle.slideSize) {
             TapHandlerView {
                 currentView
                     .background {

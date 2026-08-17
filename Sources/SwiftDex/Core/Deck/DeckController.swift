@@ -38,15 +38,17 @@ public final class DeckController {
         self.slideNumber = min(max(0, slideNumber), flow.count - 1)
         state = SlideState(actionContainer: flow[self.slideNumber].0.actionContainer)
 
+        let size = T.deckStyle.slideSize
         for (index, (slide, _)) in flow.enumerated() {
             let renderer = ImageRenderer(
-                content: ScaleEffectView(width: 1920, height: 1080) {
+                content: ScaleEffectView(size: size) {
                     slide.createStaticView()
                         .background {
                             Color(T.deckStyle.colorStyle.backgroundColor)
                         }
                         .environment(\.fontStyle, T.deckStyle.fontStyle.self)
                         .environment(\.colorStyle, T.deckStyle.colorStyle.self)
+                        .environment(\.slideSize, size)
                 }
                 .frame(width: 192 * 3, height: 108 * 3)
             )
