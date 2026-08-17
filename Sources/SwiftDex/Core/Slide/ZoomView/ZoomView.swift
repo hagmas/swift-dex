@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ZoomView<Content: View>: View {
     @EnvironmentObject private var elementAnchors: ElementAnchors
+    @Environment(\.slideSize) private var slideSize
 
     private let content: () -> Content
 
@@ -21,7 +22,7 @@ struct ZoomView<Content: View>: View {
                     // anchors keep resolving in untransformed slide coordinates and a
                     // later zoom target is not distorted by the current zoom.
                     ZoomEffect(
-                        baseRect: CGRect(x: 0, y: 0, width: 1920, height: 1080),
+                        baseRect: CGRect(origin: .zero, size: slideSize),
                         targetRect: targetRect(for: progress, proxy: proxy)
                     )
                     .ignoredByLayout()
@@ -45,7 +46,7 @@ private extension ZoomView {
             rect = proxy[anchor]
         }
         else {
-            rect = CGRect(x: 0, y: 0, width: 1920, height: 1080)
+            rect = CGRect(origin: .zero, size: slideSize)
         }
 
         let xInset = (rect.width / zoom.ratio - rect.width) / 2

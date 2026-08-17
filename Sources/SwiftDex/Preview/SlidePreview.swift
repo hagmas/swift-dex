@@ -37,6 +37,7 @@ public struct SlidePreview<T: Slide, S: DeckStyle>: View {
             content
                 .environment(\.fontStyle, deckStyle.fontStyle.self)
                 .environment(\.colorStyle, deckStyle.colorStyle.self)
+                .environment(\.slideSize, deckStyle.slideSize)
         }
     }
 }
@@ -55,7 +56,7 @@ private extension SlidePreview {
     }
 
     var content: some View {
-        ScaleEffectView(width: 1920, height: 1080) {
+        ScaleEffectView(size: deckStyle.slideSize) {
             TapHandlerView {
                 SlideView(
                     slide: slide,
@@ -108,7 +109,8 @@ private extension SlidePreview {
     }
 
     func staticContent(step: Int) -> some View {
-        ScaleEffectView(width: 1920, height: 1080) {
+        let size = deckStyle.slideSize
+        return ScaleEffectView(size: size) {
             SlideView(
                 slide: slide,
                 step: step
@@ -118,6 +120,7 @@ private extension SlidePreview {
             }
             .environment(\.fontStyle, deckStyle.fontStyle.self)
             .environment(\.colorStyle, deckStyle.colorStyle.self)
+            .environment(\.slideSize, size)
         }
         .frame(width: 192 * 3, height: 108 * 3)
     }
