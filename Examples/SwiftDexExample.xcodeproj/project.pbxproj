@@ -23,6 +23,8 @@
 		93912B3C4425A6203FC96450 /* SwiftDexExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BD7255273A93DB0FEF98C81 /* SwiftDexExampleApp.swift */; };
 		9EEC10946E592DFFAEA1B03A /* Title.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1F9F0DDDBC33B4282CCF9D7 /* Title.swift */; };
 		B6DAA2601DFD8504C4C0FD62 /* Layout2.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A17BC3CB6C02ADB509A76B /* Layout2.swift */; };
+		BAD7307B15C35E37802F5B0A /* AboutGif.swift in Sources */ = {isa = PBXBuildFile; fileRef = 262AAA59F86D1C76DAB2E17E /* AboutGif.swift */; };
+		C29F40A2A5A65127AC2464DE /* cat-chan.gif in Resources */ = {isa = PBXBuildFile; fileRef = CA2840DB24E3B23FD1430E35 /* cat-chan.gif */; };
 		C65C6EBF4499FB2BD42BC98F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AAC5BDDB4254D1D61F5EAEE8 /* Assets.xcassets */; };
 		CB1687152630DD3D402B3497 /* ElementTransition+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5D1F2148F8EBF20D2C49FEF /* ElementTransition+Extensions.swift */; };
 		D06E76DDE96065BB17514B84 /* SlideTransition+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F87C8689A0B703A15C957B7 /* SlideTransition+Extensions.swift */; };
@@ -36,6 +38,7 @@
 		06E75E552EE513B1C0ADFA6D /* AboutFlipper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutFlipper.swift; sourceTree = "<group>"; };
 		1914BA586BA4C9DEEA1C1F1B /* SwiftDexExample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftDexExample.entitlements; sourceTree = "<group>"; };
 		1CF0C9952FE28D81CF2AAC16 /* SwiftDexExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftDexExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		262AAA59F86D1C76DAB2E17E /* AboutGif.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutGif.swift; sourceTree = "<group>"; };
 		32AA799D9FCFC50C68CE5E7D /* Layout1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layout1.swift; sourceTree = "<group>"; };
 		3A24F7319BE654F100A0C686 /* MultipleApplyByItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipleApplyByItem.swift; sourceTree = "<group>"; };
 		461ABD1D9D01D34EED6CFA3F /* MyDeck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyDeck.swift; sourceTree = "<group>"; };
@@ -53,6 +56,7 @@
 		C0A17BC3CB6C02ADB509A76B /* Layout2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layout2.swift; sourceTree = "<group>"; };
 		C2C23E7D5C1B84F8C87E8CC6 /* AboutTransition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutTransition.swift; sourceTree = "<group>"; };
 		C93EE49FF7DB4060675933EB /* AboutApply.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutApply.swift; sourceTree = "<group>"; };
+		CA2840DB24E3B23FD1430E35 /* cat-chan.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "cat-chan.gif"; sourceTree = "<group>"; };
 		E5D1F2148F8EBF20D2C49FEF /* ElementTransition+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ElementTransition+Extensions.swift"; sourceTree = "<group>"; };
 		EC28170B7BB8A2D53CEF3B2E /* swift-dex */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "swift-dex"; path = ..; sourceTree = SOURCE_ROOT; };
 		F33E50F3C38B6DA824A966BB /* AboutAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutAction.swift; sourceTree = "<group>"; };
@@ -95,6 +99,14 @@
 			path = CustomAnimation;
 			sourceTree = "<group>";
 		};
+		48BC55FE9A0BDDB84011C41E /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				CA2840DB24E3B23FD1430E35 /* cat-chan.gif */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		4B7DBD59F216C5568E7D01AB /* SlideTransition */ = {
 			isa = PBXGroup;
 			children = (
@@ -112,6 +124,7 @@
 				1914BA586BA4C9DEEA1C1F1B /* SwiftDexExample.entitlements */,
 				5BD7255273A93DB0FEF98C81 /* SwiftDexExampleApp.swift */,
 				32F12D4ACF9DC6582903C744 /* Common */,
+				48BC55FE9A0BDDB84011C41E /* Resources */,
 				FC0CCF23004E37A3CF6D3F94 /* Slides */,
 			);
 			path = SwiftDexExample;
@@ -158,6 +171,7 @@
 				4D5ACA3638B63FD73584EC5A /* AboutBullets.swift */,
 				FF13D146E4ACED0DFA40779D /* AboutCode.swift */,
 				06E75E552EE513B1C0ADFA6D /* AboutFlipper.swift */,
+				262AAA59F86D1C76DAB2E17E /* AboutGif.swift */,
 				3A24F7319BE654F100A0C686 /* MultipleApplyByItem.swift */,
 			);
 			path = CustomViews;
@@ -248,6 +262,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C65C6EBF4499FB2BD42BC98F /* Assets.xcassets in Resources */,
+				C29F40A2A5A65127AC2464DE /* cat-chan.gif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -264,6 +279,7 @@
 				1BFBA7EA6EB6F6A3B5274EA5 /* AboutCode.swift in Sources */,
 				6DAC5E01973E1F8E896894D8 /* AboutDissolve.swift in Sources */,
 				FA85639F5460A873A20083FC /* AboutFlipper.swift in Sources */,
+				BAD7307B15C35E37802F5B0A /* AboutGif.swift in Sources */,
 				7C59F47B5CE1149B8F6AC137 /* AboutHighlight.swift in Sources */,
 				1E24A3EAE77A431FCD1CB195 /* AboutMatchedTransition.swift in Sources */,
 				32EB5D9C7CA555D972C8AA19 /* AboutStandardLayout.swift in Sources */,
