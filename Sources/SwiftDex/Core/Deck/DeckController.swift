@@ -27,6 +27,13 @@ public final class DeckController {
     /// Cached slide thumbnails, generated once at init.
     @ObservationIgnored private(set) var thumbnails: [Int: NSImage] = [:]
 
+    /// Slide-local shared state (`@SlideValue`), observed by every surface.
+    ///
+    /// Values survive only forward movement within one slide; every other
+    /// operation clears the store so rewinds stay deterministic. The store is
+    /// its own observable authority — the controller only owns its lifetime.
+    @ObservationIgnored let slideValueStore = SlideValueStore()
+
     /// Creates a controller for the given deck.
     ///
     /// - Parameters:
@@ -80,6 +87,7 @@ public final class DeckController {
             state.position = .click(state.currentClick + 1)
         }
         else if slideNumber < flow.count - 1 {
+            slideValueStore.clear()
             withAnimation(transitionAnimation) {
                 slideNumber += 1
                 slideID = UUID()
@@ -94,9 +102,11 @@ public final class DeckController {
         state.latestUserOperation = .backward
 
         if state.currentClick > 0 {
+            slideValueStore.clear()
             state.position = .click(state.currentClick - 1)
         }
         else if slideNumber > 0 {
+            slideValueStore.clear()
             slideNumber -= 1
             state = SlideState(
                 actionContainer: flow[slideNumber].0.actionContainer,
@@ -113,6 +123,7 @@ public final class DeckController {
         else {
             return
         }
+        slideValueStore.clear()
         self.slideNumber = slideNumber
         state = SlideState(actionContainer: flow[slideNumber].0.actionContainer)
         state.latestUserOperation = .randomAccess
