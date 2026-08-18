@@ -29,6 +29,11 @@ public extension ElementID {
         ElementID(rawValue: "flipper\(number)")
     }
 
+    static var video = ElementID(rawValue: "video")
+    static func video(_ number: Int) -> ElementID {
+        ElementID(rawValue: "video\(number)")
+    }
+
     static func element(_ number: Int) -> ElementID {
         ElementID(rawValue: "element\(number)")
     }

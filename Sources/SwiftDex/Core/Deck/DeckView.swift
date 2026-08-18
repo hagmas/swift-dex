@@ -55,10 +55,10 @@ public struct DeckView<T: Deck>: View {
         }
         .environment(\.namespaceID, deckNamespace)
         .environment(\.matchProperties, matchedProperties)
-        .environment(\.slideValueStore, controller.slideValueStore)
         .environment(\.fontStyle, T.deckStyle.fontStyle)
         .environment(\.colorStyle, T.deckStyle.colorStyle)
         .environment(\.slideSize, T.deckStyle.slideSize)
+        .environment(\.slideValueStore, controller.slideValueStore)
     }
 }
 

@@ -32,6 +32,7 @@ private extension MyDeck {
             .next(AboutCode(), transition: .customPush())
             .next(AboutFlipper(), transition: .customPush())
             .next(AboutGif(), transition: .customPush())
+            .next(AboutVideo(), transition: .customPush())
     }
 
     var layoutFlow: some Flow {
