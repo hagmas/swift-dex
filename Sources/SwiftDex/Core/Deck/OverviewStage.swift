@@ -79,6 +79,10 @@ private extension OverviewStage {
                     .resizable()
             }
             presentation()
+                .environment(
+                    \.isStaticRendering,
+                    !isPresentationVisible
+                )
                 .opacity(isPresentationVisible ? 1 : 0)
         }
         .clipShape(
