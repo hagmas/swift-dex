@@ -1,11 +1,6 @@
 import SwiftUI
 
 public extension String {
-    func elementID(_ elemenetID: ElementID) -> some View {
-        Text(self)
-            .elementID(elemenetID)
-    }
-
     func foregroundStyle<S>(_ style: S) -> some View where S: ShapeStyle {
         Text(self)
             .foregroundStyle(style)

@@ -14,7 +14,7 @@ struct AboutAction: StandardLayoutSlide {
                 Bullets {
                     "To use an **Action:**"
                     Indent {
-                        "Assign an **ElementID** to the target view."
+                        "Wrap the target view in an **Element** with an **ElementID**."
                         "Specify the action using this ID in the action container."
                     }
                 }
@@ -26,10 +26,11 @@ struct AboutAction: StandardLayoutSlide {
                         struct SimpleSlide: StandardLayoutSlide {
                             @ViewBuilder
                             var body: some View {
-                                "Target View"
-                                    .elementID(.element(0))
+                                Element(.element(0)) {
+                                    "Target View"
+                                }
                             }
-                            
+
                             @ActionContainerBuilder
                             var actionContainer: ActionContainer {
                                 Apply(.fade, to: .element(0))

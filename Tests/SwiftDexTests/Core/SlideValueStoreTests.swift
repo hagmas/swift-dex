@@ -84,8 +84,9 @@ private struct StoreDeck: Deck {
 
 private struct ActionSlide: Slide {
     var content: some View {
-        EmptyView()
-            .elementID(.element(0))
+        Element(.element(0)) {
+            EmptyView()
+        }
     }
 
     @ActionContainerBuilder

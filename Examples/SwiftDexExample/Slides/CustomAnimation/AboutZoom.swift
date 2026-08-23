@@ -12,20 +12,23 @@ struct AboutZoom: StandardLayoutSlide {
             "The **`Zoom`** Action is for zooming in or out on an Element."
             HStack {
                 Spacer()
-                Image(systemName: "circle.fill")
-                    .font(.system(size: 320))
-                    .foregroundColor(.cyan)
-                    .elementID(.element(0))
+                Element(.element(0)) {
+                    Image(systemName: "circle.fill")
+                        .font(.system(size: 320))
+                        .foregroundColor(.cyan)
+                }
                 Spacer()
-                Image(systemName: "square.fill")
-                    .font(.system(size: 320))
-                    .foregroundColor(.mint)
-                    .elementID(.element(1))
+                Element(.element(1)) {
+                    Image(systemName: "square.fill")
+                        .font(.system(size: 320))
+                        .foregroundColor(.mint)
+                }
                 Spacer()
-                Image(systemName: "triangle.fill")
-                    .font(.system(size: 320))
-                    .foregroundColor(.pink)
-                    .elementID(.element(2))
+                Element(.element(2)) {
+                    Image(systemName: "triangle.fill")
+                        .font(.system(size: 320))
+                        .foregroundColor(.pink)
+                }
                 Spacer()
             }
             .frame(maxHeight: .infinity)

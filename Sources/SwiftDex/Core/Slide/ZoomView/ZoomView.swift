@@ -12,7 +12,9 @@ struct ZoomView<Content: View>: View {
 
     var body: some View {
         GeometryReader { proxy in
-            ActionReader(Zoom.self, clicks: 1) { progress in
+            // Slide-scoped: the action itself is not bound to an element — its
+            // target lives in `Zoom.operation` and is resolved through anchors.
+            ActionReader(Zoom.self, elementID: .none, clicks: 1) { progress in
                 ZStack(alignment: .topLeading) {
                     content()
                 }

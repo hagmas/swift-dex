@@ -14,28 +14,32 @@ struct AboutApply: StandardLayoutSlide {
                 GridRow {
                     Spacer()
                     iconView(title: "Fade") {
-                        Image(systemName: "fish").font(.system(size: 120))
-                            .elementID(.element(0))
+                        Element(.element(0)) {
+                            Image(systemName: "fish").font(.system(size: 120))
+                        }
                     }
                     Spacer()
                     Spacer()
                     iconView(title: "Offset") {
-                        Image(systemName: "leaf").font(.system(size: 120))
-                            .elementID(.element(1))
+                        Element(.element(1)) {
+                            Image(systemName: "leaf").font(.system(size: 120))
+                        }
                     }
                     Spacer()
                 }
                 GridRow {
                     Spacer()
                     iconView(title: "Blur") {
-                        Image(systemName: "bird").font(.system(size: 120))
-                            .elementID(.element(2))
+                        Element(.element(2)) {
+                            Image(systemName: "bird").font(.system(size: 120))
+                        }
                     }
                     Spacer()
                     Spacer()
                     iconView(title: "Combination") {
-                        Image(systemName: "carrot").font(.system(size: 120))
-                            .elementID(.element(3))
+                        Element(.element(3)) {
+                            Image(systemName: "carrot").font(.system(size: 120))
+                        }
                     }
                     Spacer()
                 }
