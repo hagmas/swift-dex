@@ -12,10 +12,7 @@ let package = Package(
         .library(name: "SwiftDex", targets: ["SwiftDex"])
     ],
     targets: [
-        .target(
-            name: "SwiftDex",
-            resources: [.process("Shader/Dissolve.metal")]
-        ),
+        .target(name: "SwiftDex"),
         .testTarget(
             name: "SwiftDexTests",
             dependencies: ["SwiftDex"]

@@ -13,8 +13,10 @@ import SwiftUI
 /// the sub-step counting from `1` to `clicks`, then completes. A one-shot action
 /// (`clicks == 1`) completes on the click that activates it.
 ///
-/// A view that owns its action takes the `ElementID` in its initializer and passes it
-/// straight through, so the identity is visible at the call site rather than inherited
+/// Carrying an `ElementID` also makes the element a target of the `Apply` action and
+/// publishes its bounds for `Zoom` and `Highlight` — a view that consumes an action of
+/// its own can be faded or moved without doing anything for it. A view takes the
+/// identity in its initializer, so it is visible at the call site rather than inherited
 /// from an ancestor:
 ///
 /// ```swift
@@ -33,8 +35,6 @@ import SwiftUI
 /// }
 /// ```
 public struct ActionReader<A: Action, Content: View>: View {
-    @Environment(AnySlideViewModel.self) private var slideViewModel
-
     private let elementID: ElementID
     private let clicks: Int
     private let content: (ActionProgress<A>) -> Content
@@ -44,8 +44,10 @@ public struct ActionReader<A: Action, Content: View>: View {
     ///
     /// - Parameters:
     ///   - type: The `Action` type this view responds to.
-    ///   - elementID: The element the action targets. Pass `.none` when the view is
-    ///     not an action target, in which case no action of this type ever activates.
+    ///   - elementID: The element the action targets. Pass `.none` — the default for a
+    ///     view that was given no identity — when the reader is not bound to one
+    ///     element, in which case no action of this type ever activates and the element
+    ///     is neither an `Apply` target nor addressable by `Zoom` or `Highlight`.
     ///   - clicks: The number of clicks the action consumes on the slide timeline.
     ///   - content: A closure that renders the content for the current `ActionProgress`.
     ///   - animation: An optional closure that resolves the `Animation` used when the
@@ -66,22 +68,15 @@ public struct ActionReader<A: Action, Content: View>: View {
 
     /// The content and behavior of the view.
     public var body: some View {
-        let progress =
-            slideViewModel.actionProgress(for: elementID, type: A.self)
-            ?? .idle(previous: nil, next: nil)
-        content(progress)
-            .onAppear {
-                slideViewModel.register(clicks: clicks, for: elementID, type: A.self)
-            }
-            .animation(resolvedAnimation(for: progress), value: slideViewModel.currentClick)
-    }
-}
-
-private extension ActionReader {
-    func resolvedAnimation(for progress: ActionProgress<A>) -> Animation? {
-        guard slideViewModel.canBeAnimated else {
-            return nil
-        }
-        return animation?(progress)
+        ActionProgressReader(
+            A.self,
+            elementID: elementID,
+            clicks: clicks,
+            content: content,
+            animation: animation
+        )
+        // Outermost, so this reader's own animation stays scoped to its content
+        // and does not govern the `Apply` transition.
+        .modifier(ElementAnimator(elementID: elementID))
     }
 }

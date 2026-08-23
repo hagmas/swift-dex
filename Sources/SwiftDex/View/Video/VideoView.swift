@@ -16,10 +16,6 @@ import SwiftUI
 /// VideoView(name: "demo", elementID: .video)
 ///     .frame(width: 800, height: 450)
 /// ```
-///
-/// > Note: Do not wrap a `VideoView` in an ``Element``. The animation and
-/// > visual-effect modifiers it applies force SwiftUI to flatten the video
-/// > layer, which fails.
 public struct VideoView: View {
     private let url: URL?
     private let elementID: ElementID
@@ -56,10 +52,12 @@ public struct VideoView: View {
     /// The content and behavior of the view.
     public var body: some View {
         if let url {
-            // `@SlideValue` reads its identity from the environment, which a view
-            // cannot write for its own stored properties — hence the private child.
+            // `@SlideValue` reads its identity from the environment, which a
+            // view cannot write for its own stored properties — hence the
+            // private child.
             VideoPlayerView(url: url)
                 .environment(\.elementID, elementID)
+                .modifier(ElementAnimator(elementID: elementID))
         }
     }
 }

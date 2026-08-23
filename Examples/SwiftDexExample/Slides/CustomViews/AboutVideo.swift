@@ -15,6 +15,14 @@ struct AboutVideo: StandardLayoutSlide {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
+
+    // A video is an ordinary element: it fades in, then zooms.
+    @ActionContainerBuilder
+    var actionContainer: ActionContainer {
+        Apply(.fade, to: .video)
+        Zoom(.in(.video, ratio: 0.8))
+        Zoom(.out)
+    }
 }
 
 #Preview {

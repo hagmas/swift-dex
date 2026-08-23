@@ -19,8 +19,9 @@ import SwiftUI
 /// ```
 ///
 /// Views that consume an action themselves — `Bullets`, `Flipper`, `VideoView` —
-/// take their `ElementID` in their initializer instead. `Element` is for views
-/// that know nothing about actions.
+/// take their `ElementID` in their initializer instead, and get `Apply` support
+/// from their own `ActionReader`. `Element` is for views that know nothing about
+/// actions.
 public struct Element<Content: View>: View {
     private let elementID: ElementID
     private let content: Content
@@ -37,21 +38,7 @@ public struct Element<Content: View>: View {
 
     /// The content and behavior of the view.
     public var body: some View {
-        ActionReader(Apply.self, elementID: elementID, clicks: 1) { progress in
-            let elementModifier = progress.elementModifier
-            if !(elementModifier?.isHidden ?? false) {
-                content.apply(elementModifier ?? .identity)
-            }
-        } animation: { progress in
-            progress.transitionAnimation
-        }
-        // Published outside the modifier so bounds stay in untransformed slide
-        // coordinates: a zoom already in effect must not distort a later target.
-        .transformAnchorPreference(
-            key: ElementAnchorsPreference.self,
-            value: .bounds
-        ) {
-            $0[elementID] = $1
-        }
+        content
+            .modifier(ElementAnimator(elementID: elementID))
     }
 }

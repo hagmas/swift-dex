@@ -22,7 +22,6 @@ private extension MyDeck {
             .next(AboutMatchedTransition0(), transition: .customPush())
             .next(AboutMatchedTransition1(), transition: .matched())
             .next(AboutHighlight(), transition: .customPush())
-            .next(AboutDissolve(), transition: .customPush())
     }
 
     var customViewsFlow: some Flow {
