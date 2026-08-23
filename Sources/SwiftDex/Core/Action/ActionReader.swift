@@ -37,6 +37,7 @@ public struct ActionReader<A: Action, Content: View>: View {
 
     private let elementID: ElementID
     private let clicks: Int
+    private let isApplyTarget: Bool
     private let content: (ActionProgress<A>) -> Content
     private let animation: ((ActionProgress<A>) -> Animation?)?
 
@@ -47,6 +48,13 @@ public struct ActionReader<A: Action, Content: View>: View {
     ///   - elementID: The element the action targets. Pass `.none` when the view is
     ///     not an action target, in which case no action of this type ever activates.
     ///   - clicks: The number of clicks the action consumes on the slide timeline.
+    ///   - isApplyTarget: Whether the element also accepts the `Apply` action and
+    ///     publishes its bounds for `Zoom` and `Highlight`. Defaults to `true`, so a
+    ///     view that consumes its own action can be faded or moved without doing
+    ///     anything. Pass `false` for a reader that is not bound to a single element,
+    ///     or whose content cannot survive `ElementModifier` — it always installs the
+    ///     dissolve shader as a `layerEffect`, which SwiftUI cannot composite over a
+    ///     video layer.
     ///   - content: A closure that renders the content for the current `ActionProgress`.
     ///   - animation: An optional closure that resolves the `Animation` used when the
     ///     progress changes. The animation is suppressed when the slide state does not
@@ -55,11 +63,13 @@ public struct ActionReader<A: Action, Content: View>: View {
         _ type: A.Type,
         elementID: ElementID,
         clicks: Int,
+        isApplyTarget: Bool = true,
         @ViewBuilder content: @escaping (ActionProgress<A>) -> Content,
         animation: ((ActionProgress<A>) -> Animation?)? = nil
     ) {
         self.elementID = elementID
         self.clicks = clicks
+        self.isApplyTarget = isApplyTarget
         self.content = content
         self.animation = animation
     }
@@ -74,6 +84,9 @@ public struct ActionReader<A: Action, Content: View>: View {
                 slideViewModel.register(clicks: clicks, for: elementID, type: A.self)
             }
             .animation(resolvedAnimation(for: progress), value: slideViewModel.currentClick)
+            // Outermost, so this reader's own animation stays scoped to its
+            // content and does not govern the `Apply` transition.
+            .modifier(ElementAnimator(elementID: elementID, isEnabled: isApplyTarget))
     }
 }
 

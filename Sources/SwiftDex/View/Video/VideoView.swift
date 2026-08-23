@@ -17,9 +17,13 @@ import SwiftUI
 ///     .frame(width: 800, height: 450)
 /// ```
 ///
-/// > Note: Do not wrap a `VideoView` in an ``Element``. The animation and
-/// > visual-effect modifiers it applies force SwiftUI to flatten the video
-/// > layer, which fails.
+/// Unlike other identified views, a `VideoView` is not an `Apply` target:
+/// `ElementModifier` always installs the dissolve shader as a `layerEffect`,
+/// which SwiftUI cannot composite over a video layer. `Zoom` and `Highlight`
+/// do work, because they transform the slide around the video rather than the
+/// video itself.
+///
+/// > Note: For the same reason, do not wrap a `VideoView` in an ``Element``.
 public struct VideoView: View {
     private let url: URL?
     private let elementID: ElementID
@@ -60,6 +64,9 @@ public struct VideoView: View {
             // cannot write for its own stored properties — hence the private child.
             VideoPlayerView(url: url)
                 .environment(\.elementID, elementID)
+                // Bounds only: `Zoom` and `Highlight` can target the video,
+                // but the `Apply` path would break its layer.
+                .modifier(ElementAnchorPublisher(elementID: elementID))
         }
     }
 }

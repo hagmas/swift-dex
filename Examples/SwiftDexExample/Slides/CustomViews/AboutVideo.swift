@@ -15,6 +15,15 @@ struct AboutVideo: StandardLayoutSlide {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
+
+    // A VideoView cannot be an `Apply` target, but `Zoom` transforms the slide
+    // around it rather than the video layer itself, so it works — on a video
+    // that keeps playing while it scales.
+    @ActionContainerBuilder
+    var actionContainer: ActionContainer {
+        Zoom(.in(.video, ratio: 0.8))
+        Zoom(.out)
+    }
 }
 
 #Preview {
