@@ -11,18 +11,22 @@ struct AboutDissolve: StandardLayoutSlide {
         VStack(alignment: .leading, spacing: 48) {
             "Elements can dissolve in with a **Metal shader**, driven by the Action system."
             HStack(spacing: 80) {
-                Image("munchkin")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .cornerRadius(16)
-                    .elementID(.element(0))
+                Element(.element(0)) {
+                    Image("munchkin")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .cornerRadius(16)
+                }
                 VStack(alignment: .leading, spacing: 32) {
-                    "The grain size is configurable,"
-                        .elementID(.element(1))
-                    "from a fine sand-like dissolve"
-                        .elementID(.element(2))
-                    "to chunky pixel blocks."
-                        .elementID(.element(3))
+                    Element(.element(1)) {
+                        "The grain size is configurable,"
+                    }
+                    Element(.element(2)) {
+                        "from a fine sand-like dissolve"
+                    }
+                    Element(.element(3)) {
+                        "to chunky pixel blocks."
+                    }
                 }
             }
             .frame(maxHeight: .infinity)

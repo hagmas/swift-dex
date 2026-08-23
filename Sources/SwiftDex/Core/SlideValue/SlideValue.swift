@@ -5,20 +5,32 @@ import SwiftUI
 ///
 /// Use it in place of `@State` inside a custom view when the state should be
 /// shared between the presentation window and its mirrors (e.g. a presenter
-/// display). The value is keyed by the view's `ElementID`:
+/// display). The value is keyed by an `ElementID`, which the wrapper reads from
+/// the environment. A view cannot write the environment for its own stored
+/// properties, so take the identity in the initializer and hand it to a private
+/// child view that declares the `@SlideValue`:
 ///
 /// ```swift
-/// struct CounterView: View {
+/// public struct Counter: View {
+///     private let elementID: ElementID
+///
+///     public init(elementID: ElementID = .none) {
+///         self.elementID = elementID
+///     }
+///
+///     public var body: some View {
+///         CounterBody()
+///             .environment(\.elementID, elementID)
+///     }
+/// }
+///
+/// private struct CounterBody: View {
 ///     @SlideValue private var count = 0
 ///
 ///     var body: some View {
 ///         Button("\(count)") { count += 1 }
 ///     }
 /// }
-///
-/// // In the slide:
-/// CounterView()
-///     .elementID(.element(0))
 /// ```
 ///
 /// Without an `ElementID` (or outside a `DeckView`), the wrapper falls back

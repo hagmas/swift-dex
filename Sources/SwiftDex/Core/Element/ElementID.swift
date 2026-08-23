@@ -3,7 +3,9 @@ import SwiftUI
 /// `ElementID` is an identifier for each element within a slide.
 ///
 /// It is used to specify which element is the target when using `Action`.
-/// The `.elementID` View Modifier can be used to assign an ID to a View, which can then be retrieved as an `environmentValue` in child Views.
+/// Wrap an arbitrary view in an ``Element`` to give it an identity, or pass the
+/// identity to the initializer of a view that consumes its own action
+/// (`Bullets`, `Flipper`, `VideoView`).
 public struct ElementID: Hashable {
     /// A `String` representation of the `ElementID`.
     public let rawValue: String
@@ -44,6 +46,14 @@ private struct ElementIDKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
+    /// Plumbing for `@SlideValue`.
+    ///
+    /// A property wrapper cannot read an identity from its view's initializer,
+    /// so a view that owns an `ElementID` writes it here for a private child
+    /// view that declares the `@SlideValue` (see `VideoView`).
+    ///
+    /// Actions never resolve their target through this value: `ActionReader`
+    /// takes its `ElementID` explicitly.
     var elementID: ElementID {
         get { self[ElementIDKey.self] }
         set { self[ElementIDKey.self] = newValue }

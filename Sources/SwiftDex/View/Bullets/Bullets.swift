@@ -5,24 +5,30 @@ import SwiftUI
 /// It allows for animations on each item using the `ApplyByItem` action, enabling dynamic visual effects for list presentations.
 public struct Bullets: View {
     let style: BulletStyle
+    private let elementID: ElementID
     private let items: [BulletItem]
 
     /// Creates an instance.
     ///
     /// - Parameters:
+    ///  - elementID: The identity an `ApplyByItem` action targets. Omit it for a
+    ///    static list that no action drives.
     ///  - style: Type of bullets.
     ///  - items: A closure to create a list of `BulletItem`. Use the `BulletsBuilder` result builder.
     public init(
+        elementID: ElementID = .none,
         style: BulletStyle = .bullet,
         @BulletsBuilder items: () -> [BulletItem]
     ) {
+        self.elementID = elementID
         self.style = style
         self.items = items()
     }
 
     /// The content and behavior of the view.
     public var body: some View {
-        ActionReader(ApplyByItem.self, clicks: items.numberOfItems) { progress in
+        ActionReader(ApplyByItem.self, elementID: elementID, clicks: items.numberOfItems) {
+            progress in
             BulletsChildView(
                 style: style,
                 items: items,

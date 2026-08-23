@@ -11,18 +11,18 @@ struct AboutFlipper: StandardLayoutSlide {
         VStack(alignment: .leading, spacing: 32) {
             "**Flipper** displays multiple views on the same place."
             HStack {
-                Bullets {
+                Bullets(elementID: .bullets) {
                     "Bengal Cat"
                     "British Shorthair"
                     "Munchkin"
                     "Scottish Fold"
                 }
-                .elementID(.bullets)
                 .frame(
                     maxWidth: .infinity,
                     alignment: .leading
                 )
                 Flipper(
+                    elementID: .flipper,
                     transition: .opacity,
                     animation: .linear
                 ) {
@@ -43,7 +43,6 @@ struct AboutFlipper: StandardLayoutSlide {
                         .aspectRatio(contentMode: .fit)
                         .cornerRadius(16)
                 }
-                .elementID(.flipper)
                 .frame(maxWidth: .infinity)
             }
             .frame(maxHeight: .infinity)

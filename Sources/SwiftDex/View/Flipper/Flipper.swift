@@ -7,6 +7,7 @@ public struct Flipper: View {
     @Environment(AnySlideViewModel.self) private var slideViewModel
     @State private var index: Int?
 
+    private let elementID: ElementID
     private let content: [AnyView]
     private let transition: AnyTransition
     private let animation: Animation?
@@ -14,14 +15,18 @@ public struct Flipper: View {
     /// Creates a new instance.
     ///
     /// - Parameters:
+    ///     - elementID: The identity a `FlipByItem` action targets. Omit it to
+    ///       show the first item only, with nothing to advance it.
     ///     - transition: A `transition` applied to each items.
     ///     - animation: An animation that is applied to the specified `transition`.
     ///     - content: A `@FlipperBuilder` closure returning an array of views to be displayed.
     public init(
+        elementID: ElementID = .none,
         transition: AnyTransition = .identity,
         animation: Animation? = nil,
         @FlipperBuilder content: @escaping () -> [AnyView]
     ) {
+        self.elementID = elementID
         self.content = content()
         self.transition = transition
         self.animation = animation
@@ -39,7 +44,8 @@ public struct Flipper: View {
     /// Contexts that never fire `onChange` (thumbnail rendering) fall back to the
     /// derived index directly.
     public var body: some View {
-        ActionReader(FlipByItem.self, clicks: max(1, content.count - 1)) { progress in
+        ActionReader(FlipByItem.self, elementID: elementID, clicks: max(1, content.count - 1)) {
+            progress in
             let targetIndex = currentIndex(for: progress)
             let displayIndex = index ?? targetIndex
             content[displayIndex]

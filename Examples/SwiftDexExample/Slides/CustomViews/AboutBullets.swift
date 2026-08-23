@@ -8,7 +8,7 @@ struct AboutBullets: StandardLayoutSlide {
     }
 
     var body: some View {
-        Bullets(style: .bullet) {
+        Bullets(elementID: .bullets, style: .bullet) {
             "**Bullets** is a view for displaying items in a bulleted list format."
             "Bullet items can be text,"
             HStack {
@@ -28,7 +28,6 @@ struct AboutBullets: StandardLayoutSlide {
             maxHeight: .infinity,
             alignment: .topLeading
         )
-        .elementID(.bullets)
     }
 
     @ActionContainerBuilder

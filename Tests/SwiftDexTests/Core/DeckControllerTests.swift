@@ -170,8 +170,9 @@ private struct MyDeck: Deck {
 
 private struct Slide01: Slide {
     var content: some View {
-        EmptyView()
-            .elementID(.element(0))
+        Element(.element(0)) {
+            EmptyView()
+        }
     }
 
     @ActionContainerBuilder
@@ -183,15 +184,17 @@ private struct Slide01: Slide {
 
 private struct Slide02: Slide {
     var content: some View {
-        EmptyView()
-            .elementID(.element(0))
+        Element(.element(0)) {
+            EmptyView()
+        }
     }
 }
 
 private struct Slide03: Slide {
     var content: some View {
-        EmptyView()
-            .elementID(.element(0))
+        Element(.element(0)) {
+            EmptyView()
+        }
     }
 
     @ActionContainerBuilder

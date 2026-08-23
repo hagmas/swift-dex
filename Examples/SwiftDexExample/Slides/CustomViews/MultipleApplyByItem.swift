@@ -10,12 +10,11 @@ struct MultipleApplyByItem: StandardLayoutSlide {
     var body: some View {
         VStack(alignment: .leading, spacing: 48) {
             "The same **Bullets** can be targeted by multiple **ApplyByItem** actions in sequence."
-            Bullets(style: .numbered) {
+            Bullets(elementID: .bullets, style: .numbered) {
                 "First, each item fades in from above."
                 "Then, a second **ApplyByItem** kicks in."
                 "It checks off each item, one by one."
             }
-            .elementID(.bullets)
         }
         .frame(
             maxWidth: .infinity,

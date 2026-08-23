@@ -10,7 +10,7 @@ struct Introduction: StandardLayoutSlide {
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {
             "**SwiftDex** is a framework for describing presentations in SwiftUI."
-            Bullets {
+            Bullets(elementID: .bullets) {
                 "Supports custom views, such as **Buellts**, **Code**, or **Flipper**."
                 "Supports animations with simple syntax."
                 "Flexible layouts."
@@ -19,7 +19,6 @@ struct Introduction: StandardLayoutSlide {
                 maxWidth: .infinity,
                 alignment: .leading
             )
-            .elementID(.bullets)
             Spacer()
         }
     }
