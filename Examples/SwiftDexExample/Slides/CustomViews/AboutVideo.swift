@@ -16,11 +16,10 @@ struct AboutVideo: StandardLayoutSlide {
         }
     }
 
-    // A VideoView cannot be an `Apply` target, but `Zoom` transforms the slide
-    // around it rather than the video layer itself, so it works — on a video
-    // that keeps playing while it scales.
+    // A video is an ordinary element: it fades in, then zooms.
     @ActionContainerBuilder
     var actionContainer: ActionContainer {
+        Apply(.fade, to: .video)
         Zoom(.in(.video, ratio: 0.8))
         Zoom(.out)
     }

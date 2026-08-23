@@ -7,8 +7,7 @@ struct HighlightView: View {
         GeometryReader { proxy in
             // Slide-scoped: the action itself is not bound to an element — its
             // target lives in `Highlight.target` and is resolved through anchors.
-            ActionReader(Highlight.self, elementID: .none, clicks: 1, isApplyTarget: false) {
-                progress in
+            ActionReader(Highlight.self, elementID: .none, clicks: 1) { progress in
                 overlayView(for: progress, proxy: proxy)
             } animation: { _ in
                 .linear

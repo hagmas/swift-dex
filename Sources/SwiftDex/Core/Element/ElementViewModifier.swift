@@ -6,12 +6,6 @@ struct ElementViewModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .modifier(
-                DissolveEffect(
-                    progress: elementModifier.dissolve.progress,
-                    cellSize: elementModifier.dissolve.cellSize
-                )
-            )
             .rotationEffect(
                 elementModifier.rotationEffect.angle,
                 anchor: elementModifier.rotationEffect.anchor
