@@ -9,8 +9,7 @@ SwiftDex is a Swift Package Manager library for creating presentations in SwiftU
 ## Development Commands
 
 ### Testing
-- `./scripts/test.sh` - Run the test suite using xcodebuild
-- `swift test` - Alternative test command using Swift Package Manager
+- `./scripts/test.sh` - Run the test suite using xcodebuild. This is the only working test command: `swift test` fails with `no such module 'XCTest'`, since XCTest ships with Xcode rather than the standalone toolchain. It requires `xcode-select` to point at Xcode, not CommandLineTools.
 
 ### Code Quality
 - `make lint` - Check code formatting with swift-format

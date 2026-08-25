@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		190126C8EE7F5BFA05C16623 /* MultipleApplyByItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A24F7319BE654F100A0C686 /* MultipleApplyByItem.swift */; };
 		1BFBA7EA6EB6F6A3B5274EA5 /* AboutCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF13D146E4ACED0DFA40779D /* AboutCode.swift */; };
-		1E24A3EAE77A431FCD1CB195 /* AboutMatchedTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66442CB29C6A6B619C5D500B /* AboutMatchedTransition.swift */; };
 		2A964C936EFFD3FD4FB87D13 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE46BC7FF2F4B42204668B45 /* ContentView.swift */; };
 		32EB5D9C7CA555D972C8AA19 /* AboutStandardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = B727C7891235FBB7D368C4A9 /* AboutStandardLayout.swift */; };
 		41EDA80C0FB3207CFE8ED445 /* Introduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F497EC9F50CC1B8B8B813C /* Introduction.swift */; };
@@ -46,7 +45,6 @@
 		475CCF49FCB2BA35E7BCCDE9 /* AboutHighlight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutHighlight.swift; sourceTree = "<group>"; };
 		4D5ACA3638B63FD73584EC5A /* AboutBullets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutBullets.swift; sourceTree = "<group>"; };
 		5BD7255273A93DB0FEF98C81 /* SwiftDexExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDexExampleApp.swift; sourceTree = "<group>"; };
-		66442CB29C6A6B619C5D500B /* AboutMatchedTransition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutMatchedTransition.swift; sourceTree = "<group>"; };
 		69FE6C82C9FB80970BECBC0B /* cat-chan.mp4 */ = {isa = PBXFileReference; path = "cat-chan.mp4"; sourceTree = "<group>"; };
 		6F87C8689A0B703A15C957B7 /* SlideTransition+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SlideTransition+Extensions.swift"; sourceTree = "<group>"; };
 		87F497EC9F50CC1B8B8B813C /* Introduction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Introduction.swift; sourceTree = "<group>"; };
@@ -93,7 +91,6 @@
 				F33E50F3C38B6DA824A966BB /* AboutAction.swift */,
 				C93EE49FF7DB4060675933EB /* AboutApply.swift */,
 				475CCF49FCB2BA35E7BCCDE9 /* AboutHighlight.swift */,
-				66442CB29C6A6B619C5D500B /* AboutMatchedTransition.swift */,
 				C2C23E7D5C1B84F8C87E8CC6 /* AboutTransition.swift */,
 				B6189BF1512A381102BFFF88 /* AboutZoom.swift */,
 			);
@@ -284,7 +281,6 @@
 				FA85639F5460A873A20083FC /* AboutFlipper.swift in Sources */,
 				BAD7307B15C35E37802F5B0A /* AboutGif.swift in Sources */,
 				7C59F47B5CE1149B8F6AC137 /* AboutHighlight.swift in Sources */,
-				1E24A3EAE77A431FCD1CB195 /* AboutMatchedTransition.swift in Sources */,
 				32EB5D9C7CA555D972C8AA19 /* AboutStandardLayout.swift in Sources */,
 				864818E5202D35F51C508736 /* AboutTransition.swift in Sources */,
 				4EE5D8E416520127DA6F5D70 /* AboutVideo.swift in Sources */,

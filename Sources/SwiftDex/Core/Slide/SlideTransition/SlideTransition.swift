@@ -8,24 +8,17 @@ public struct SlideTransition {
     /// The Animation that is applied to the specified `transition`.
     let animation: Animation?
 
-    /// Setting this flag to `true` allows for transitions using `matchedGeometryEffect`.
-    /// `matchedGeometryEffect` will be applied to Views with the same `MatchID`.
-    let isMatched: Bool
-
     /// Initializes a new `SlideTransition`.
     ///
     /// - Parameters:
     ///   - transition: The type of transition (e.g., fade, slide, etc.).
     ///   - animation: The animation style to apply to the transition.
-    ///   - isMatched: A Boolean value that, when true, enables matched geometry effects for the transition.
     public init(
         transition: AnyTransition,
-        animation: Animation?,
-        isMatched: Bool = false
+        animation: Animation?
     ) {
         self.transition = transition
         self.animation = animation
-        self.isMatched = isMatched
     }
 }
 
@@ -55,19 +48,6 @@ public extension SlideTransition {
         SlideTransition(
             transition: .opacity,
             animation: .linear(duration: duration)
-        )
-    }
-
-    /// Creates a matched transition using `matchedGeometryEffect`.
-    ///
-    /// This is useful for a smooth transition between elements shared across slides.
-    /// - Parameter duration: The duration of the animation, defaulting to 1.0 seconds.
-    /// - Returns: A `SlideTransition` with a matched effect.
-    static func matched(duration: TimeInterval = 1.0) -> SlideTransition {
-        SlideTransition(
-            transition: .opacity,
-            animation: .spring(duration: duration),
-            isMatched: true
         )
     }
 }
