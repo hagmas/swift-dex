@@ -17,7 +17,7 @@ private extension MyDeck {
         Title(title: "Custom Animations")
             .next(AboutAction(), transition: .customPush())
             .next(AboutApply(), transition: .customPush())
-            .next(AboutZoom(), transition: .customPush())
+            .next(AboutCamera(), transition: .customPush())
             .next(AboutTransition(), transition: .customPush())
             .next(AboutHighlight(), transition: .customPush())
     }

@@ -4,7 +4,7 @@ import SwiftUI
 ///
 /// Wrap any view to give it an identity that actions can target. `Element`
 /// applies the `Apply` action's `ElementModifier` to its content and publishes
-/// the content's bounds so that `Zoom` and `Highlight` can find it.
+/// the content's bounds so that `Camera` and `Highlight` can find it.
 ///
 /// ```swift
 /// Element(.title) {

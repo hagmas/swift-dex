@@ -18,13 +18,13 @@ struct AboutVideo: StandardLayoutSlide {
     }
 
     // A video is an ordinary element: the same identity takes Apply, PlayVideo,
-    // and Zoom, and playback keeps running across the later clicks.
+    // and Camera, and playback keeps running across the later clicks.
     @ActionContainerBuilder
     var actionContainer: ActionContainer {
         Apply(.fade, to: .video)
         PlayVideo(.video)
-        Zoom(.in(.video, ratio: 0.8))
-        Zoom(.out)
+        Camera(.zoom(to: .video, ratio: 0.8))
+        Camera(.reset)
     }
 }
 

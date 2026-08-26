@@ -66,7 +66,7 @@ struct Slide01: StandardLayoutSlide {
 ```
 ![Apply_Sample](https://github.com/hagmas/swift-dex/assets/7201608/ec94ab50-433a-4af1-9ec8-db31fea2d39b)
 
-It's possible to specify multiple `Action`s within a Slide. Advancing the slide (either by tapping on the left side of the slide view or pressing the left arrow key on the keyboard) triggers the actions sequentially, starting with the first one. There are several preset actions available, such as `ApplyByItem`, `Zoom`, and `FlipByItem`. Additionally, custom Actions can be created using custom views.
+It's possible to specify multiple `Action`s within a Slide. Advancing the slide (either by tapping on the left side of the slide view or pressing the left arrow key on the keyboard) triggers the actions sequentially, starting with the first one. There are several preset actions available, such as `ApplyByItem`, `Camera`, and `FlipByItem`. Additionally, custom Actions can be created using custom views.
 
 ## 2. Defining a Deck
 A Deck can be defined with the slide instances and information about transitions between slides.

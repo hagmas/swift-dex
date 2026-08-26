@@ -192,6 +192,36 @@ extension SlideState {
         return .idle(previous: tagged.action, next: next)
     }
 
+    /// Every occurrence of the given element's action of the given type that has
+    /// started at or before the current click, in timeline order.
+    ///
+    /// `actionProgress(for:type:)` answers what an action is doing now, which is
+    /// all a view needs when each occurrence stands on its own. An action whose
+    /// occurrences build on one another — the camera, where a scroll is relative
+    /// to the operation before it — needs the sequence instead.
+    func actionHistory<A: Action>(
+        for elementID: ElementID,
+        type: A.Type
+    ) -> [A] {
+        guard let chain: [TaggedAction<A>] = actionContainer.chains[elementID]?[A.self] else {
+            return []
+        }
+
+        let click = currentClick
+        let intervals = intervals()
+        return
+            chain
+            .enumerated()
+            .compactMap { order, tagged in
+                intervals[tagged.id].map { (tagged.action, $0.start, order) }
+            }
+            .filter { $0.1 <= click }
+            // Build order breaks ties so the fold is deterministic, even though
+            // distinct structural positions cannot currently share a click.
+            .sorted { ($0.1, $0.2) < ($1.1, $1.2) }
+            .map { $0.0 }
+    }
+
     private func duration(of node: TimelineNode) -> Int {
         switch node {
         case .action(let key, _):

@@ -37,7 +37,7 @@ struct SlideView<T>: View where T: Slide {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            ZoomView {
+            CameraView {
                 slide.background
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 slide.content

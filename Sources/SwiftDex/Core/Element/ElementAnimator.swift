@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Makes a view a target of the `Apply` action and publishes its bounds for
-/// `Zoom` and `Highlight`.
+/// `Camera` and `Highlight`.
 ///
 /// Every view can be faded, offset, scaled or blurred, so carrying an
 /// `ElementID` implies this. `ActionReader` installs it for its own element,
@@ -9,9 +9,9 @@ import SwiftUI
 /// `Apply` target without doing anything for it.
 ///
 /// A view without an identity is left untouched. `.none` is the sentinel for
-/// "no identity", so it can be neither an action target nor an anchor — and an
-/// anchor published under it would shadow the full-slide rect that
-/// `Zoom(.out)` resolves to by finding none.
+/// "no identity", so it can be neither an action target nor an anchor — the
+/// slide-scoped readers register under `.none`, and an anchor published there
+/// would make the sentinel itself addressable as a target.
 struct ElementAnimator: ViewModifier {
     let elementID: ElementID
 
