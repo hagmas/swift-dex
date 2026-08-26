@@ -8,7 +8,6 @@ import SwiftUI
 /// initializer to let the view create a private controller.
 public struct DeckView<T: Deck>: View {
     var deck: T
-    @Namespace var deckNamespace
 
     // A view's init runs on every parent body evaluation, so a privately owned
     // controller must live in @State to survive; an external one is held as a
@@ -53,8 +52,6 @@ public struct DeckView<T: Deck>: View {
                 presentation
             }
         }
-        .environment(\.namespaceID, deckNamespace)
-        .environment(\.matchProperties, matchedProperties)
         .environment(\.fontStyle, T.deckStyle.fontStyle)
         .environment(\.colorStyle, T.deckStyle.colorStyle)
         .environment(\.slideSize, T.deckStyle.slideSize)
@@ -105,24 +102,5 @@ private extension DeckView {
             insertion: insertion,
             removal: removal
         )
-    }
-
-    var matchedProperties: MatchProperties {
-        MatchProperties(
-            insertionID: insertionID,
-            removalID: removalID
-        )
-    }
-
-    var insertionID: String? {
-        guard slideNumber + 1 < flow.endIndex else {
-            return nil
-        }
-
-        return flow[slideNumber + 1].1.isMatched ? "\(slideNumber + 1)" : nil
-    }
-
-    var removalID: String? {
-        return flow[slideNumber].1.isMatched ? "\(slideNumber)" : nil
     }
 }

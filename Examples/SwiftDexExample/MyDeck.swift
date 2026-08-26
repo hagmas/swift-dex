@@ -19,8 +19,6 @@ private extension MyDeck {
             .next(AboutApply(), transition: .customPush())
             .next(AboutZoom(), transition: .customPush())
             .next(AboutTransition(), transition: .customPush())
-            .next(AboutMatchedTransition0(), transition: .customPush())
-            .next(AboutMatchedTransition1(), transition: .matched())
             .next(AboutHighlight(), transition: .customPush())
     }
 
