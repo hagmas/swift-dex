@@ -38,4 +38,11 @@ final class StaticSlideViewModel: SlideViewModel {
         }
         return progress
     }
+
+    func actionHistory<A: Action>(
+        for elementID: ElementID,
+        type: A.Type
+    ) -> [A] {
+        state.actionHistory(for: elementID, type: type)
+    }
 }

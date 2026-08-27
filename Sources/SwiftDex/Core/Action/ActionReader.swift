@@ -14,7 +14,7 @@ import SwiftUI
 /// (`clicks == 1`) completes on the click that activates it.
 ///
 /// Carrying an `ElementID` also makes the element a target of the `Apply` action and
-/// publishes its bounds for `Zoom` and `Highlight` — a view that consumes an action of
+/// publishes its bounds for `Camera` and `Highlight` — a view that consumes an action of
 /// its own can be faded or moved without doing anything for it. A view takes the
 /// identity in its initializer, so it is visible at the call site rather than inherited
 /// from an ancestor:
@@ -47,7 +47,7 @@ public struct ActionReader<A: Action, Content: View>: View {
     ///   - elementID: The element the action targets. Pass `.none` — the default for a
     ///     view that was given no identity — when the reader is not bound to one
     ///     element, in which case no action of this type ever activates and the element
-    ///     is neither an `Apply` target nor addressable by `Zoom` or `Highlight`.
+    ///     is neither an `Apply` target nor addressable by `Camera` or `Highlight`.
     ///   - clicks: The number of clicks the action consumes on the slide timeline.
     ///   - content: A closure that renders the content for the current `ActionProgress`.
     ///   - animation: An optional closure that resolves the `Animation` used when the

@@ -16,6 +16,15 @@ protocol SlideViewModel {
         for elementID: ElementID,
         type: A.Type
     ) -> ActionProgress<A>?
+
+    /// The occurrences of the action that have started, in timeline order.
+    ///
+    /// Needed by an action whose occurrences are relative to one another; see
+    /// `SlideState.actionHistory(for:type:)`.
+    func actionHistory<A: Action>(
+        for elementID: ElementID,
+        type: A.Type
+    ) -> [A]
 }
 
 @Observable class AnySlideViewModel: SlideViewModel {
@@ -42,5 +51,12 @@ protocol SlideViewModel {
         type: A.Type
     ) -> ActionProgress<A>? {
         wrappedViewModel.actionProgress(for: elementID, type: type)
+    }
+
+    func actionHistory<A: Action>(
+        for elementID: ElementID,
+        type: A.Type
+    ) -> [A] {
+        wrappedViewModel.actionHistory(for: elementID, type: type)
     }
 }

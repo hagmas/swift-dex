@@ -50,7 +50,7 @@ Development dependencies (swift-docc-plugin, swift-format, XcodeGen) are only in
 
 **Action**: Animations and dynamic behaviors within slides
 - Applied sequentially when advancing through a slide
-- Built-in actions: `Apply`, `ApplyByItem`, `Zoom`, `Highlight`, `FlipByItem`
+- Built-in actions: `Apply`, `ApplyByItem`, `Camera`, `Highlight`, `FlipByItem`
 - Target elements using `ElementID` system (`.elementID()` modifier)
 
 ### Key Architectural Patterns
