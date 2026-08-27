@@ -103,6 +103,7 @@ public final class DeckController {
 
         if state.currentClick > 0 {
             slideValueStore.clear()
+            state.cameraOverride = nil
             state.position = .click(state.currentClick - 1)
         }
         else if slideNumber > 0 {

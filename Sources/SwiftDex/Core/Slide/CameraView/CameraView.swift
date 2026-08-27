@@ -6,8 +6,13 @@ struct CameraView<Content: View, Background: View>: View {
     @Environment(\.slideSize) private var slideSize
 
     let canvas: SlideCanvas
+    let cameraControl: CameraControl
     @ViewBuilder let content: () -> Content
     @ViewBuilder let background: () -> Background
+
+    // The event monitor is installed once, so its handler reads the geometry
+    // from here instead of closing over values that change every click.
+    @State private var live = LiveCameraFrame()
 
     var body: some View {
         GeometryReader { proxy in
@@ -17,19 +22,34 @@ struct CameraView<Content: View, Background: View>: View {
             // rectangle comes from the whole history, because `pan` is
             // relative to the operation before it.
             ActionReader(Camera.self, elementID: .none, clicks: 1) { progress in
+                let action = actionRect(proxy: proxy)
+                let current = slideViewModel.cameraOverride?.apply(to: action) ?? action
+
                 canvasContent
                     .modifier(
                         // `ignoredByLayout` keeps the camera transform out of layout, so
                         // anchors keep resolving in untransformed canvas coordinates and a
                         // later target is not distorted by where the camera is now.
-                        CameraEffect(rect: cameraRect(proxy: proxy), viewport: slideSize)
+                        CameraEffect(rect: current, viewport: slideSize)
                             .ignoredByLayout()
                     )
+                    .onChange(of: frame(proxy: proxy, action: action, current: current), initial: true) {
+                        live.value = $1
+                    }
             } animation: { progress in
                 progress.current != nil ? .spring() : nil
             }
         }
         .clipped()
+        .modifier(
+            TrackpadCameraInput(
+                isEnabled: cameraControl == .interactive,
+                live: live,
+                onPan: pan,
+                onMagnify: magnify,
+                onReturn: returnToScript
+            )
+        )
     }
 }
 
@@ -76,7 +96,41 @@ private extension CameraView {
         CGRect(origin: .zero, size: slideSize)
     }
 
-    func cameraRect(proxy: GeometryProxy) -> CGRect {
+    func frame(proxy: GeometryProxy, action: CGRect, current: CGRect) -> CameraFrame {
+        let global = proxy.frame(in: .global)
+        // `.global` carries the scale the surface is displayed at, which is the
+        // factor between a trackpad's window points and the slide's own units.
+        let onScreenScale = proxy.size.width > 0 ? global.width / proxy.size.width : 1
+        return CameraFrame(
+            viewport: slideSize,
+            actionRect: action,
+            currentRect: current,
+            onScreenScale: onScreenScale,
+            origin: global.origin
+        )
+    }
+
+    func pan(by translation: CGSize) {
+        slideViewModel.updateCameraOverride {
+            $0.translation.width += translation.width
+            $0.translation.height += translation.height
+        }
+    }
+
+    func magnify(by factor: CGFloat, about pivot: CGPoint) {
+        let action = live.value.actionRect
+        slideViewModel.updateCameraOverride {
+            $0.magnify(by: factor, about: pivot, in: action)
+        }
+    }
+
+    func returnToScript() {
+        withAnimation(.spring()) {
+            slideViewModel.clearCameraOverride()
+        }
+    }
+
+    func actionRect(proxy: GeometryProxy) -> CGRect {
         CameraRect.resolve(
             history: slideViewModel.actionHistory(for: .none, type: Camera.self),
             home: home

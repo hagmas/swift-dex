@@ -37,6 +37,12 @@ struct SlideState {
     var clickCounts: [ClickCountKey: Int] = [:]
     var latestUserOperation: UserOperation?
 
+    /// The presenter's own movement of the camera, if any.
+    ///
+    /// Held raw: whether it still applies is decided by the timeline, in
+    /// `effectiveCameraOverride`.
+    var cameraOverride: CameraOverride?
+
     init(
         actionContainer: ActionContainer = .empty,
         position: SlidePosition = .click(0)
@@ -57,6 +63,7 @@ extension SlideState: Equatable {
         lhs.position == rhs.position
             && lhs.clickCounts == rhs.clickCounts
             && lhs.latestUserOperation == rhs.latestUserOperation
+            && lhs.cameraOverride == rhs.cameraOverride
     }
 }
 
@@ -220,6 +227,41 @@ extension SlideState {
             // distinct structural positions cannot currently share a click.
             .sorted { ($0.1, $0.2) < ($1.1, $1.2) }
             .map { $0.0 }
+    }
+
+    /// The click the most recently started occurrence of `A` began on, or `0`
+    /// when none has started.
+    func latestActionStart<A: Action>(
+        for elementID: ElementID,
+        type: A.Type
+    ) -> Int {
+        guard let chain: [TaggedAction<A>] = actionContainer.chains[elementID]?[A.self] else {
+            return 0
+        }
+
+        let click = currentClick
+        let intervals = intervals()
+        return
+            chain
+            .compactMap { intervals[$0.id]?.start }
+            .filter { $0 <= click }
+            .max() ?? 0
+    }
+
+    /// The presenter's camera movement, if the timeline has not overruled it.
+    ///
+    /// A `Camera` action that started after the movement did is the slide
+    /// taking the camera back, so the movement is dropped. Deciding this by
+    /// comparing clicks rather than by reacting to the action keeps it a pure
+    /// function: a mirrored surface reaches the same answer without being told,
+    /// and the composite rectangle animates from wherever the presenter left it
+    /// to wherever the action points, because only one value changed.
+    var effectiveCameraOverride: CameraOverride? {
+        guard let override = cameraOverride else {
+            return nil
+        }
+        return latestActionStart(for: .none, type: Camera.self) > override.anchorClick
+            ? nil : override
     }
 
     private func duration(of node: TimelineNode) -> Int {

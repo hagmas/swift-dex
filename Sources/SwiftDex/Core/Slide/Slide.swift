@@ -22,6 +22,12 @@ public protocol Slide: Flow {
     /// canvas gives the slide room the viewport cannot show at once, reached
     /// with `Camera`.
     var canvas: SlideCanvas { get }
+
+    /// Who is allowed to move this slide's camera.
+    ///
+    /// Derived from `canvas` by default: a slide with somewhere to go can be
+    /// moved. Write it to override that in either direction.
+    var cameraControl: CameraControl { get }
 }
 
 public extension Slide {
@@ -38,6 +44,16 @@ public extension Slide {
     /// Default value for `canvas`.
     var canvas: SlideCanvas {
         .slide
+    }
+
+    /// Default value for `cameraControl`.
+    ///
+    /// A slide that declared a canvas has somewhere to go, and a presenter who
+    /// tries to travel there should not first have to discover a flag. A slide
+    /// that did not declare one is untouched, so nothing a deck already
+    /// contains gains behaviour it never asked for.
+    var cameraControl: CameraControl {
+        canvas == .slide ? .scripted : .interactive
     }
 
     /// Default implemenation for `flatten()`.
