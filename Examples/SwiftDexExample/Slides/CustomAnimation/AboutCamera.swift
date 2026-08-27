@@ -10,7 +10,7 @@ struct AboutCamera: StandardLayoutSlide {
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {
             "The **`Camera`** Action moves the rectangle of the slide the viewport shows."
-            "**`zoom`** resizes it, **`scroll`** moves it at the current zoom level, and **`reset`** returns home."
+            "**`zoom`** resizes it, **`pan`** moves it at the current zoom level, and **`reset`** returns home."
             HStack {
                 Spacer()
                 Element(.element(0)) {
@@ -38,14 +38,14 @@ struct AboutCamera: StandardLayoutSlide {
     }
 
     // The three zooms re-fit each shape in turn, so the camera resizes as it
-    // moves. The scroll that follows keeps the zoom level the last one set and
+    // moves. The pan that follows keeps the zoom level the last one set and
     // only travels, which is the difference between the two operations.
     @ActionContainerBuilder
     var actionContainer: ActionContainer {
         Camera(.zoom(to: .element(0), ratio: 0.5))
         Camera(.zoom(to: .element(1), ratio: 0.5))
         Camera(.zoom(to: .element(2), ratio: 0.5))
-        Camera(.scroll(to: .element(0)))
+        Camera(.pan(to: .element(0)))
         Camera(.reset)
     }
 }

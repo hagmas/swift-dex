@@ -16,7 +16,7 @@ struct CameraView<Content: View>: View {
             // Slide-scoped: the action itself is not bound to an element — its
             // target lives in `Camera.operation` and is resolved through anchors.
             // The reader registers the clicks and drives the animation; the
-            // rectangle comes from the whole history, because `scroll` is
+            // rectangle comes from the whole history, because `pan` is
             // relative to the operation before it.
             ActionReader(Camera.self, elementID: .none, clicks: 1) { progress in
                 ZStack(alignment: .topLeading) {

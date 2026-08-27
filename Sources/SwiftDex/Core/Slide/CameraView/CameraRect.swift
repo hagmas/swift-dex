@@ -4,7 +4,7 @@ import Foundation
 ///
 /// The camera is the fold of every `Camera` operation that has started, over the
 /// slide's home rectangle. Folding — rather than reading the latest operation —
-/// is what lets `scroll` be relative: it carries the size the rectangle already
+/// is what lets `pan` be relative: it carries the size the rectangle already
 /// had, so panning after a zoom stays at that zoom level.
 ///
 /// The result is a pure function of the timeline, so it is identical on every
@@ -40,7 +40,7 @@ enum CameraRect {
                     dy: -(target.height / ratio - target.height) / 2
                 )
 
-            case .scroll(let elementID):
+            case .pan(let elementID):
                 guard let target = elementRect(elementID) else {
                     return rect
                 }

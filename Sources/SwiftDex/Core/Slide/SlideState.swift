@@ -197,7 +197,7 @@ extension SlideState {
     ///
     /// `actionProgress(for:type:)` answers what an action is doing now, which is
     /// all a view needs when each occurrence stands on its own. An action whose
-    /// occurrences build on one another — the camera, where a scroll is relative
+    /// occurrences build on one another — the camera, where a pan is relative
     /// to the operation before it — needs the sequence instead.
     func actionHistory<A: Action>(
         for elementID: ElementID,

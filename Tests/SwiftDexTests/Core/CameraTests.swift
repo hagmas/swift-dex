@@ -32,10 +32,10 @@ final class CameraTests: XCTestCase {
         )
     }
 
-    func test_scroll_keepsTheSizeTheZoomEstablished() {
+    func test_pan_keepsTheSizeTheZoomEstablished() {
         let rect = resolve([
             Camera(.zoom(to: .element(0), ratio: 0.5)),
-            Camera(.scroll(to: .element(1))),
+            Camera(.pan(to: .element(1))),
         ])
 
         // Centred on element 1 (1050, 550), still 400×400: this is the whole
@@ -43,9 +43,9 @@ final class CameraTests: XCTestCase {
         XCTAssertEqual(rect, CGRect(x: 850, y: 350, width: 400, height: 400))
     }
 
-    func test_scroll_withoutAPrecedingZoom_keepsTheHomeSize() {
+    func test_pan_withoutAPrecedingZoom_keepsTheHomeSize() {
         XCTAssertEqual(
-            resolve([Camera(.scroll(to: .element(1)))]),
+            resolve([Camera(.pan(to: .element(1)))]),
             CGRect(x: 90, y: 10, width: 1920, height: 1080)
         )
     }
@@ -53,7 +53,7 @@ final class CameraTests: XCTestCase {
     func test_reset_returnsHomeRegardlessOfHistory() {
         let rect = resolve([
             Camera(.zoom(to: .element(0), ratio: 0.5)),
-            Camera(.scroll(to: .element(1))),
+            Camera(.pan(to: .element(1))),
             Camera(.reset),
         ])
         XCTAssertEqual(rect, home)
@@ -67,11 +67,11 @@ final class CameraTests: XCTestCase {
         XCTAssertEqual(
             resolve([
                 Camera(.zoom(to: .element(0), ratio: 0.5)),
-                Camera(.scroll(to: .element(9))),
+                Camera(.pan(to: .element(9))),
             ]),
             zoomed
         )
-        XCTAssertEqual(resolve([Camera(.scroll(to: .element(9)))]), home)
+        XCTAssertEqual(resolve([Camera(.pan(to: .element(9)))]), home)
     }
 
     func test_nonPositiveRatio_leavesTheCameraWhereItIs() {
@@ -83,7 +83,7 @@ final class CameraTests: XCTestCase {
     private func createState() -> SlideState {
         @ActionContainerBuilder func build() -> ActionContainer {
             Camera(.zoom(to: .element(0), ratio: 0.5))
-            Camera(.scroll(to: .element(1)))
+            Camera(.pan(to: .element(1)))
             Camera(.reset)
         }
         return SlideState(actionContainer: build())
