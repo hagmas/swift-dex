@@ -9,6 +9,14 @@ import SwiftUI
 struct CameraEffect: GeometryEffect {
     var rect: CGRect
 
+    /// The size of the surface the camera maps onto.
+    ///
+    /// Passed in rather than taken from `effectValue(size:)`, whose `size` is
+    /// the size of the view being transformed — on a canvas slide that is the
+    /// canvas, not the viewport. The two coincide only when a slide is exactly
+    /// as large as the screen.
+    let viewport: CGSize
+
     var animatableData: CGRect.AnimatableData {
         get {
             CGRect.AnimatableData(
@@ -31,10 +39,10 @@ struct CameraEffect: GeometryEffect {
             return ProjectionTransform()
         }
 
-        let scale = min(size.width / rect.width, size.height / rect.height)
+        let scale = min(viewport.width / rect.width, viewport.height / rect.height)
         return ProjectionTransform(
             CGAffineTransform.identity
-                .translatedBy(x: size.width / 2, y: size.height / 2)
+                .translatedBy(x: viewport.width / 2, y: viewport.height / 2)
                 .scaledBy(x: scale, y: scale)
                 .translatedBy(x: -rect.midX, y: -rect.midY)
         )
