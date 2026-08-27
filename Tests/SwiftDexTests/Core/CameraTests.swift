@@ -7,6 +7,7 @@ import XCTest
 /// a rectangle, and the transform that maps that rectangle onto the viewport.
 final class CameraTests: XCTestCase {
     private let home = CGRect(x: 0, y: 0, width: 1920, height: 1080)
+    private let viewport = CGSize(width: 1920, height: 1080)
 
     private let rects: [ElementID: CGRect] = [
         .element(0): CGRect(x: 100, y: 100, width: 200, height: 200),
@@ -117,20 +118,40 @@ final class CameraTests: XCTestCase {
     }
 
     func test_effectValue_putsTheCameraCentreAtTheViewportCentre() {
-        let size = CGSize(width: 1920, height: 1080)
         let rect = CGRect(x: 850, y: 350, width: 400, height: 400)
-        let transform = CameraEffect(rect: rect).effectValue(size: size)
+        let transform = CameraEffect(rect: rect, viewport: viewport)
+            .effectValue(size: viewport)
 
         let centre = apply(transform, to: CGPoint(x: rect.midX, y: rect.midY))
         XCTAssertEqual(centre.x, 960, accuracy: 0.001)
         XCTAssertEqual(centre.y, 540, accuracy: 0.001)
     }
 
+    func test_effectValue_ignoresTheSizeItIsHanded() {
+        // The transformed view is the canvas, so `size` is the canvas — three
+        // viewports wide here. Reading the viewport off it shifts the whole
+        // slide out of frame and mis-scales every zoom.
+        let rect = CGRect(x: 850, y: 350, width: 400, height: 400)
+        let effect = CameraEffect(rect: rect, viewport: viewport)
+
+        let onViewport = effect.effectValue(size: viewport)
+        let onCanvas = effect.effectValue(size: CGSize(width: 5760, height: 1080))
+
+        for point in [CGPoint.zero, CGPoint(x: 1050, y: 550), CGPoint(x: 5000, y: 900)] {
+            let a = apply(onViewport, to: point)
+            let b = apply(onCanvas, to: point)
+            XCTAssertEqual(a.x, b.x, accuracy: 0.001)
+            XCTAssertEqual(a.y, b.y, accuracy: 0.001)
+        }
+    }
+
     func test_effectValue_fitsOnTheTighterAxis() {
-        let size = CGSize(width: 1920, height: 1080)
         // 400×400 in a 16:9 viewport fits by height: scale 1080/400 = 2.7.
-        let transform = CameraEffect(rect: CGRect(x: 850, y: 350, width: 400, height: 400))
-            .effectValue(size: size)
+        let transform = CameraEffect(
+            rect: CGRect(x: 850, y: 350, width: 400, height: 400),
+            viewport: viewport
+        )
+        .effectValue(size: viewport)
 
         let topLeft = apply(transform, to: CGPoint(x: 850, y: 350))
         let bottomRight = apply(transform, to: CGPoint(x: 1250, y: 750))
@@ -139,8 +160,7 @@ final class CameraTests: XCTestCase {
     }
 
     func test_effectValue_atHomeIsTheIdentity() {
-        let size = CGSize(width: 1920, height: 1080)
-        let transform = CameraEffect(rect: home).effectValue(size: size)
+        let transform = CameraEffect(rect: home, viewport: viewport).effectValue(size: viewport)
 
         for point in [CGPoint.zero, CGPoint(x: 1920, y: 1080), CGPoint(x: 640, y: 800)] {
             let mapped = apply(transform, to: point)
@@ -150,7 +170,7 @@ final class CameraTests: XCTestCase {
     }
 
     func test_effectValue_degenerateRectIsTheIdentity() {
-        let transform = CameraEffect(rect: .zero).effectValue(size: CGSize(width: 1920, height: 1080))
+        let transform = CameraEffect(rect: .zero, viewport: viewport).effectValue(size: viewport)
         let mapped = apply(transform, to: CGPoint(x: 100, y: 200))
         XCTAssertEqual(mapped.x, 100, accuracy: 0.001)
         XCTAssertEqual(mapped.y, 200, accuracy: 0.001)

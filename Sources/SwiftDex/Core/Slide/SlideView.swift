@@ -36,13 +36,11 @@ struct SlideView<T>: View where T: Slide {
     }
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            CameraView {
-                slide.background
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                slide.content
-            }
-            HighlightView()
+        CameraView(canvas: slide.canvas) {
+            slide.content
+        } background: {
+            slide.background
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .environment(viewModel)
         .environmentObject(elementAnchors)

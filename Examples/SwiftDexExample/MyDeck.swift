@@ -18,6 +18,7 @@ private extension MyDeck {
             .next(AboutAction(), transition: .customPush())
             .next(AboutApply(), transition: .customPush())
             .next(AboutCamera(), transition: .customPush())
+            .next(AboutCanvas(), transition: .customPush())
             .next(AboutTransition(), transition: .customPush())
             .next(AboutHighlight(), transition: .customPush())
     }

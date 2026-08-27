@@ -15,6 +15,13 @@ public protocol Slide: Flow {
     ///
     /// Define it using the `@ActionContainerBuilder` result builder.
     var actionContainer: ActionContainer { get }
+
+    /// The area this slide lays its content out in.
+    ///
+    /// Defaults to the viewport, which is the whole of the slide. A larger
+    /// canvas gives the slide room the viewport cannot show at once, reached
+    /// with `Camera`.
+    var canvas: SlideCanvas { get }
 }
 
 public extension Slide {
@@ -26,6 +33,11 @@ public extension Slide {
     /// Default value for `actionContainer`.
     var actionContainer: ActionContainer {
         ActionContainer.empty
+    }
+
+    /// Default value for `canvas`.
+    var canvas: SlideCanvas {
+        .slide
     }
 
     /// Default implemenation for `flatten()`.
