@@ -45,4 +45,12 @@ final class StaticSlideViewModel: SlideViewModel {
     ) -> [A] {
         state.actionHistory(for: elementID, type: type)
     }
+
+    // A preview or a thumbnail has no presenter, so it is always exactly where
+    // the actions put the camera.
+    var cameraOverride: CameraOverride? { nil }
+
+    func updateCameraOverride(_ edit: (inout CameraOverride) -> Void) {}
+
+    func clearCameraOverride() {}
 }

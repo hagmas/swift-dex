@@ -19,6 +19,27 @@ final class DeckControllerTests: XCTestCase {
         XCTAssertEqual(controller.slideNumber, 1)
     }
 
+    func test_backward_clearsTheCameraOverride() {
+        let controller = DeckController(deck: MyDeck())
+        controller.forward()
+        controller.state.cameraOverride = CameraOverride(anchorClick: controller.currentClick)
+
+        controller.backward()
+
+        // Rewinding is deterministic, as it is for `@SlideValue`: stepping back
+        // to a click must not depend on what the presenter did the first time.
+        XCTAssertNil(controller.state.cameraOverride)
+    }
+
+    func test_movingToAnotherSlide_clearsTheCameraOverride() {
+        let controller = DeckController(deck: MyDeck())
+        controller.state.cameraOverride = CameraOverride(anchorClick: 0)
+
+        controller.randomAccess(slideNumber: 1)
+
+        XCTAssertNil(controller.state.cameraOverride)
+    }
+
     func test_forward() {
         let controller = DeckController(deck: MyDeck())
 

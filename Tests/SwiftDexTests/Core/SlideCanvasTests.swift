@@ -62,6 +62,30 @@ final class SlideCanvasTests: XCTestCase {
         XCTAssertEqual(PlainSlide().canvas, .slide)
     }
 
+    func test_cameraControl_followsWhetherThereIsSomewhereToGo() {
+        // A slide with a canvas can be moved without the author having to
+        // discover a second flag; one without a canvas gains nothing.
+        XCTAssertEqual(PlainSlide().cameraControl, .scripted)
+        XCTAssertEqual(WideSlide().cameraControl, .interactive)
+        XCTAssertEqual(TallSlide().cameraControl, .interactive)
+    }
+
+    func test_cameraControl_canBeOverriddenInEitherDirection() {
+        XCTAssertEqual(ScriptedTourSlide().cameraControl, .scripted)
+        XCTAssertEqual(InteractivePlainSlide().cameraControl, .interactive)
+    }
+
+    private struct ScriptedTourSlide: Slide {
+        var canvas: SlideCanvas { .init(width: .points(5760)) }
+        var cameraControl: CameraControl { .scripted }
+        var content: some View { EmptyView() }
+    }
+
+    private struct InteractivePlainSlide: Slide {
+        var cameraControl: CameraControl { .interactive }
+        var content: some View { EmptyView() }
+    }
+
     func test_slide_declaredCanvasIsKept() {
         XCTAssertEqual(WideSlide().canvas, SlideCanvas(width: .points(5760), height: .slide))
         XCTAssertEqual(TallSlide().canvas, SlideCanvas(width: .slide, height: .content))

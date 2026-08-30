@@ -25,6 +25,18 @@ protocol SlideViewModel {
         for elementID: ElementID,
         type: A.Type
     ) -> [A]
+
+    /// The presenter's camera movement in force, or `nil` when the camera is
+    /// where the actions put it.
+    var cameraOverride: CameraOverride? { get }
+
+    /// Edits the presenter's camera movement, starting one anchored at the
+    /// current click if there is none.
+    func updateCameraOverride(_ edit: (inout CameraOverride) -> Void)
+
+    /// Drops the presenter's camera movement, returning the camera to the
+    /// actions.
+    func clearCameraOverride()
 }
 
 @Observable class AnySlideViewModel: SlideViewModel {
@@ -58,5 +70,17 @@ protocol SlideViewModel {
         type: A.Type
     ) -> [A] {
         wrappedViewModel.actionHistory(for: elementID, type: type)
+    }
+
+    var cameraOverride: CameraOverride? {
+        wrappedViewModel.cameraOverride
+    }
+
+    func updateCameraOverride(_ edit: (inout CameraOverride) -> Void) {
+        wrappedViewModel.updateCameraOverride(edit)
+    }
+
+    func clearCameraOverride() {
+        wrappedViewModel.clearCameraOverride()
     }
 }

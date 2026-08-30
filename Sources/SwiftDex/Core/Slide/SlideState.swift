@@ -37,6 +37,12 @@ struct SlideState {
     var clickCounts: [ClickCountKey: Int] = [:]
     var latestUserOperation: UserOperation?
 
+    /// The presenter's own movement of the camera, if any.
+    ///
+    /// Held raw: whether it still applies is decided by the timeline, in
+    /// `effectiveCameraOverride`.
+    var cameraOverride: CameraOverride?
+
     init(
         actionContainer: ActionContainer = .empty,
         position: SlidePosition = .click(0)
@@ -57,6 +63,7 @@ extension SlideState: Equatable {
         lhs.position == rhs.position
             && lhs.clickCounts == rhs.clickCounts
             && lhs.latestUserOperation == rhs.latestUserOperation
+            && lhs.cameraOverride == rhs.cameraOverride
     }
 }
 
@@ -220,6 +227,26 @@ extension SlideState {
             // distinct structural positions cannot currently share a click.
             .sorted { ($0.1, $0.2) < ($1.1, $1.2) }
             .map { $0.0 }
+    }
+
+    /// The presenter's camera movement, if it still applies.
+    ///
+    /// Moving the camera by hand steps off the script, and advancing the slide
+    /// is how the presenter says they are done: any click past the one the
+    /// movement was made on drops it. Stating the rule without exceptions is
+    /// the point — a rule with a clause about which actions count is one a
+    /// presenter cannot hold in their head while talking.
+    ///
+    /// Deciding it by comparing clicks rather than by reacting to the advance
+    /// keeps it a pure function: a mirrored surface reaches the same answer
+    /// without being told, and the composite rectangle animates from wherever
+    /// the presenter left it to wherever the script points, because only one
+    /// value changed.
+    var effectiveCameraOverride: CameraOverride? {
+        guard let override = cameraOverride, override.anchorClick == currentClick else {
+            return nil
+        }
+        return override
     }
 
     private func duration(of node: TimelineNode) -> Int {

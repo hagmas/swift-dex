@@ -17,6 +17,7 @@ struct AboutCanvas: Slide {
                     color: .cyan
                 ) {
                     "Give a slide a **`canvas`** and it keeps laying out past the edge of the viewport."
+                    "Scroll or pinch to travel yourself — the control in the corner returns the camera to the script."
                 }
             }
             Element(.element(1)) {
