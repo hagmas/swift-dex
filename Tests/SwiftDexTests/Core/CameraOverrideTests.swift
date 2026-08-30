@@ -88,7 +88,7 @@ final class CameraOverrideTests: XCTestCase {
         XCTAssertEqual(override.scale, CameraOverride.scaleLimits.lowerBound)
     }
 
-    // MARK: - When the slide takes the camera back
+    // MARK: - When the script takes the camera back
 
     private func createState() -> SlideState {
         @ActionContainerBuilder func build() -> ActionContainer {
@@ -99,46 +99,37 @@ final class CameraOverrideTests: XCTestCase {
         return SlideState(actionContainer: build())
     }
 
-    func test_latestActionStart_isTheMostRecentlyStartedOccurrence() {
-        var state = createState()
-        XCTAssertEqual(state.latestActionStart(for: .none, type: Camera.self), 0)
-
-        state.position = .click(1)
-        XCTAssertEqual(state.latestActionStart(for: .none, type: Camera.self), 1)
-
-        state.position = .click(2)
-        XCTAssertEqual(state.latestActionStart(for: .none, type: Camera.self), 1, "click 2 is not a Camera action")
-
-        state.position = .click(3)
-        XCTAssertEqual(state.latestActionStart(for: .none, type: Camera.self), 3)
-    }
-
-    func test_override_survivesAClickThatIsNotACameraAction() {
-        var state = createState()
-        state.position = .click(1)
-        state.cameraOverride = CameraOverride(scale: 2, translation: .zero, anchorClick: 1)
-
-        state.position = .click(2)
-        XCTAssertNotNil(state.effectiveCameraOverride, "an action elsewhere on the slide leaves the camera alone")
-    }
-
-    func test_override_isDroppedByALaterCameraAction() {
-        var state = createState()
-        state.position = .click(1)
-        state.cameraOverride = CameraOverride(scale: 2, translation: .zero, anchorClick: 1)
-
-        state.position = .click(3)
-        XCTAssertNil(state.effectiveCameraOverride, "the slide put the camera somewhere, so the movement is stale")
-    }
-
-    func test_override_isNotDroppedByTheCameraActionItWasMadeOn() {
+    func test_override_appliesOnTheClickItWasMadeOn() {
         var state = createState()
         state.position = .click(1)
         state.cameraOverride = CameraOverride(scale: 2, translation: .zero, anchorClick: 1)
 
         XCTAssertNotNil(
             state.effectiveCameraOverride,
-            "moving the camera after an action ran must not immediately undo itself"
+            "moving the camera after a click must not immediately undo itself"
         )
+    }
+
+    func test_override_isDroppedByAdvancing() {
+        var state = createState()
+        state.position = .click(1)
+        state.cameraOverride = CameraOverride(scale: 2, translation: .zero, anchorClick: 1)
+
+        state.position = .click(2)
+
+        // Advancing is how the presenter says they are done exploring, whatever
+        // the next click happens to do. No exception for actions that are not
+        // about the camera: a rule with clauses is one a presenter cannot hold
+        // in their head while talking.
+        XCTAssertNil(state.effectiveCameraOverride)
+    }
+
+    func test_override_isDroppedByRewindingToo() {
+        var state = createState()
+        state.position = .click(2)
+        state.cameraOverride = CameraOverride(scale: 2, translation: .zero, anchorClick: 2)
+
+        state.position = .click(1)
+        XCTAssertNil(state.effectiveCameraOverride)
     }
 }

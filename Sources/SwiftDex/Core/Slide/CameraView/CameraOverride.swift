@@ -7,8 +7,8 @@ import Foundation
 /// is also what makes returning free: dropping the override *is* the return,
 /// with nothing to restore.
 ///
-/// `anchorClick` is the click the movement started on, which is how the
-/// timeline decides the override is stale — see
+/// `anchorClick` is the click the movement was made on. Advancing past it is
+/// the presenter resuming the script, which drops the movement — see
 /// `SlideState.effectiveCameraOverride`.
 struct CameraOverride: Equatable {
     /// How much the presenter has magnified the camera. `1` is the action's own

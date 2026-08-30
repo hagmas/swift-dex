@@ -44,8 +44,8 @@ final class DynamicSlideViewModel: SlideViewModel {
 
     func updateCameraOverride(_ edit: (inout CameraOverride) -> Void) {
         // A stale override is gone as far as the camera is concerned, so a new
-        // movement starts from the action's own rectangle rather than resuming
-        // one the slide already took back.
+        // movement starts from the script's own rectangle rather than resuming
+        // one the presenter left behind on an earlier click.
         var override = state.effectiveCameraOverride ?? CameraOverride(anchorClick: state.currentClick)
         edit(&override)
         state.cameraOverride = override.isIdentity ? nil : override

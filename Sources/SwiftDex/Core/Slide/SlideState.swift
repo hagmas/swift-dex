@@ -229,39 +229,24 @@ extension SlideState {
             .map { $0.0 }
     }
 
-    /// The click the most recently started occurrence of `A` began on, or `0`
-    /// when none has started.
-    func latestActionStart<A: Action>(
-        for elementID: ElementID,
-        type: A.Type
-    ) -> Int {
-        guard let chain: [TaggedAction<A>] = actionContainer.chains[elementID]?[A.self] else {
-            return 0
-        }
-
-        let click = currentClick
-        let intervals = intervals()
-        return
-            chain
-            .compactMap { intervals[$0.id]?.start }
-            .filter { $0 <= click }
-            .max() ?? 0
-    }
-
-    /// The presenter's camera movement, if the timeline has not overruled it.
+    /// The presenter's camera movement, if it still applies.
     ///
-    /// A `Camera` action that started after the movement did is the slide
-    /// taking the camera back, so the movement is dropped. Deciding this by
-    /// comparing clicks rather than by reacting to the action keeps it a pure
-    /// function: a mirrored surface reaches the same answer without being told,
-    /// and the composite rectangle animates from wherever the presenter left it
-    /// to wherever the action points, because only one value changed.
+    /// Moving the camera by hand steps off the script, and advancing the slide
+    /// is how the presenter says they are done: any click past the one the
+    /// movement was made on drops it. Stating the rule without exceptions is
+    /// the point — a rule with a clause about which actions count is one a
+    /// presenter cannot hold in their head while talking.
+    ///
+    /// Deciding it by comparing clicks rather than by reacting to the advance
+    /// keeps it a pure function: a mirrored surface reaches the same answer
+    /// without being told, and the composite rectangle animates from wherever
+    /// the presenter left it to wherever the script points, because only one
+    /// value changed.
     var effectiveCameraOverride: CameraOverride? {
-        guard let override = cameraOverride else {
+        guard let override = cameraOverride, override.anchorClick == currentClick else {
             return nil
         }
-        return latestActionStart(for: .none, type: Camera.self) > override.anchorClick
-            ? nil : override
+        return override
     }
 
     private func duration(of node: TimelineNode) -> Int {
