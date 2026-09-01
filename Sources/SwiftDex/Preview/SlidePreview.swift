@@ -57,7 +57,7 @@ private extension SlidePreview {
 
     var content: some View {
         ScaleEffectView(size: deckStyle.slideSize) {
-            TapHandlerView {
+            TapHandlerView(isEnabled: true) {
                 SlideView(
                     slide: slide,
                     state: $viewModel.state

@@ -8,7 +8,7 @@ targets:
   SwiftDexExample:
     type: application
     platform: macOS
-    deploymentTarget: '14.0'
+    deploymentTarget: '26.0'
     settings:
         CODE_SIGNING_REQUIRED: NO
         CODE_SIGN_IDENTITY: "-"
