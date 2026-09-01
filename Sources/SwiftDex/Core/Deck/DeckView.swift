@@ -65,19 +65,17 @@ private extension DeckView {
     /// The live presentation surface: the current slide with tap and arrow-key
     /// navigation, transitioning between slides.
     var presentation: some View {
-        ScaleEffectView(size: T.deckStyle.slideSize) {
-            TapHandlerView {
-                currentView
-                    .background {
-                        T.deckStyle.colorStyle.backgroundColor
-                    }
-            } onLeftTap: {
-                controller.backward()
-            } onRightTap: {
-                controller.forward()
-            }
-            .clipped()
+        TapHandlerView(isEnabled: !controller.isOverviewPresented) {
+            currentView
+                .background {
+                    T.deckStyle.colorStyle.backgroundColor
+                }
+        } onLeftTap: {
+            controller.backward()
+        } onRightTap: {
+            controller.forward()
         }
+        .clipped()
     }
 
     var currentView: some View {

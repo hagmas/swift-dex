@@ -1,6 +1,12 @@
 import SwiftUI
 
 struct TapHandlerView<Content: View>: View {
+    /// Whether this surface currently owns navigation.
+    ///
+    /// The live presentation stays mounted underneath the grid overview, so its
+    /// arrow keys have to be switched off rather than shadowed — otherwise
+    /// browsing the grid would quietly advance the talk.
+    let isEnabled: Bool
     @ViewBuilder let content: () -> Content
     let onLeftTap: () -> Void
     let onRightTap: () -> Void
@@ -17,14 +23,19 @@ struct TapHandlerView<Content: View>: View {
                     }
                 }
                 .background {
-                    Button("") {
-                        onLeftTap()
+                    // Only the shortcuts are disabled: `.disabled` inherits, and
+                    // the slide itself must keep rendering as it always does.
+                    Group {
+                        Button("") {
+                            onLeftTap()
+                        }
+                        .keyboardShortcut(.leftArrow, modifiers: [])
+                        Button("") {
+                            onRightTap()
+                        }
+                        .keyboardShortcut(.rightArrow, modifiers: [])
                     }
-                    .keyboardShortcut(.leftArrow, modifiers: [])
-                    Button("") {
-                        onRightTap()
-                    }
-                    .keyboardShortcut(.rightArrow, modifiers: [])
+                    .disabled(!isEnabled)
                 }
         }
     }

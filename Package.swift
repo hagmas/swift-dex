@@ -1,4 +1,4 @@
-// swift-tools-version:5.9
+// swift-tools-version:6.2
 
 import Foundation
 import PackageDescription
@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "swift-dex",
     platforms: [
-        .macOS(.v14)
+        .macOS(.v26)
     ],
     products: [
         .library(name: "SwiftDex", targets: ["SwiftDex"])
@@ -18,7 +18,7 @@ let package = Package(
             dependencies: ["SwiftDex"]
         ),
     ],
-    swiftLanguageVersions: [.v5]
+    swiftLanguageModes: [.v5]
 )
 
 // swift-format is no longer a dependency: it ships with the Swift toolchain

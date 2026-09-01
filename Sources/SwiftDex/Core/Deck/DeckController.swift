@@ -58,7 +58,7 @@ public final class DeckController {
                         .environment(\.slideSize, size)
                         .environment(\.isStaticRendering, true)
                 }
-                .frame(width: 192 * 3, height: 108 * 3)
+                .frame(width: 192 * 4, height: 108 * 4)
             )
             thumbnails[index] = renderer.nsImage
         }
