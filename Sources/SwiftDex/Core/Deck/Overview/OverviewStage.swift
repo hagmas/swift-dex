@@ -20,7 +20,7 @@ struct OverviewStage<Presentation: View>: View {
     /// Written by the grid while the presenter scrolls, and written here when
     /// the overview opens — where the position is not read but decided.
     @State private var scrollY: CGFloat = 0
-    @State private var scrollAnchorSlide: Int?
+    @State private var scrollAnchor: OverviewScrollAnchor?
 
     var body: some View {
         OverviewTransitionLayer(
@@ -49,7 +49,7 @@ private extension OverviewStage {
             controller: controller,
             geometry: geometry,
             scrollY: $scrollY,
-            scrollAnchorSlide: $scrollAnchorSlide,
+            scrollAnchor: $scrollAnchor,
             onSelect: select
         )
     }
@@ -60,7 +60,7 @@ private extension OverviewStage {
     /// their cursor if they open the overview again: coming straight back is
     /// the one case where the grid must not re-aim.
     func select(slideNumber: Int) {
-        scrollAnchorSlide = slideNumber
+        scrollAnchor = OverviewScrollAnchor(slideNumber: slideNumber, offset: scrollY)
         controller.select(slideNumber: slideNumber)
     }
 

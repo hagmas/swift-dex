@@ -10,9 +10,7 @@ import XCTest
 final class OverviewScrollTests: XCTestCase {
     private let slideNumber = 5
 
-    /// The grid must be aimable by identity even though a `Layout` places the
-    /// cells: `scrollTo` works off layout frames, which is the whole reason the
-    /// cells are placed rather than offset.
+    /// Opening puts the current slide's row at the top of the viewport.
     func test_openingAimsTheCurrentSlidesRowAtTheTop() throws {
         let harness = try Harness(slideNumber: slideNumber)
 
@@ -20,7 +18,7 @@ final class OverviewScrollTests: XCTestCase {
         // from `topRowScroll`, so a disagreement would land it off its cell.
         let expected = harness.geometry.rowPitch
         XCTAssertEqual(harness.geometry.topRowScroll(for: slideNumber), expected)
-        XCTAssertEqual(harness.clipView.bounds.origin.y, expected)
+        XCTAssertEqual(try harness.clipView.bounds.origin.y, expected)
         XCTAssertEqual(harness.reportedScrollY, expected)
     }
 
@@ -42,6 +40,39 @@ final class OverviewScrollTests: XCTestCase {
         XCTAssertEqual(hostingView.fittingSize.height, geometry.placementFrame(at: 0).height)
     }
 
+    /// Reopening on the same slide must put the grid back where it was.
+    ///
+    /// Closing the overview unmounts the grid, so the ScrollView that comes
+    /// back is a new one starting at zero. Leaving the position alone because
+    /// the slide has not changed leaves it at zero, and the travelling slide —
+    /// which aims at a cell in the grid's own coordinates — then flies to
+    /// wherever that cell really is, which is off the surface entirely.
+    func test_reopeningOnTheSameSlideRestoresTheOffset() throws {
+        let harness = try Harness(slideNumber: slideNumber)
+        let expected = harness.geometry.rowPitch
+        XCTAssertEqual(try harness.clipView.bounds.origin.y, expected)
+
+        harness.closeAndReopen()
+
+        XCTAssertEqual(try harness.clipView.bounds.origin.y, expected)
+        XCTAssertEqual(harness.reportedScrollY, expected)
+    }
+
+    /// What the presenter scrolled to is what they come back to.
+    ///
+    /// The rule keeps the position, not the row it was derived from, so a grid
+    /// left part-way through a row opens part-way through that row.
+    func test_reopeningRestoresWhereThePresenterScrolledTo() throws {
+        let harness = try Harness(slideNumber: slideNumber)
+        try harness.scroll(to: 120)
+
+        harness.closeAndReopen()
+
+        XCTAssertEqual(try harness.clipView.bounds.origin.y, 120)
+        // And the number the travelling slide aims with is where the grid is.
+        XCTAssertEqual(harness.reportedScrollY, try harness.clipView.bounds.origin.y)
+    }
+
     /// The offset has to be read through AppKit.
     ///
     /// Scrolling on macOS moves the clip view without a SwiftUI layout pass, so
@@ -50,51 +81,56 @@ final class OverviewScrollTests: XCTestCase {
     func test_scrollingIsReported() throws {
         let harness = try Harness(slideNumber: slideNumber)
 
-        harness.scroll(to: 300)
+        try harness.scroll(to: 300)
 
-        XCTAssertEqual(harness.clipView.bounds.origin.y, 300)
+        XCTAssertEqual(try harness.clipView.bounds.origin.y, 300)
         XCTAssertEqual(harness.reportedScrollY, 300)
     }
 }
 
 /// The grid in a real window, which is the only place a `ScrollView` scrolls.
+///
+/// The grid is mounted and unmounted the way the overview does it, because the
+/// grid's second appearance behaves differently from its first and that is
+/// where the interesting failures live.
 @MainActor
 private final class Harness {
     let geometry: OverviewGeometry
-    let clipView: NSClipView
+    let controller: DeckController
 
     private let hostingView: NSHostingView<AnyView>
     private let window: NSWindow
-    private let state = State()
+    fileprivate let state = HarnessState()
 
     var reportedScrollY: CGFloat {
         state.scrollY
     }
 
-    private final class State {
-        var scrollY: CGFloat = 0
-        var anchor: Int?
+    /// The clip view of whichever ScrollView is on screen now.
+    ///
+    /// Looked up each time rather than held: closing the overview destroys the
+    /// ScrollView, and reopening builds another one.
+    var clipView: NSClipView {
+        get throws {
+            guard let scrollView = Harness.findScrollView(in: hostingView) else {
+                throw XCTSkip("SwiftUI's ScrollView is not backed by an NSScrollView here")
+            }
+            return scrollView.contentView
+        }
     }
 
     init(slideNumber: Int) throws {
         let size = ScrollDeckStyle.slideSize
-        let controller = DeckController(deck: ScrollDeck())
+        controller = DeckController(deck: ScrollDeck())
         controller.randomAccess(slideNumber: slideNumber)
         geometry = OverviewGeometry(slideSize: size, slideCount: controller.slideCount)
 
-        let state = self.state
-        let grid = OverviewGridView(
-            controller: controller,
-            geometry: geometry,
-            scrollY: Binding(get: { state.scrollY }, set: { state.scrollY = $0 }),
-            scrollAnchorSlide: Binding(get: { state.anchor }, set: { state.anchor = $0 }),
-            onSelect: { _ in }
-        )
-        .frame(width: size.width, height: size.height)
-        .environment(\.colorStyle, ScrollDeckStyle.colorStyle)
-        .environment(\.slideSize, size)
+        let root = HarnessRoot(controller: controller, geometry: geometry, state: state)
+            .frame(width: size.width, height: size.height)
+            .environment(\.colorStyle, ScrollDeckStyle.colorStyle)
+            .environment(\.slideSize, size)
 
-        hostingView = NSHostingView(rootView: AnyView(grid))
+        hostingView = NSHostingView(rootView: AnyView(root))
         hostingView.frame = CGRect(origin: .zero, size: size)
         window = NSWindow(
             contentRect: CGRect(origin: .zero, size: size),
@@ -106,18 +142,24 @@ private final class Harness {
         window.makeKeyAndOrderFront(nil)
         hostingView.layoutSubtreeIfNeeded()
         Harness.settle()
-
-        guard let scrollView = Harness.findScrollView(in: hostingView) else {
-            throw XCTSkip("SwiftUI's ScrollView is not backed by an NSScrollView here")
-        }
-        clipView = scrollView.contentView
+        _ = try clipView
     }
 
-    func scroll(to offset: CGFloat) {
+    func scroll(to offset: CGFloat) throws {
+        let clipView = try clipView
         clipView.scroll(to: CGPoint(x: 0, y: offset))
         clipView.enclosingScrollView?.reflectScrolledClipView(clipView)
         hostingView.layoutSubtreeIfNeeded()
         Harness.settle()
+    }
+
+    /// Closes the overview and opens it again, as pressing `g` twice does.
+    func closeAndReopen() {
+        for isOpen in [false, true] {
+            state.isOpen = isOpen
+            hostingView.layoutSubtreeIfNeeded()
+            Harness.settle()
+        }
     }
 
     /// Lets the window server lay the hierarchy out and the notifications land.
@@ -138,6 +180,34 @@ private final class Harness {
             }
         }
         return nil
+    }
+}
+
+private final class HarnessState: ObservableObject {
+    @Published var isOpen = true
+    var scrollY: CGFloat = 0
+    var anchor: OverviewScrollAnchor?
+}
+
+/// Mirrors how `OverviewTransitionLayer` holds the grid: present only while
+/// the overview is open, so closing really does destroy the ScrollView.
+private struct HarnessRoot: View {
+    let controller: DeckController
+    let geometry: OverviewGeometry
+    @ObservedObject var state: HarnessState
+
+    var body: some View {
+        ZStack {
+            if state.isOpen {
+                OverviewGridView(
+                    controller: controller,
+                    geometry: geometry,
+                    scrollY: Binding(get: { state.scrollY }, set: { state.scrollY = $0 }),
+                    scrollAnchor: Binding(get: { state.anchor }, set: { state.anchor = $0 }),
+                    onSelect: { _ in }
+                )
+            }
+        }
     }
 }
 

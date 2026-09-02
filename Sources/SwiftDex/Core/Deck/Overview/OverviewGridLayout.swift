@@ -3,10 +3,10 @@ import SwiftUI
 /// Places the overview's cells at the frames `OverviewGeometry` computes.
 ///
 /// A `Layout` rather than `.position` or `.offset`, because those leave the
-/// layout frame untouched: every cell would report the whole grid as its
-/// frame and `ScrollViewProxy.scrollTo(_:anchor:)` would have nothing to aim
-/// at. Placing the cells for real keeps the grid scrollable by identity while
-/// the frames stay ours.
+/// layout frame untouched: every cell would claim the whole grid, and a cell
+/// that does not occupy the rectangle it is drawn in is one nothing else can
+/// reason about — hit testing and accessibility included. Placing the cells
+/// for real keeps the frames ours and honest at the same time.
 struct OverviewGridLayout: Layout {
     let geometry: OverviewGeometry
 
