@@ -3,7 +3,7 @@ import SwiftUI
 /// `TextStyle` defines the style categories for text elements within a Deck.
 ///
 /// It is used to apply consistent font styles across different types of text content.
-public enum TextStyle {
+public enum TextStyle: Sendable {
     /// Used for main titles, typically the largest and most prominent text.
     case title
 
@@ -77,14 +77,14 @@ public extension TextStyle {
 }
 
 public extension View {
-    func textStyle(_ textStyle: TextStyle) -> some View {
+    nonisolated func textStyle(_ textStyle: TextStyle) -> some View {
         self
             .modifier(TextStyleModifier(textStyle: textStyle))
     }
 }
 
 public extension String {
-    func textStyle(_ textStyle: TextStyle) -> some View {
+    nonisolated func textStyle(_ textStyle: TextStyle) -> some View {
         Text(self)
             .modifier(TextStyleModifier(textStyle: textStyle))
     }
@@ -95,7 +95,7 @@ private struct TextStyleModifier: ViewModifier {
     @Environment(\.colorStyle) var colorStyle
     var textStyle: TextStyle
 
-    init(textStyle: TextStyle) {
+    nonisolated init(textStyle: TextStyle) {
         self.textStyle = textStyle
     }
 

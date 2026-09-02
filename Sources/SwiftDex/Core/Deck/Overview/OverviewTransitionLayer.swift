@@ -21,7 +21,7 @@ struct OverviewTransitionLayer<Grid: View, Presentation: View>: View, Animatable
     let grid: Grid
     let presentation: Presentation
 
-    var animatableData: Double {
+    nonisolated var animatableData: Double {
         get { progress }
         set { progress = newValue }
     }

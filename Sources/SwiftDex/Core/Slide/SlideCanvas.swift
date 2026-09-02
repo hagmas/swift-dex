@@ -1,7 +1,7 @@
 import Foundation
 
 /// The extent of one axis of a slide's canvas.
-public enum CanvasExtent: Equatable {
+public enum CanvasExtent: Equatable, Sendable {
     /// The deck's slide size: the extent the viewport itself has.
     case slide
 
@@ -31,7 +31,7 @@ public enum CanvasExtent: Equatable {
 ///
 /// The axes are independent: a slide can be three screens wide and exactly one
 /// screen tall, or as tall as its content and no wider than the viewport.
-public struct SlideCanvas: Equatable {
+public struct SlideCanvas: Equatable, Sendable {
 
     /// The extent of the horizontal axis.
     public var width: CanvasExtent

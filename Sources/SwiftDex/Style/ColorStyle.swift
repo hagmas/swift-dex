@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// `ColorStyle` is a protocol for defining a Color Style that is shared across the entire Deck.
-public protocol ColorStyle {
+public protocol ColorStyle: Sendable {
     /// The color set as the background for each Slide.
     ///
     /// It is set behind the `background` of `Slide`. By default, `.white` is set.

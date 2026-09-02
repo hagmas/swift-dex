@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The `FontStyle` protocol allows you to define a Font Style that is shared across the entire Deck.
-public protocol FontStyle {
+public protocol FontStyle: Sendable {
     /// If using a custom font, specify it from this field.
     ///
     /// By default, the System Font is used.

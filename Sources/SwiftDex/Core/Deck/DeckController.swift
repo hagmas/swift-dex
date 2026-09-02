@@ -15,6 +15,7 @@ import SwiftUI
 /// }
 /// ```
 @Observable
+@MainActor
 public final class DeckController {
     let flow: [(any Slide, SlideTransition)]
 
@@ -39,7 +40,6 @@ public final class DeckController {
     /// - Parameters:
     ///   - deck: The deck to present.
     ///   - slideNumber: The slide to start on. Defaults to the first slide.
-    @MainActor
     public init<T: Deck>(deck: T, slideNumber: Int = 0) {
         self.flow = deck.flow.flatten()
         self.slideNumber = min(max(0, slideNumber), flow.count - 1)

@@ -54,6 +54,7 @@ public struct SlideValue<Value>: DynamicProperty {
     }
 
     /// The current value, shared across surfaces when an `ElementID` is set.
+    @MainActor
     public var wrappedValue: Value {
         get {
             if let store, elementID != .none {
@@ -72,6 +73,7 @@ public struct SlideValue<Value>: DynamicProperty {
     }
 
     /// A binding to the value, for handing to controls.
+    @MainActor
     public var projectedValue: Binding<Value> {
         Binding(
             get: { wrappedValue },

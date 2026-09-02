@@ -7,7 +7,7 @@ import SwiftUI
 /// - Important: Due to the limitation of SwiftUI, the order in these view modifiers applied to a `View` is statically defined (Refer to `ElementViewModifier`).
 /// This might cause an unexpected effect when two or more modifiers are combined (e.g., `RotationEffect` + `Offset` or `ScaleEffect` + `Offset`).
 /// For precise control over effects, please consider defining a custom view and action.
-public struct ElementModifier {
+public struct ElementModifier: Sendable {
     struct RotationEffect: Equatable {
         let angle: Angle
         let anchor: UnitPoint

@@ -10,6 +10,7 @@ import SwiftUI
 /// Entries are keyed by `(ElementID, value type)`, mirroring the action
 /// system's rule that an element's identity is its `ElementID`.
 @Observable
+@MainActor
 final class SlideValueStore {
     private var storage: [Key: Any] = [:]
 

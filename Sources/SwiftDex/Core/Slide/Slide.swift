@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// A protocol for defining the contents of a slide and a series of actions to apply to it.
+@MainActor
 public protocol Slide: Flow {
     associatedtype Content: View
     associatedtype Background: View
@@ -57,12 +58,13 @@ public extension Slide {
     }
 
     /// Default implemenation for `flatten()`.
-    func flatten() -> [(any Slide, SlideTransition)] {
+    nonisolated func flatten() -> [(any Slide, SlideTransition)] {
         [(self, .none)]
     }
 }
 
 extension Slide {
+    @MainActor
     func createView(state: Binding<SlideState>) -> AnyView {
         AnyView(
             SlideView(
@@ -72,6 +74,7 @@ extension Slide {
         )
     }
 
+    @MainActor
     func createStaticView() -> AnyView {
         AnyView(
             SlideView(slide: self)

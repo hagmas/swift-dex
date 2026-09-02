@@ -24,7 +24,9 @@ public struct SlideTransition {
 
 public extension SlideTransition {
     /// A `SlideTransition` that represents no transition effect.
-    static let none = SlideTransition(transition: .identity, animation: nil)
+    static var none: SlideTransition {
+        SlideTransition(transition: .identity, animation: nil)
+    }
 
     /// Creates a slide transition with a push effect.
     ///

@@ -4,7 +4,7 @@ import SwiftUI
 /// A value used in conjunction with `Apply` or `ApplyByItem`.
 ///
 /// These `Actions` allow the application of values defined in `ElementTransition` to elements of a Slide.
-public struct ElementTransition {
+public struct ElementTransition: Sendable {
     /// The `Animation` value used when applying the specified `ElementModifier` to an Element.
     public let animation: Animation?
 

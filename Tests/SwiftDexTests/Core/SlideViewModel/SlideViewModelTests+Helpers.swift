@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import XCTest
 
 @testable import SwiftDex
@@ -44,4 +45,19 @@ func assertCompleted<A: Action & Equatable>(
         return
     }
     XCTAssertEqual(actualCurrent, current, file: file, line: line)
+}
+
+/// Holds a `SlideState` on the main actor so a test can hand a `Binding` to a
+/// view model and mutate the state behind it without capturing a local `var`.
+@MainActor
+final class SlideStateBox {
+    var value: SlideState
+
+    init(_ value: SlideState) {
+        self.value = value
+    }
+
+    var binding: Binding<SlideState> {
+        Binding(get: { self.value }, set: { self.value = $0 })
+    }
 }
