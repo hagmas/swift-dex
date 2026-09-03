@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ElementAnchorsPreference: PreferenceKey {
-    static var defaultValue: [ElementID: Anchor<CGRect>] = [:]
+    static let defaultValue: [ElementID: Anchor<CGRect>] = [:]
 
     static func reduce(
         value: inout [ElementID: Anchor<CGRect>],

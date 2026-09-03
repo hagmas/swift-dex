@@ -14,6 +14,7 @@ targets:
         CODE_SIGN_IDENTITY: "-"
         CODE_SIGN_STYLE: Manual
         GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: 6.0
     dependencies:
       - package: SwiftDex
     sources:

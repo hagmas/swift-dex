@@ -4,6 +4,7 @@ import XCTest
 
 @testable import SwiftDex
 
+@MainActor
 final class FlowTests: XCTestCase {
     func test_single_flow() {
         let slide01 = Slide01()

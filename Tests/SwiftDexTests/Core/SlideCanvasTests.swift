@@ -4,6 +4,7 @@ import XCTest
 @testable import SwiftDex
 
 /// Tests for the canvas a slide lays its content out in.
+@MainActor
 final class SlideCanvasTests: XCTestCase {
     private let slideSize = CGSize(width: 1920, height: 1080)
 

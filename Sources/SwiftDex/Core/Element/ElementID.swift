@@ -6,7 +6,7 @@ import SwiftUI
 /// Wrap an arbitrary view in an ``Element`` to give it an identity, or pass the
 /// identity to the initializer of a view that consumes its own action
 /// (`Bullets`, `Flipper`, `VideoView`).
-public struct ElementID: Hashable {
+public struct ElementID: Hashable, Sendable {
     /// A `String` representation of the `ElementID`.
     public let rawValue: String
 
@@ -17,21 +17,21 @@ public struct ElementID: Hashable {
 }
 
 public extension ElementID {
-    static var none = ElementID(rawValue: "")
+    static let none = ElementID(rawValue: "")
 
-    static var title = ElementID(rawValue: "title")
+    static let title = ElementID(rawValue: "title")
 
-    static var bullets = ElementID(rawValue: "bullets")
+    static let bullets = ElementID(rawValue: "bullets")
     static func bullets(_ number: Int) -> ElementID {
         ElementID(rawValue: "bullets\(number)")
     }
 
-    static var flipper = ElementID(rawValue: "flipper")
+    static let flipper = ElementID(rawValue: "flipper")
     static func flipper(_ number: Int) -> ElementID {
         ElementID(rawValue: "flipper\(number)")
     }
 
-    static var video = ElementID(rawValue: "video")
+    static let video = ElementID(rawValue: "video")
     static func video(_ number: Int) -> ElementID {
         ElementID(rawValue: "video\(number)")
     }

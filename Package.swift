@@ -18,7 +18,7 @@ let package = Package(
             dependencies: ["SwiftDex"]
         ),
     ],
-    swiftLanguageModes: [.v5]
+    swiftLanguageModes: [.v6]
 )
 
 // swift-format is no longer a dependency: it ships with the Swift toolchain
