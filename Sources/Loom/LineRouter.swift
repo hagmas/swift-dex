@@ -93,6 +93,9 @@ struct RoutedLine {
 
     /// Which ends are tipped with an arrowhead.
     var arrow: Line.Arrow
+
+    /// Words written along the line.
+    var label: String?
 }
 
 /// One line's meeting with one node.
@@ -102,6 +105,9 @@ private struct Joint {
 
     /// The edge the line uses, or `nil` at a tie, which it only passes through.
     let edge: NodeEdge?
+
+    /// The direction the line travels through here.
+    let axis: Axis
 
     /// Where the joint would sit if it were the only one.
     let base: CGPoint
@@ -126,18 +132,11 @@ private struct Joint {
         }
     }
 
-    /// The direction a bundle spreads in here.
+    /// The direction a bundle spreads in here: across the travel, not along it.
     var tangent: CGVector {
-        switch edge {
-        case .top, .bottom:
-            CGVector(dx: 1, dy: 0)
-        case .leading, .trailing:
-            CGVector(dx: 0, dy: 1)
-        case nil:
-            // A tie: lines spread across the run, not along it.
-            abs(neighbour.x - base.x) > abs(neighbour.y - base.y)
-                ? CGVector(dx: 0, dy: 1)
-                : CGVector(dx: 1, dy: 0)
+        switch axis {
+        case .vertical: CGVector(dx: 1, dy: 0)
+        case .horizontal: CGVector(dx: 0, dy: 1)
         }
     }
 }
@@ -149,6 +148,14 @@ private enum Bundle: Hashable {
 
     /// One tie. Lines through it spread across its width.
     case tie(NodeID)
+}
+
+/// One line, on its way to being drawn.
+private struct Route {
+    let arrow: Line.Arrow
+    let label: String?
+    let routing: LineRouting
+    var joints: [Joint]
 }
 
 extension LineRouter {
@@ -167,27 +174,67 @@ extension LineRouter {
         for lines: [Line],
         rects: [NodeID: CGRect],
         addresses: [NodeID: NodeAddress],
+        tieAxes: [NodeID: Axis],
+        routing: LineRouting,
         spacing: CGFloat
     ) -> [RoutedLine] {
-        var routes: [(arrow: Line.Arrow, joints: [Joint])] = []
+        var routes: [Route] = []
 
         for (index, line) in lines.enumerated() {
-            guard let joints = joints(for: line, line: index, rects: rects, addresses: addresses) else {
+            guard
+                let joints = joints(
+                    for: line,
+                    line: index,
+                    rects: rects,
+                    addresses: addresses,
+                    tieAxes: tieAxes
+                )
+            else {
                 continue
             }
-            routes.append((line.arrow, joints))
+            routes.append(
+                Route(
+                    arrow: line.arrow,
+                    label: line.label,
+                    routing: line.routing ?? routing,
+                    joints: joints
+                )
+            )
         }
 
         spread(&routes, spacing: spacing)
 
-        return routes.map { RoutedLine(points: $0.joints.map(\.point), arrow: $0.arrow) }
+        return routes.map { route in
+            RoutedLine(points: points(of: route), arrow: route.arrow, label: route.label)
+        }
+    }
+
+    /// The corners a route is drawn through, turns and all.
+    private static func points(of route: Route) -> [CGPoint] {
+        var points: [CGPoint] = []
+
+        for (index, joint) in route.joints.enumerated() {
+            if index > 0 {
+                let previous = route.joints[index - 1]
+                points += route.routing.corners(
+                    from: previous.point,
+                    along: previous.axis,
+                    to: joint.point,
+                    along: joint.axis
+                )
+            }
+            points.append(joint.point)
+        }
+
+        return points.simplified
     }
 
     private static func joints(
         for line: Line,
         line index: Int,
         rects: [NodeID: CGRect],
-        addresses: [NodeID: NodeAddress]
+        addresses: [NodeID: NodeAddress],
+        tieAxes: [NodeID: Axis]
     ) -> [Joint]? {
         let stops = line.stops
         guard stops.allSatisfy({ rects[$0] != nil && addresses[$0] != nil }) else {
@@ -196,7 +243,9 @@ extension LineRouter {
 
         // Every hop chooses its own edges, so a line with a tie in it leaves
         // aimed at the tie rather than at where it eventually ends up.
-        let hops = zip(stops, stops.dropFirst()).map { edges(from: addresses[$0]!, to: addresses[$1]!) }
+        let hops = zip(stops, stops.dropFirst()).map {
+            edges(from: addresses[$0]!, to: addresses[$1]!)
+        }
 
         var joints = stops.enumerated().map { position, node in
             let rect = rects[node]!
@@ -211,7 +260,15 @@ extension LineRouter {
                     nil
                 }
             let base = edge?.point(in: rect) ?? CGPoint(x: rect.midX, y: rect.midY)
-            return Joint(line: index, node: node, edge: edge, base: base, neighbour: base, point: base)
+            return Joint(
+                line: index,
+                node: node,
+                edge: edge,
+                axis: edge?.axis ?? tieAxes[node] ?? .vertical,
+                base: base,
+                neighbour: base,
+                point: base
+            )
         }
 
         for index in joints.indices {
@@ -223,10 +280,7 @@ extension LineRouter {
     }
 
     /// Holds the lines sharing an edge or a tie apart from one another.
-    private static func spread(
-        _ routes: inout [(arrow: Line.Arrow, joints: [Joint])],
-        spacing: CGFloat
-    ) {
+    private static func spread(_ routes: inout [Route], spacing: CGFloat) {
         var bundles: [Bundle: [(route: Int, joint: Int)]] = [:]
         for (route, entry) in routes.enumerated() {
             for (joint, value) in entry.joints.enumerated() {
@@ -257,6 +311,16 @@ extension LineRouter {
                     y: joint.base.y + tangent.dy * offset
                 )
             }
+        }
+    }
+}
+
+extension NodeEdge {
+    /// The direction a line travels as it meets this edge.
+    var axis: Axis {
+        switch self {
+        case .top, .bottom: .vertical
+        case .leading, .trailing: .horizontal
         }
     }
 }
