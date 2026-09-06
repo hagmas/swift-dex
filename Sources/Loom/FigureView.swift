@@ -32,24 +32,34 @@ public struct FigureView<Content: Figure>: View {
 
     /// The content and behavior of the view.
     public var body: some View {
-        figure.arrangement.elementBody
-            .backgroundPreferenceValue(NodeAnchorsPreference.self) { anchors in
-                GeometryReader { proxy in
-                    let lines = figure.lines
-                    ForEach(lines.indices, id: \.self) { index in
-                        let line = lines[index]
-                        if let from = anchors[line.from], let to = anchors[line.to] {
-                            LineView(
-                                from: proxy[from],
-                                to: proxy[to],
-                                arrow: line.arrow,
-                                color: color,
-                                width: width
-                            )
-                        }
+        // The arrangement's root may hold several elements. Stacking them here
+        // gives the outermost container a direction, which is the same one
+        // `Placement.paths(in:)` reads a line's leaving edge from.
+        VStack {
+            figure.arrangement.elementBody
+        }
+        .backgroundPreferenceValue(NodeAnchorsPreference.self) { anchors in
+            GeometryReader { proxy in
+                let paths = Placement.paths(in: figure.arrangement.placements)
+                let lines = figure.lines
+                ForEach(lines.indices, id: \.self) { index in
+                    let line = lines[index]
+                    if let from = anchors[line.from],
+                        let to = anchors[line.to],
+                        let edges = LineRouter.edges(from: line.from, to: line.to, paths: paths)
+                    {
+                        LineView(
+                            from: proxy[from],
+                            to: proxy[to],
+                            edges: edges,
+                            arrow: line.arrow,
+                            color: color,
+                            width: width
+                        )
                     }
                 }
             }
+        }
     }
 }
 
@@ -57,6 +67,7 @@ public struct FigureView<Content: Figure>: View {
 private struct LineView: View {
     let from: CGRect
     let to: CGRect
+    let edges: (start: NodeEdge, end: NodeEdge)
     let arrow: Line.Arrow
     let color: Color
     let width: CGFloat
@@ -66,7 +77,7 @@ private struct LineView: View {
     }
 
     var body: some View {
-        let ends = LineRouter.endpoints(from: from, to: to)
+        let ends = LineRouter.endpoints(from: from, to: to, edges: edges)
 
         ZStack {
             Path { path in

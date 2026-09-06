@@ -3,46 +3,84 @@ import XCTest
 
 @testable import Loom
 
+private extension NodeID {
+    static let top = NodeID("top")
+    static let middle = NodeID("middle")
+    static let left = NodeID("left")
+    static let right = NodeID("right")
+}
+
+/// ```
+///          [ top ]
+///          [ middle ]
+/// [ left ]          [ right ]
+/// ```
+private struct Stacked: Figure {
+    var arrangement: some FigureElement {
+        Column {
+            Row { Box(.top, title: "Top") }
+            Row { Box(.middle, title: "Middle") }
+            Row {
+                Box(.left, title: "Left")
+                Box(.right, title: "Right")
+            }
+        }
+    }
+}
+
 final class LineRouterTests: XCTestCase {
-    private let upper = CGRect(x: 0, y: 0, width: 100, height: 50)
-
-    func test_stackedNodes_meetAtTheFacingEdges() {
-        let lower = CGRect(x: 0, y: 100, width: 100, height: 50)
-
-        let ends = LineRouter.endpoints(from: upper, to: lower)
-
-        XCTAssertEqual(ends.start, CGPoint(x: 50, y: 50))
-        XCTAssertEqual(ends.end, CGPoint(x: 50, y: 100))
+    private func edges(
+        _ figure: some Figure,
+        from: NodeID,
+        to: NodeID
+    ) throws -> (start: NodeEdge, end: NodeEdge) {
+        let paths = Placement.paths(in: figure.arrangement.placements)
+        return try XCTUnwrap(LineRouter.edges(from: from, to: to, paths: paths))
     }
 
-    func test_sideBySideNodes_meetAtTheFacingEdges() {
-        let right = CGRect(x: 150, y: 0, width: 100, height: 50)
+    func test_nodesInTheSameRow_joinSideToSide() throws {
+        let edges = try edges(Stacked(), from: .left, to: .right)
 
-        let ends = LineRouter.endpoints(from: upper, to: right)
-
-        XCTAssertEqual(ends.start, CGPoint(x: 100, y: 25))
-        XCTAssertEqual(ends.end, CGPoint(x: 150, y: 25))
+        XCTAssertEqual(edges.start, .trailing)
+        XCTAssertEqual(edges.end, .leading)
     }
 
-    func test_directionIsRespected() {
-        let lower = CGRect(x: 0, y: 100, width: 100, height: 50)
+    func test_nodesInDifferentRows_joinBottomToTop() throws {
+        let edges = try edges(Stacked(), from: .top, to: .middle)
 
-        let downward = LineRouter.endpoints(from: upper, to: lower)
-        let upward = LineRouter.endpoints(from: lower, to: upper)
-
-        XCTAssertEqual(downward.start, upward.end)
-        XCTAssertEqual(downward.end, upward.start)
+        XCTAssertEqual(edges.start, .bottom)
+        XCTAssertEqual(edges.end, .top)
     }
 
-    func test_theSameRectanglesAlwaysRouteTheSameWay() {
-        // A square directly on the diagonal makes several edge pairs equally
-        // short. The tie-break must not wander between calls.
-        let diagonal = CGRect(x: 100, y: 100, width: 100, height: 50)
+    func test_aLineDrawnUpwardsLeavesTheTopEdge() throws {
+        let edges = try edges(Stacked(), from: .middle, to: .top)
 
-        let first = LineRouter.endpoints(from: upper, to: diagonal)
-        let second = LineRouter.endpoints(from: upper, to: diagonal)
+        XCTAssertEqual(edges.start, .top)
+        XCTAssertEqual(edges.end, .bottom)
+    }
 
-        XCTAssertEqual(first.start, second.start)
-        XCTAssertEqual(first.end, second.end)
+    func test_aNodeOffToTheSideOfTheRowBelowStillJoinsBottomToTop() throws {
+        // `middle` is centred and `right` sits off to the right, so the
+        // geometrically shortest run leaves `middle`'s flank. The rows are what
+        // the line means, though, so it goes down.
+        let edges = try edges(Stacked(), from: .middle, to: .right)
+
+        XCTAssertEqual(edges.start, .bottom)
+        XCTAssertEqual(edges.end, .top)
+    }
+
+    func test_anUnknownNodeHasNoEdges() {
+        let paths = Placement.paths(in: Stacked().arrangement.placements)
+
+        XCTAssertNil(LineRouter.edges(from: .top, to: NodeID("absent"), paths: paths))
+    }
+
+    func test_edgeMidpoints() {
+        let rect = CGRect(x: 10, y: 20, width: 100, height: 50)
+
+        XCTAssertEqual(NodeEdge.top.point(in: rect), CGPoint(x: 60, y: 20))
+        XCTAssertEqual(NodeEdge.bottom.point(in: rect), CGPoint(x: 60, y: 70))
+        XCTAssertEqual(NodeEdge.leading.point(in: rect), CGPoint(x: 10, y: 45))
+        XCTAssertEqual(NodeEdge.trailing.point(in: rect), CGPoint(x: 110, y: 45))
     }
 }

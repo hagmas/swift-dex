@@ -34,9 +34,9 @@ public struct Row<Content: FigureElement>: FigureElement {
         }
     }
 
-    /// The identities of the elements in this run, in order.
-    public var nodeIDs: [NodeID] {
-        content.nodeIDs
+    /// The row's elements, as one horizontal group.
+    public var placements: [Placement] {
+        [.group(.horizontal, content.placements)]
     }
 }
 
@@ -71,9 +71,9 @@ public struct Column<Content: FigureElement>: FigureElement {
         }
     }
 
-    /// The identities of the elements in this run, in order.
-    public var nodeIDs: [NodeID] {
-        content.nodeIDs
+    /// The column's elements, as one vertical group.
+    public var placements: [Placement] {
+        [.group(.vertical, content.placements)]
     }
 }
 
@@ -105,8 +105,8 @@ public struct Empty: FigureElement {
             .frame(width: width, height: height)
     }
 
-    /// None: a hole is not a node.
-    public var nodeIDs: [NodeID] {
-        []
+    /// A gap: it holds a position without being a node.
+    public var placements: [Placement] {
+        [.gap]
     }
 }

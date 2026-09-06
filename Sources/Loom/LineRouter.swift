@@ -1,7 +1,7 @@
 import CoreGraphics
 
 /// One side of a node's bounds.
-enum NodeEdge: CaseIterable {
+enum NodeEdge: Hashable {
     case top
     case bottom
     case leading
@@ -24,46 +24,64 @@ enum NodeEdge: CaseIterable {
 
 /// Chooses where a line meets the nodes it connects.
 ///
-/// With both anchors given explicitly there is nothing to decide, so the
-/// interesting case is the automatic one: try every pair of edge midpoints —
-/// sixteen of them — and keep the shortest. Leaving from the middle of an edge
-/// rather than from wherever a centre-to-centre ray happens to cross is what
-/// makes a run of boxes read as a diagram rather than as a web.
+/// The choice is made from the arrangement, not from the rectangles the nodes
+/// landed on. Two nodes side by side in a row are joined side to side; two
+/// nodes in different rows are joined bottom to top — whatever the measured
+/// distances say. Picking the geometrically shortest run instead reads wrong
+/// the moment a row is wider than the gap between rows: a line meant to say
+/// "the level below" comes out of a node's flank and points sideways.
+///
+/// So: find the container the two nodes share, take its direction, and leave
+/// and arrive along it, in the order the two sit in that container.
 enum LineRouter {
-    /// The points at which a line between two nodes meets each of them.
+    /// The edges a line between two nodes leaves and arrives on.
     ///
-    /// Ties are broken by ``NodeEdge/allCases`` order, so the same pair of
-    /// rectangles always routes the same way.
-    static func endpoints(from: CGRect, to: CGRect) -> (start: CGPoint, end: CGPoint) {
-        var best: (start: CGPoint, end: CGPoint) = (from.center, to.center)
-        var shortest = CGFloat.infinity
+    /// Returns `nil` when either node is missing from the arrangement — the
+    /// same condition ``Figure/issues()`` reports.
+    static func edges(
+        from: NodeID,
+        to: NodeID,
+        paths: [NodeID: NodePath]
+    ) -> (start: NodeEdge, end: NodeEdge)? {
+        guard let start = paths[from], let end = paths[to] else {
+            return nil
+        }
+        return edges(from: start, to: end)
+    }
 
-        for startEdge in NodeEdge.allCases {
-            for endEdge in NodeEdge.allCases {
-                let start = startEdge.point(in: from)
-                let end = endEdge.point(in: to)
-                let distance = start.distance(to: end)
-                if distance < shortest {
-                    shortest = distance
-                    best = (start, end)
-                }
-            }
+    /// The edges a line between two placed nodes leaves and arrives on.
+    static func edges(from: NodePath, to: NodePath) -> (start: NodeEdge, end: NodeEdge) {
+        var depth = 0
+        while depth < from.count, depth < to.count, from[depth] == to[depth] {
+            depth += 1
         }
 
-        return best
-    }
-}
+        // Distinct nodes are leaves of the same tree, so they part company
+        // inside some container they share. A node compared with itself does
+        // not, and neither end of that line means anything; fall through to the
+        // vertical reading rather than inventing one.
+        guard depth < from.count, depth < to.count else {
+            return (.bottom, .top)
+        }
 
-extension CGRect {
-    var center: CGPoint {
-        CGPoint(x: midX, y: midY)
-    }
-}
+        let leaves = from[depth]
+        let arrives = to[depth]
+        let inOrder = leaves.index < arrives.index
 
-extension CGPoint {
-    func distance(to other: CGPoint) -> CGFloat {
-        let dx = other.x - x
-        let dy = other.y - y
-        return (dx * dx + dy * dy).squareRoot()
+        return switch leaves.axis {
+        case .horizontal:
+            inOrder ? (.trailing, .leading) : (.leading, .trailing)
+        case .vertical:
+            inOrder ? (.bottom, .top) : (.top, .bottom)
+        }
+    }
+
+    /// The points at which a line meets the nodes it connects.
+    static func endpoints(
+        from: CGRect,
+        to: CGRect,
+        edges: (start: NodeEdge, end: NodeEdge)
+    ) -> (start: CGPoint, end: CGPoint) {
+        (edges.start.point(in: from), edges.end.point(in: to))
     }
 }

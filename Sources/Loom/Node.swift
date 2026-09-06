@@ -42,8 +42,8 @@ public extension Node {
             }
     }
 
-    var nodeIDs: [NodeID] {
-        [id]
+    var placements: [Placement] {
+        [.node(id)]
     }
 }
 

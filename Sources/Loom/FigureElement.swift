@@ -19,8 +19,18 @@ public protocol FigureElement {
     /// The rendered form of this element.
     @ViewBuilder var elementBody: ElementBody { get }
 
+    /// What this element contributes to the shape of the arrangement.
+    ///
+    /// One element can contribute several placements — a block of three boxes
+    /// is three of them, side by side in whatever container encloses it.
+    var placements: [Placement] { get }
+}
+
+public extension FigureElement {
     /// Every node identity in this element, in arrangement order.
-    var nodeIDs: [NodeID] { get }
+    var nodeIDs: [NodeID] {
+        placements.flatMap(\.nodeIDs)
+    }
 }
 
 /// Builds the closed tree of an arrangement.
@@ -63,8 +73,11 @@ public struct ElementPair<First: FigureElement, Second: FigureElement>: FigureEl
         TupleView((first.elementBody, second.elementBody))
     }
 
-    /// The identities of both elements, in order.
-    public var nodeIDs: [NodeID] {
-        first.nodeIDs + second.nodeIDs
+    /// Both elements' placements, in order.
+    ///
+    /// A pair is how a block is folded together, not a container in its own
+    /// right, so it adds no level to the tree.
+    public var placements: [Placement] {
+        first.placements + second.placements
     }
 }
