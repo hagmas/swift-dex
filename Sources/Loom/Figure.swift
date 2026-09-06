@@ -63,9 +63,9 @@ public extension Figure {
         var missing: [FigureIssue] = []
         var reported = Set<NodeID>()
         for line in lines {
-            for endpoint in [line.from, line.to]
-            where !known.contains(endpoint) && reported.insert(endpoint).inserted {
-                missing.append(.lineToUnknownNode(endpoint))
+            for stop in line.stops
+            where !known.contains(stop) && reported.insert(stop).inserted {
+                missing.append(.lineToUnknownNode(stop))
             }
         }
 

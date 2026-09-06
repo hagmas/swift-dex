@@ -13,6 +13,7 @@ public struct FigureView<Content: Figure>: View {
     private let figure: Content
     private let color: Color
     private let width: CGFloat
+    private let spacing: CGFloat
 
     /// Renders a figure.
     ///
@@ -20,14 +21,17 @@ public struct FigureView<Content: Figure>: View {
     ///   - figure: The figure to draw.
     ///   - color: The colour of the lines.
     ///   - width: The stroke width of the lines.
+    ///   - spacing: How far apart lines sharing an edge or a tie are held.
     public init(
         _ figure: Content,
         color: Color = .secondary,
-        width: CGFloat = 1.5
+        width: CGFloat = 1.5,
+        spacing: CGFloat = 10
     ) {
         self.figure = figure
         self.color = color
         self.width = width
+        self.spacing = spacing
     }
 
     /// The content and behavior of the view.
@@ -38,37 +42,26 @@ public struct FigureView<Content: Figure>: View {
         VStack {
             figure.arrangement.elementBody
         }
+        .environment(\.tieSpans, TieSpans.spans(for: figure.lines, spacing: spacing))
         .backgroundPreferenceValue(NodeAnchorsPreference.self) { anchors in
             GeometryReader { proxy in
-                let paths = Placement.paths(in: figure.arrangement.placements)
-                let lines = figure.lines
-                ForEach(lines.indices, id: \.self) { index in
-                    let line = lines[index]
-                    if let from = anchors[line.from],
-                        let to = anchors[line.to],
-                        let edges = LineRouter.edges(from: line.from, to: line.to, paths: paths)
-                    {
-                        LineView(
-                            from: proxy[from],
-                            to: proxy[to],
-                            edges: edges,
-                            arrow: line.arrow,
-                            color: color,
-                            width: width
-                        )
-                    }
+                let routes = LineRouter.routes(
+                    for: figure.lines,
+                    rects: anchors.mapValues { proxy[$0] },
+                    paths: Placement.paths(in: figure.arrangement.placements),
+                    spacing: spacing
+                )
+                ForEach(routes.indices, id: \.self) { index in
+                    LineView(route: routes[index], color: color, width: width)
                 }
             }
         }
     }
 }
 
-/// One line, drawn between two placed nodes.
+/// One line, drawn through the points it was routed along.
 private struct LineView: View {
-    let from: CGRect
-    let to: CGRect
-    let edges: (start: NodeEdge, end: NodeEdge)
-    let arrow: Line.Arrow
+    let route: RoutedLine
     let color: Color
     let width: CGFloat
 
@@ -77,22 +70,21 @@ private struct LineView: View {
     }
 
     var body: some View {
-        let ends = LineRouter.endpoints(from: from, to: to, edges: edges)
+        let points = route.points
 
         ZStack {
             Path { path in
-                path.move(to: ends.start)
-                path.addLine(to: ends.end)
+                path.addLines(points)
             }
             .stroke(color, lineWidth: width)
 
-            if arrow.tipsEnd {
-                ArrowHead(tip: ends.end, from: ends.start, size: head)
+            if route.arrow.tipsEnd, points.count >= 2 {
+                ArrowHead(tip: points[points.count - 1], from: points[points.count - 2], size: head)
                     .fill(color)
             }
 
-            if arrow.tipsStart {
-                ArrowHead(tip: ends.start, from: ends.end, size: head)
+            if route.arrow.tipsStart, points.count >= 2 {
+                ArrowHead(tip: points[0], from: points[1], size: head)
                     .fill(color)
             }
         }
