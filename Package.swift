@@ -9,13 +9,22 @@ let package = Package(
         .macOS(.v26)
     ],
     products: [
-        .library(name: "SwiftDex", targets: ["SwiftDex"])
+        .library(name: "SwiftDex", targets: ["SwiftDex"]),
+        .library(name: "Loom", targets: ["Loom"]),
     ],
     targets: [
         .target(name: "SwiftDex"),
         .testTarget(
             name: "SwiftDexTests",
             dependencies: ["SwiftDex"]
+        ),
+        // Loom draws figures. It knows nothing about SwiftDex, and SwiftDex
+        // knows nothing about it: the two meet only in a deck's own code, where
+        // both can be imported. The compiler keeps that boundary honest.
+        .target(name: "Loom"),
+        .testTarget(
+            name: "LoomTests",
+            dependencies: ["Loom"]
         ),
     ],
     swiftLanguageModes: [.v6]
