@@ -41,16 +41,16 @@ enum LineRouter {
     static func edges(
         from: NodeID,
         to: NodeID,
-        paths: [NodeID: NodePath]
+        addresses: [NodeID: NodeAddress]
     ) -> (start: NodeEdge, end: NodeEdge)? {
-        guard let start = paths[from], let end = paths[to] else {
+        guard let start = addresses[from], let end = addresses[to] else {
             return nil
         }
         return edges(from: start, to: end)
     }
 
     /// The edges a line between two placed nodes leaves and arrives on.
-    static func edges(from: NodePath, to: NodePath) -> (start: NodeEdge, end: NodeEdge) {
+    static func edges(from: NodeAddress, to: NodeAddress) -> (start: NodeEdge, end: NodeEdge) {
         var depth = 0
         while depth < from.count, depth < to.count, from[depth] == to[depth] {
             depth += 1
@@ -166,13 +166,13 @@ extension LineRouter {
     static func routes(
         for lines: [Line],
         rects: [NodeID: CGRect],
-        paths: [NodeID: NodePath],
+        addresses: [NodeID: NodeAddress],
         spacing: CGFloat
     ) -> [RoutedLine] {
         var routes: [(arrow: Line.Arrow, joints: [Joint])] = []
 
         for (index, line) in lines.enumerated() {
-            guard let joints = joints(for: line, line: index, rects: rects, paths: paths) else {
+            guard let joints = joints(for: line, line: index, rects: rects, addresses: addresses) else {
                 continue
             }
             routes.append((line.arrow, joints))
@@ -187,16 +187,16 @@ extension LineRouter {
         for line: Line,
         line index: Int,
         rects: [NodeID: CGRect],
-        paths: [NodeID: NodePath]
+        addresses: [NodeID: NodeAddress]
     ) -> [Joint]? {
         let stops = line.stops
-        guard stops.allSatisfy({ rects[$0] != nil && paths[$0] != nil }) else {
+        guard stops.allSatisfy({ rects[$0] != nil && addresses[$0] != nil }) else {
             return nil
         }
 
         // Every hop chooses its own edges, so a line with a tie in it leaves
         // aimed at the tie rather than at where it eventually ends up.
-        let hops = zip(stops, stops.dropFirst()).map { edges(from: paths[$0]!, to: paths[$1]!) }
+        let hops = zip(stops, stops.dropFirst()).map { edges(from: addresses[$0]!, to: addresses[$1]!) }
 
         var joints = stops.enumerated().map { position, node in
             let rect = rects[node]!

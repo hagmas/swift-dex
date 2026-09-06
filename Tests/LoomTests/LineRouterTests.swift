@@ -34,8 +34,8 @@ final class LineRouterTests: XCTestCase {
         from: NodeID,
         to: NodeID
     ) throws -> (start: NodeEdge, end: NodeEdge) {
-        let paths = Placement.paths(in: figure.arrangement.placements)
-        return try XCTUnwrap(LineRouter.edges(from: from, to: to, paths: paths))
+        let addresses = Placement.addresses(in: figure.arrangement.placements)
+        return try XCTUnwrap(LineRouter.edges(from: from, to: to, addresses: addresses))
     }
 
     func test_nodesInTheSameRow_joinSideToSide() throws {
@@ -70,9 +70,9 @@ final class LineRouterTests: XCTestCase {
     }
 
     func test_anUnknownNodeHasNoEdges() {
-        let paths = Placement.paths(in: Stacked().arrangement.placements)
+        let addresses = Placement.addresses(in: Stacked().arrangement.placements)
 
-        XCTAssertNil(LineRouter.edges(from: .top, to: NodeID("absent"), paths: paths))
+        XCTAssertNil(LineRouter.edges(from: .top, to: NodeID("absent"), addresses: addresses))
     }
 
     func test_edgeMidpoints() {

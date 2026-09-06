@@ -40,9 +40,9 @@ final class PlacementTests: XCTestCase {
     }
 
     func test_aGapHoldsItsPositionWithoutBeingANode() {
-        let paths = Placement.paths(in: OffsetFigure().arrangement.placements)
-        let second = try? XCTUnwrap(paths[.second])
-        let third = try? XCTUnwrap(paths[.third])
+        let addresses = Placement.addresses(in: OffsetFigure().arrangement.placements)
+        let second = try? XCTUnwrap(addresses[.second])
+        let third = try? XCTUnwrap(addresses[.third])
 
         // `third` follows an `Empty`, so it sits second in its row. This is
         // about the shape being recorded faithfully, not about routing: an
@@ -54,8 +54,8 @@ final class PlacementTests: XCTestCase {
     }
 
     func test_everyNodeIsReachable() {
-        let paths = Placement.paths(in: OffsetFigure().arrangement.placements)
+        let addresses = Placement.addresses(in: OffsetFigure().arrangement.placements)
 
-        XCTAssertEqual(Set(paths.keys), [.first, .second, .third])
+        XCTAssertEqual(Set(addresses.keys), [.first, .second, .third])
     }
 }

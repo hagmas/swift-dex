@@ -38,7 +38,7 @@ public struct FigureView<Content: Figure>: View {
     public var body: some View {
         // The arrangement's root may hold several elements. Stacking them here
         // gives the outermost container a direction, which is the same one
-        // `Placement.paths(in:)` reads a line's leaving edge from.
+        // `Placement.addresses(in:)` reads a line's leaving edge from.
         VStack {
             figure.arrangement.elementBody
         }
@@ -48,7 +48,7 @@ public struct FigureView<Content: Figure>: View {
                 let routes = LineRouter.routes(
                     for: figure.lines,
                     rects: anchors.mapValues { proxy[$0] },
-                    paths: Placement.paths(in: figure.arrangement.placements),
+                    addresses: Placement.addresses(in: figure.arrangement.placements),
                     spacing: spacing
                 )
                 ForEach(routes.indices, id: \.self) { index in

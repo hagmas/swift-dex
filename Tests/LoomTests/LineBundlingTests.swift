@@ -62,7 +62,7 @@ private func routes(_ figure: some Figure, spacing: CGFloat = 10) -> [RoutedLine
     LineRouter.routes(
         for: figure.lines,
         rects: rects,
-        paths: Placement.paths(in: figure.arrangement.placements),
+        addresses: Placement.addresses(in: figure.arrangement.placements),
         spacing: spacing
     )
 }

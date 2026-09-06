@@ -40,7 +40,7 @@ public extension Placement {
 }
 
 /// One container a node sits inside, and where it sits in it.
-struct PathStep: Hashable {
+struct AddressStep: Hashable {
     /// The direction the container runs in.
     let axis: Axis
 
@@ -48,35 +48,49 @@ struct PathStep: Hashable {
     let index: Int
 }
 
-/// The containers a node sits inside, outermost first.
+/// Where a node lives in the arrangement: the containers it sits inside,
+/// outermost first, and its position in each.
 ///
-/// Two nodes' paths agree until the container they share, which is what says
-/// how a line between them should leave and arrive.
-typealias NodePath = [PathStep]
+/// An address, not a route — nothing here is ever drawn. It is more like a seat
+/// number than a line on a page: "third row, second along" says where a node
+/// sits without saying where that is on screen.
+///
+/// Two nodes' addresses agree until the container they share, and that
+/// container's direction is the direction a line between them travels. Which is
+/// the whole of what an address is for.
+typealias NodeAddress = [AddressStep]
 
 extension Placement {
-    /// Where every node sits in the tree.
+    /// Where every node lives in the tree.
+    ///
+    /// A step records the direction of the container an item sits *in*, not any
+    /// direction of its own — because that is the direction a line will travel
+    /// when two nodes part company there.
     ///
     /// The outermost container is vertical, matching how ``FigureView`` stacks
-    /// an arrangement whose root holds more than one element.
-    static func paths(in placements: [Placement]) -> [NodeID: NodePath] {
-        var paths: [NodeID: NodePath] = [:]
+    /// an arrangement whose root holds more than one element. Change one and
+    /// the other has to change with it, or a line crossing the root will leave
+    /// along an axis the layout does not agree with.
+    static func addresses(in placements: [Placement]) -> [NodeID: NodeAddress] {
+        var addresses: [NodeID: NodeAddress] = [:]
 
-        func walk(_ placements: [Placement], axis: Axis, prefix: NodePath) {
+        func walk(_ placements: [Placement], axis: Axis, prefix: NodeAddress) {
             for (index, placement) in placements.enumerated() {
-                let path = prefix + [PathStep(axis: axis, index: index)]
+                let address = prefix + [AddressStep(axis: axis, index: index)]
                 switch placement {
                 case .node(let id):
-                    paths[id] = path
+                    addresses[id] = address
                 case .gap:
+                    // Skipped, but it has taken an index: a gap holds a
+                    // position without being a node.
                     break
                 case .group(let axis, let children):
-                    walk(children, axis: axis, prefix: path)
+                    walk(children, axis: axis, prefix: address)
                 }
             }
         }
 
         walk(placements, axis: .vertical, prefix: [])
-        return paths
+        return addresses
     }
 }
