@@ -40,19 +40,22 @@ final class PlacementTests: XCTestCase {
     }
 
     func test_aGapHoldsItsPositionWithoutBeingANode() {
-        let paths = Placement.paths(in: OffsetFigure().arrangement.placements)
-        let second = try? XCTUnwrap(paths[.second])
-        let third = try? XCTUnwrap(paths[.third])
+        let addresses = Placement.addresses(in: OffsetFigure().arrangement.placements)
+        let second = try? XCTUnwrap(addresses[.second])
+        let third = try? XCTUnwrap(addresses[.third])
 
-        // `third` follows an `Empty`, so it sits second in its row, lining up
-        // under `second` rather than under `first`.
+        // `third` follows an `Empty`, so it sits second in its row. This is
+        // about the shape being recorded faithfully, not about routing: an
+        // index is only ever compared with a sibling's, and a gap shifts both
+        // sides without reordering them. What lines `third` up under `second`
+        // on screen is the space `Empty` takes in the stack.
         XCTAssertEqual(second?.last?.index, 1)
         XCTAssertEqual(third?.last?.index, 1)
     }
 
     func test_everyNodeIsReachable() {
-        let paths = Placement.paths(in: OffsetFigure().arrangement.placements)
+        let addresses = Placement.addresses(in: OffsetFigure().arrangement.placements)
 
-        XCTAssertEqual(Set(paths.keys), [.first, .second, .third])
+        XCTAssertEqual(Set(addresses.keys), [.first, .second, .third])
     }
 }
