@@ -58,11 +58,18 @@ private let rects: [NodeID: CGRect] = [
     .tie: CGRect(x: 250, y: 25, width: 0, height: 0),
 ]
 
-private func routes(_ figure: some Figure, spacing: CGFloat = 10) -> [RoutedLine] {
-    LineRouter.routes(
+private func routes(
+    _ figure: some Figure,
+    spacing: CGFloat = 10,
+    routing: LineRouting = .straight
+) -> [RoutedLine] {
+    let placements = figure.arrangement.placements
+    return LineRouter.routes(
         for: figure.lines,
         rects: rects,
-        addresses: Placement.addresses(in: figure.arrangement.placements),
+        addresses: Placement.addresses(in: placements),
+        tieAxes: Placement.tieAxes(in: placements),
+        routing: routing,
         spacing: spacing
     )
 }
