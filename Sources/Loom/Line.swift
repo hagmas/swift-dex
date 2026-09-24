@@ -28,6 +28,12 @@ public struct Line {
     /// The ties the line is routed through, in the order it meets them.
     public let waypoints: [NodeID]
 
+    /// Words written along the line, splitting it where they sit.
+    public var label: String?
+
+    /// How the line gets where it is going, or `nil` to follow the figure.
+    public var routing: Routing?
+
     /// Which ends are tipped with an arrowhead.
     public var arrow: Arrow
 
@@ -37,17 +43,25 @@ public struct Line {
     ///   - from: The node the line leaves.
     ///   - to: The node the line arrives at.
     ///   - through: Ties to route through, in the order the line meets them.
+    ///   - label: Words to write along the line.
+    ///   - routing: How the line gets where it is going. Defaults to whatever
+    ///     the figure was rendered with, since a figure almost always wants one
+    ///     kind of line throughout.
     ///   - arrow: Which ends are tipped. Defaults to the arriving end, since
     ///     `from`/`to` already state a direction.
     public init(
         from: NodeID,
         to: NodeID,
         through: NodeID...,
+        label: String? = nil,
+        routing: Routing? = nil,
         arrow: Arrow = .end
     ) {
         self.from = from
         self.to = to
         self.waypoints = through
+        self.label = label
+        self.routing = routing
         self.arrow = arrow
     }
 
@@ -80,6 +94,25 @@ public extension Line {
         var tipsEnd: Bool {
             self == .end || self == .both
         }
+    }
+
+    /// How a line gets from one node to the next.
+    ///
+    /// Set it once for a figure — a diagram wants one kind of line throughout,
+    /// and a single line drawn differently from its neighbours reads as a
+    /// mistake rather than as emphasis. Override it on a line only when it
+    /// means something.
+    enum Routing: Hashable, Sendable {
+        /// Straight from one node to the other.
+        case straight
+
+        /// Along the axes, turning at right angles.
+        ///
+        /// A line leaves and arrives along the direction its edges face, so a
+        /// hop between two rows goes down, across, and down again rather than
+        /// cutting the corner. Where the two ends already line up the turns
+        /// collapse and the line comes out straight.
+        case orthogonal
     }
 }
 

@@ -25,16 +25,21 @@
         }
 
         var lines: [Line] {
-            Line(from: .viewModel, to: .repository)
-            Line(from: .repository, to: .apiClient)
+            Line(from: .viewModel, to: .repository, label: "observes")
+            Line(from: .repository, to: .apiClient, label: "fetch")
             Line(from: .repository, to: .cache)
             Line(from: .apiClient, to: .cache)
             Line(from: .viewModel, to: .cache, through: .sideChannel)
         }
     }
 
-    #Preview("Figure") {
+    #Preview("Straight") {
         FigureView(SampleFigure())
+            .padding(64)
+    }
+
+    #Preview("Orthogonal") {
+        FigureView(SampleFigure(), routing: .orthogonal)
             .padding(64)
     }
 #endif

@@ -47,6 +47,11 @@ public struct Tie: Node {
     public var body: some View {
         TieBody(id: id, axis: axis)
     }
+
+    /// The tie, and the direction it carries its lines.
+    public var placements: [Placement] {
+        [.tie(id, axis)]
+    }
 }
 
 /// The space a tie holds open, read from the environment.
