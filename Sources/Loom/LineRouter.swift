@@ -103,7 +103,7 @@ private struct Joint {
     let line: Int
     let node: NodeID
 
-    /// The edge the line uses, or `nil` at a tie, which it only passes through.
+    /// The edge the line uses, or `nil` at a waypoint, which it only passes through.
     let edge: NodeEdge?
 
     /// The direction the line travels through here.
@@ -120,15 +120,15 @@ private struct Joint {
 
     /// What this joint shares with the ones beside it.
     ///
-    /// A tie is keyed by itself rather than by an edge, so a line arriving and
-    /// leaving is one point rather than two and the bundle passes through
-    /// without a kink.
+    /// A waypoint is keyed by itself rather than by an edge, so a line arriving
+    /// and leaving is one point rather than two, and a bundle passing through
+    /// can never pull the two halves apart.
     var bundle: Bundle {
         if let edge {
             .edge(node, edge)
         }
         else {
-            .tie(node)
+            .waypoint(node)
         }
     }
 
@@ -146,8 +146,8 @@ private enum Bundle: Hashable {
     /// One edge of one node. Lines meeting it spread along it.
     case edge(NodeID, NodeEdge)
 
-    /// One tie. Lines through it spread across its width.
-    case tie(NodeID)
+    /// One waypoint. Lines through it spread across its width.
+    case waypoint(NodeID)
 }
 
 /// One line, on its way to being drawn.
@@ -161,8 +161,8 @@ private struct Route {
 extension LineRouter {
     /// Every line, reduced to the points it is drawn through.
     ///
-    /// Lines that meet the same edge, or pass through the same tie, are held
-    /// apart rather than laid on top of one another. Which edge a line uses is
+    /// Lines that meet the same edge, or pass through the same waypoint, are
+    /// held apart rather than laid on top of one another. Which edge a line uses is
     /// still decided by the arrangement; only the order lines take within a
     /// bundle is decided by where each is headed, because a line crossing its
     /// neighbours to reach the far side is the one arrangement that always
@@ -174,7 +174,7 @@ extension LineRouter {
         for lines: [Line],
         rects: [NodeID: CGRect],
         addresses: [NodeID: NodeAddress],
-        tieAxes: [NodeID: Axis],
+        waypointAxes: [NodeID: Axis],
         routing: Line.Routing,
         spacing: CGFloat
     ) -> [RoutedLine] {
@@ -187,7 +187,7 @@ extension LineRouter {
                     line: index,
                     rects: rects,
                     addresses: addresses,
-                    tieAxes: tieAxes
+                    waypointAxes: waypointAxes
                 )
             else {
                 continue
@@ -234,15 +234,15 @@ extension LineRouter {
         line index: Int,
         rects: [NodeID: CGRect],
         addresses: [NodeID: NodeAddress],
-        tieAxes: [NodeID: Axis]
+        waypointAxes: [NodeID: Axis]
     ) -> [Joint]? {
         let stops = line.stops
         guard stops.allSatisfy({ rects[$0] != nil && addresses[$0] != nil }) else {
             return nil
         }
 
-        // Every hop chooses its own edges, so a line with a tie in it leaves
-        // aimed at the tie rather than at where it eventually ends up.
+        // Every hop chooses its own edges, so a line with a waypoint in it
+        // leaves aimed at the waypoint rather than at where it ends up.
         let hops = zip(stops, stops.dropFirst()).map {
             edges(from: addresses[$0]!, to: addresses[$1]!)
         }
@@ -250,7 +250,7 @@ extension LineRouter {
         var joints = stops.enumerated().map { position, node in
             let rect = rects[node]!
             // A stop is the start of one hop, the end of another, or — at a
-            // tie — in the middle of both, where it takes no edge at all.
+            // waypoint — in the middle of both, where it takes no edge at all.
             let edge: NodeEdge? =
                 switch position {
                 case 0: hops[0].start
@@ -262,7 +262,7 @@ extension LineRouter {
                 line: index,
                 node: node,
                 edge: edge,
-                axis: edge?.axis ?? tieAxes[node] ?? .vertical,
+                axis: edge?.axis ?? waypointAxes[node] ?? .vertical,
                 base: base,
                 neighbour: base,
                 point: base
@@ -277,7 +277,7 @@ extension LineRouter {
         return joints
     }
 
-    /// Holds the lines sharing an edge or a tie apart from one another.
+    /// Holds the lines sharing an edge or a waypoint apart from one another.
     private static func spread(_ routes: inout [Route], spacing: CGFloat) {
         var bundles: [Bundle: [(route: Int, joint: Int)]] = [:]
         for (route, entry) in routes.enumerated() {
@@ -290,7 +290,7 @@ extension LineRouter {
             let tangent = routes[members[0].route].joints[members[0].joint].tangent
 
             // Order by where each line is headed along the spreading direction,
-            // falling back to the order the lines were written so that a tie
+            // falling back to the order the lines were written, so that a draw
             // never depends on the traversal order of a dictionary.
             let ordered = members.sorted { left, right in
                 let a = routes[left.route].joints[left.joint]

@@ -7,7 +7,7 @@ private extension NodeID {
     static let source = NodeID("source")
     static let below = NodeID("below")
     static let offset = NodeID("offset")
-    static let tie = NodeID("tie")
+    static let waypoint = NodeID("waypoint")
 }
 
 /// One line, straight down onto a node that sits off to the left.
@@ -38,20 +38,20 @@ private struct Aligned: Figure {
     }
 }
 
-/// One line through a tie, which faces across the edge it sets off from.
+/// One line through a waypoint, which faces across the edge it sets off from.
 private struct Detour: Figure {
     var arrangement: some FigureElement {
         Column {
             Row {
                 Box(.source, title: "Source")
-                Tie(.tie, axis: .vertical)
+                Waypoint(.waypoint, axis: .vertical)
             }
             Row { Box(.offset, title: "Offset") }
         }
     }
 
     var lines: [Line] {
-        Line(from: .source, to: .offset, through: .tie)
+        Line(from: .source, to: .offset, through: .waypoint)
     }
 }
 
@@ -62,7 +62,7 @@ private let rects: [NodeID: CGRect] = [
     .below: CGRect(x: 100, y: 150, width: 100, height: 50),
     // Top edge at (50, 150) — off to the left.
     .offset: CGRect(x: 0, y: 150, width: 100, height: 50),
-    .tie: CGRect(x: 260, y: 25, width: 0, height: 0),
+    .waypoint: CGRect(x: 260, y: 25, width: 0, height: 0),
 ]
 
 private func routes(_ figure: some Figure, routing: Line.Routing) -> [RoutedLine] {
@@ -71,7 +71,7 @@ private func routes(_ figure: some Figure, routing: Line.Routing) -> [RoutedLine
         for: figure.lines,
         rects: rects,
         addresses: Placement.addresses(in: placements),
-        tieAxes: Placement.tieAxes(in: placements),
+        waypointAxes: Placement.waypointAxes(in: placements),
         routing: routing,
         spacing: 10
     )

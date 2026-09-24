@@ -7,7 +7,7 @@ private extension NodeID {
     static let source = NodeID("source")
     static let left = NodeID("left")
     static let right = NodeID("right")
-    static let tie = NodeID("tie")
+    static let waypoint = NodeID("waypoint")
 }
 
 /// ```
@@ -32,7 +32,7 @@ private struct Fork: Figure {
 }
 
 /// ```
-/// [ source ] (tie)
+/// [ source ] (waypoint)
 /// [ left ]
 /// ```
 private struct Detour: Figure {
@@ -40,14 +40,14 @@ private struct Detour: Figure {
         Column {
             Row {
                 Box(.source, title: "Source")
-                Tie(.tie)
+                Waypoint(.waypoint)
             }
             Row { Box(.left, title: "Left") }
         }
     }
 
     var lines: [Line] {
-        Line(from: .source, to: .left, through: .tie)
+        Line(from: .source, to: .left, through: .waypoint)
     }
 }
 
@@ -55,7 +55,7 @@ private let rects: [NodeID: CGRect] = [
     .source: CGRect(x: 100, y: 0, width: 100, height: 50),
     .left: CGRect(x: 0, y: 150, width: 100, height: 50),
     .right: CGRect(x: 200, y: 150, width: 100, height: 50),
-    .tie: CGRect(x: 250, y: 25, width: 0, height: 0),
+    .waypoint: CGRect(x: 250, y: 25, width: 0, height: 0),
 ]
 
 private func routes(
@@ -68,7 +68,7 @@ private func routes(
         for: figure.lines,
         rects: rects,
         addresses: Placement.addresses(in: placements),
-        tieAxes: Placement.tieAxes(in: placements),
+        waypointAxes: Placement.waypointAxes(in: placements),
         routing: routing,
         spacing: spacing
     )
@@ -101,7 +101,7 @@ final class LineBundlingTests: XCTestCase {
         XCTAssertLessThan(toLeft.points[0].x, toRight.points[0].x)
     }
 
-    func test_aLineThroughATieBendsAtIt() {
+    func test_aLineThroughAWaypointBendsAtIt() {
         let routes = routes(Detour())
 
         XCTAssertEqual(routes.count, 1)
@@ -109,8 +109,8 @@ final class LineBundlingTests: XCTestCase {
         XCTAssertEqual(routes[0].points[1], CGPoint(x: 250, y: 25))
     }
 
-    func test_aTiePassesTheLineThroughWithoutAKink() {
-        // Arriving at a tie and leaving it is one point, not two, so a bundle
+    func test_aWaypointPassesTheLineThroughWithoutAKink() {
+        // Arriving at a waypoint and leaving it is one point, not two, so a bundle
         // cannot pull the two halves apart.
         let routes = routes(Detour())
 
@@ -131,24 +131,24 @@ final class LineBundlingTests: XCTestCase {
     }
 }
 
-final class TieSpanTests: XCTestCase {
-    func test_aTieCarryingOneLineIsAPoint() {
-        let spans = TieSpans.spans(for: [Line(from: .source, to: .left, through: .tie)], spacing: 10)
+final class WaypointSpanTests: XCTestCase {
+    func test_aWaypointCarryingOneLineIsAPoint() {
+        let spans = WaypointSpans.spans(for: [Line(from: .source, to: .left, through: .waypoint)], spacing: 10)
 
-        XCTAssertEqual(spans[.tie], 0)
+        XCTAssertEqual(spans[.waypoint], 0)
     }
 
-    func test_aTieWidensWithEveryExtraLine() {
+    func test_aWaypointWidensWithEveryExtraLine() {
         let lines = [
-            Line(from: .source, to: .left, through: .tie),
-            Line(from: .source, to: .right, through: .tie),
-            Line(from: .left, to: .right, through: .tie),
+            Line(from: .source, to: .left, through: .waypoint),
+            Line(from: .source, to: .right, through: .waypoint),
+            Line(from: .left, to: .right, through: .waypoint),
         ]
 
-        XCTAssertEqual(TieSpans.spans(for: lines, spacing: 10)[.tie], 20)
+        XCTAssertEqual(WaypointSpans.spans(for: lines, spacing: 10)[.waypoint], 20)
     }
 
-    func test_aTieNoLineUsesHasNoSpan() {
-        XCTAssertNil(TieSpans.spans(for: [Line(from: .source, to: .left)], spacing: 10)[.tie])
+    func test_aWaypointNoLineUsesHasNoSpan() {
+        XCTAssertNil(WaypointSpans.spans(for: [Line(from: .source, to: .left)], spacing: 10)[.waypoint])
     }
 }

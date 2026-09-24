@@ -9,8 +9,9 @@ import Foundation
 /// Line(from: .viewModel, to: .repository)
 /// ```
 ///
-/// Route it deliberately by naming ties to pass through, in order. The route is
-/// still written in terms of the arrangement rather than in coordinates:
+/// Route it deliberately by naming waypoints to pass through, in order. The
+/// route is still written in terms of the arrangement rather than in
+/// coordinates:
 ///
 /// ```swift
 /// Line(from: .viewModel, to: .store, through: .sideChannel)
@@ -25,7 +26,7 @@ public struct Line {
     /// The node the line arrives at.
     public let to: NodeID
 
-    /// The ties the line is routed through, in the order it meets them.
+    /// The waypoints the line is routed through, in the order it meets them.
     public let waypoints: [NodeID]
 
     /// Words written along the line, splitting it where they sit.
@@ -42,7 +43,7 @@ public struct Line {
     /// - Parameters:
     ///   - from: The node the line leaves.
     ///   - to: The node the line arrives at.
-    ///   - through: Ties to route through, in the order the line meets them.
+    ///   - through: Waypoints to route through, in the order the line meets them.
     ///   - label: Words to write along the line.
     ///   - routing: How the line gets where it is going. Defaults to whatever
     ///     the figure was rendered with, since a figure almost always wants one
@@ -69,7 +70,7 @@ public struct Line {
     ///
     /// A line is a run of hops between consecutive stops, and each hop picks
     /// its own edges — which is why a line leaves its first node aimed at the
-    /// first tie rather than at its eventual destination.
+    /// first waypoint rather than at its eventual destination.
     public var stops: [NodeID] {
         [from] + waypoints + [to]
     }

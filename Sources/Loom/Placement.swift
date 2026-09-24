@@ -21,12 +21,12 @@ public enum Placement: Hashable, Sendable {
     /// A hole, which holds a position without being a node.
     case gap
 
-    /// A tie, and the direction lines run as they pass through it.
+    /// A waypoint, and the direction it sends a line away along.
     ///
-    /// A tie is a node — lines name it and it takes a position — but the
-    /// direction it carries is a fact about the arrangement, so it is recorded
-    /// here rather than guessed at from where the tie happened to land.
-    case tie(NodeID, Axis)
+    /// A waypoint is a node — lines name it and it takes a position — but the
+    /// direction it sends them is a fact about the arrangement, so it is
+    /// recorded here rather than guessed at from where the waypoint landed.
+    case waypoint(NodeID, Axis)
 
     /// A nested run of elements, and the direction it runs in.
     case group(Axis, [Placement])
@@ -36,7 +36,7 @@ public extension Placement {
     /// Every node identity here, in arrangement order.
     var nodeIDs: [NodeID] {
         switch self {
-        case .node(let id), .tie(let id, _):
+        case .node(let id), .waypoint(let id, _):
             [id]
         case .gap:
             []
@@ -85,7 +85,7 @@ extension Placement {
             for (index, placement) in placements.enumerated() {
                 let address = prefix + [AddressStep(axis: axis, index: index)]
                 switch placement {
-                case .node(let id), .tie(let id, _):
+                case .node(let id), .waypoint(let id, _):
                     addresses[id] = address
                 case .gap:
                     // Skipped, but it has taken an index: a gap holds a
@@ -101,14 +101,14 @@ extension Placement {
         return addresses
     }
 
-    /// The direction each tie carries its lines.
-    static func tieAxes(in placements: [Placement]) -> [NodeID: Axis] {
+    /// The direction each waypoint sends its lines away along.
+    static func waypointAxes(in placements: [Placement]) -> [NodeID: Axis] {
         var axes: [NodeID: Axis] = [:]
 
         func walk(_ placements: [Placement]) {
             for placement in placements {
                 switch placement {
-                case .tie(let id, let axis):
+                case .waypoint(let id, let axis):
                     axes[id] = axis
                 case .group(_, let children):
                     walk(children)
