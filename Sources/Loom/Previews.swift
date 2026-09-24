@@ -14,7 +14,7 @@
             Column(spacing: 48) {
                 Row(spacing: 32) {
                     Box(.viewModel, title: "ViewModel")
-                    Tie(.sideChannel)
+                    Waypoint(.sideChannel)
                 }
                 Row { Box(.repository, title: "Repository") }
                 Row(spacing: 32) {

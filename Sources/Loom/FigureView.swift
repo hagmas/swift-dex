@@ -22,7 +22,7 @@ public struct FigureView<Content: Figure>: View {
     ///   - figure: The figure to draw.
     ///   - color: The colour of the lines.
     ///   - width: The stroke width of the lines.
-    ///   - spacing: How far apart lines sharing an edge or a tie are held.
+    ///   - spacing: How far apart lines sharing an edge or a waypoint are held.
     ///   - routing: How lines get where they are going. A line can override it,
     ///     but a figure almost always wants one kind of line throughout.
     public init(
@@ -47,7 +47,7 @@ public struct FigureView<Content: Figure>: View {
         VStack {
             figure.arrangement.elementBody
         }
-        .environment(\.tieSpans, TieSpans.spans(for: figure.lines, spacing: spacing))
+        .environment(\.waypointSpans, WaypointSpans.spans(for: figure.lines, spacing: spacing))
         .backgroundPreferenceValue(NodeAnchorsPreference.self) { anchors in
             GeometryReader { proxy in
                 let placements = figure.arrangement.placements
@@ -55,7 +55,7 @@ public struct FigureView<Content: Figure>: View {
                     for: figure.lines,
                     rects: anchors.mapValues { proxy[$0] },
                     addresses: Placement.addresses(in: placements),
-                    tieAxes: Placement.tieAxes(in: placements),
+                    waypointAxes: Placement.waypointAxes(in: placements),
                     routing: routing,
                     spacing: spacing
                 )
