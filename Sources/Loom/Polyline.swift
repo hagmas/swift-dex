@@ -1,24 +1,6 @@
 import CoreGraphics
 
-/// How a line gets from one node to the next.
-///
-/// Set it once for a figure — a diagram wants one kind of line throughout, and
-/// a single line drawn differently from its neighbours reads as a mistake
-/// rather than as emphasis. Override it on a line only when it means something.
-public enum LineRouting: Hashable, Sendable {
-    /// Straight from one node to the other.
-    case straight
-
-    /// Along the axes, turning at right angles.
-    ///
-    /// A line leaves and arrives along the direction its edges face, so a hop
-    /// between two rows goes down, across, and down again rather than cutting
-    /// the corner. Where the two ends already line up the turns collapse and
-    /// the line comes out straight.
-    case orthogonal
-}
-
-extension LineRouting {
+extension Line.Routing {
     /// The corners between two points, given the direction each end faces.
     ///
     /// Endpoints are the caller's; only what goes between them is returned.

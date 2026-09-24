@@ -154,7 +154,7 @@ private enum Bundle: Hashable {
 private struct Route {
     let arrow: Line.Arrow
     let label: String?
-    let routing: LineRouting
+    let routing: Line.Routing
     var joints: [Joint]
 }
 
@@ -175,7 +175,7 @@ extension LineRouter {
         rects: [NodeID: CGRect],
         addresses: [NodeID: NodeAddress],
         tieAxes: [NodeID: Axis],
-        routing: LineRouting,
+        routing: Line.Routing,
         spacing: CGFloat
     ) -> [RoutedLine] {
         var routes: [Route] = []

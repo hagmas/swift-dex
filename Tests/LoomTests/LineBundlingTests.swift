@@ -61,7 +61,7 @@ private let rects: [NodeID: CGRect] = [
 private func routes(
     _ figure: some Figure,
     spacing: CGFloat = 10,
-    routing: LineRouting = .straight
+    routing: Line.Routing = .straight
 ) -> [RoutedLine] {
     let placements = figure.arrangement.placements
     return LineRouter.routes(

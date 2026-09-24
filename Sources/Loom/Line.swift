@@ -32,7 +32,7 @@ public struct Line {
     public var label: String?
 
     /// How the line gets where it is going, or `nil` to follow the figure.
-    public var routing: LineRouting?
+    public var routing: Routing?
 
     /// Which ends are tipped with an arrowhead.
     public var arrow: Arrow
@@ -54,7 +54,7 @@ public struct Line {
         to: NodeID,
         through: NodeID...,
         label: String? = nil,
-        routing: LineRouting? = nil,
+        routing: Routing? = nil,
         arrow: Arrow = .end
     ) {
         self.from = from
@@ -94,6 +94,27 @@ public extension Line {
         var tipsEnd: Bool {
             self == .end || self == .both
         }
+    }
+}
+
+public extension Line {
+    /// How a line gets from one node to the next.
+    ///
+    /// Set it once for a figure — a diagram wants one kind of line throughout,
+    /// and a single line drawn differently from its neighbours reads as a
+    /// mistake rather than as emphasis. Override it on a line only when it
+    /// means something.
+    enum Routing: Hashable, Sendable {
+        /// Straight from one node to the other.
+        case straight
+
+        /// Along the axes, turning at right angles.
+        ///
+        /// A line leaves and arrives along the direction its edges face, so a
+        /// hop between two rows goes down, across, and down again rather than
+        /// cutting the corner. Where the two ends already line up the turns
+        /// collapse and the line comes out straight.
+        case orthogonal
     }
 }
 

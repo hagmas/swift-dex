@@ -14,7 +14,7 @@ public struct FigureView<Content: Figure>: View {
     private let color: Color
     private let width: CGFloat
     private let spacing: CGFloat
-    private let routing: LineRouting
+    private let routing: Line.Routing
 
     /// Renders a figure.
     ///
@@ -30,7 +30,7 @@ public struct FigureView<Content: Figure>: View {
         color: Color = .secondary,
         width: CGFloat = 1.5,
         spacing: CGFloat = 10,
-        routing: LineRouting = .straight
+        routing: Line.Routing = .straight
     ) {
         self.figure = figure
         self.color = color
