@@ -249,15 +249,13 @@ extension LineRouter {
 
         var joints = stops.enumerated().map { position, node in
             let rect = rects[node]!
+            // A stop is the start of one hop, the end of another, or — at a
+            // tie — in the middle of both, where it takes no edge at all.
             let edge: NodeEdge? =
-                if position == 0 {
-                    hops[0].start
-                }
-                else if position == stops.count - 1 {
-                    hops[position - 1].end
-                }
-                else {
-                    nil
+                switch position {
+                case 0: hops[0].start
+                case stops.count - 1: hops[position - 1].end
+                default: nil
                 }
             let base = edge?.point(in: rect) ?? CGPoint(x: rect.midX, y: rect.midY)
             return Joint(
