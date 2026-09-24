@@ -95,9 +95,7 @@ public extension Line {
             self == .end || self == .both
         }
     }
-}
 
-public extension Line {
     /// How a line gets from one node to the next.
     ///
     /// Set it once for a figure — a diagram wants one kind of line throughout,
