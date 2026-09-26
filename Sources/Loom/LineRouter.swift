@@ -99,24 +99,27 @@ struct RoutedLine {
 }
 
 /// One line's meeting with one node.
-private struct Joint {
+///
+/// Every field is settled the moment the joint is made, and none of them ever
+/// changes afterwards. Where the joint finally lands is not among them: that
+/// depends on who else wants the same edge, so it is worked out separately and
+/// kept apart from the facts it was derived from.
+struct Joint {
     let line: Int
     let node: NodeID
 
-    /// The edge the line uses, or `nil` at a waypoint, which it only passes through.
+    /// The edge the line uses, or `nil` at a waypoint, which it only passes
+    /// through.
     let edge: NodeEdge?
 
     /// The direction the line travels through here.
     let axis: Axis
 
-    /// Where the joint would sit if it were the only one.
+    /// Where the joint sits before any bundle is spread out.
     let base: CGPoint
 
     /// The next joint along, which says which way this one is headed.
-    var neighbour: CGPoint
-
-    /// Where the joint sits once the bundle has been spread out.
-    var point: CGPoint
+    let neighbour: CGPoint
 
     /// What this joint shares with the ones beside it.
     ///
@@ -139,10 +142,15 @@ private struct Joint {
         case .horizontal: CGVector(dx: 0, dy: 1)
         }
     }
+
+    /// How far along `tangent` this joint is headed.
+    func heading(along tangent: CGVector) -> CGFloat {
+        neighbour.x * tangent.dx + neighbour.y * tangent.dy
+    }
 }
 
 /// Something several lines have to share.
-private enum Bundle: Hashable {
+enum Bundle: Hashable {
     /// One edge of one node. Lines meeting it spread along it.
     case edge(NodeID, NodeEdge)
 
@@ -151,22 +159,35 @@ private enum Bundle: Hashable {
 }
 
 /// One line, on its way to being drawn.
-private struct Route {
+struct Route {
     let arrow: Line.Arrow
     let label: String?
     let routing: Line.Routing
-    var joints: [Joint]
+    let joints: [Joint]
+}
+
+/// Where one joint sits among the routes.
+struct JointIndex: Hashable {
+    let route: Int
+    let joint: Int
+}
+
+extension [Route] {
+    /// The joint at `index`.
+    subscript(index: JointIndex) -> Joint {
+        self[index.route].joints[index.joint]
+    }
 }
 
 extension LineRouter {
     /// Every line, reduced to the points it is drawn through.
     ///
     /// Lines that meet the same edge, or pass through the same waypoint, are
-    /// held apart rather than laid on top of one another. Which edge a line uses is
-    /// still decided by the arrangement; only the order lines take within a
-    /// bundle is decided by where each is headed, because a line crossing its
-    /// neighbours to reach the far side is the one arrangement that always
-    /// looks wrong.
+    /// held apart rather than laid on top of one another. Which edge a line
+    /// uses is still decided by the arrangement; only the order lines take
+    /// within a bundle is decided by where each is headed, because a line
+    /// crossing its neighbours to reach the far side is the one arrangement
+    /// that always looks wrong.
     ///
     /// Lines naming a node the arrangement does not hold are dropped — the same
     /// condition ``Figure/issues()`` reports.
@@ -202,28 +223,94 @@ extension LineRouter {
             )
         }
 
-        spread(&routes, spacing: spacing)
+        let spread = spreadPoints(of: routes, spacing: spacing)
 
-        return routes.map { route in
-            RoutedLine(points: points(of: route), arrow: route.arrow, label: route.label)
+        return routes.enumerated().map { index, route in
+            RoutedLine(
+                points: points(of: route, at: index, spread: spread),
+                arrow: route.arrow,
+                label: route.label
+            )
         }
     }
 
-    /// The corners a route is drawn through, turns and all.
-    private static func points(of route: Route) -> [CGPoint] {
-        var points: [CGPoint] = []
+    /// Where every joint ends up, once the lines sharing an edge or a waypoint
+    /// have been held apart.
+    ///
+    /// The routes come in immutably, and that is the point rather than a
+    /// nicety. Every ordering decision here reads a joint's `base`, and a base
+    /// never moves. Were the spread points written back into the joints as they
+    /// were worked out, a later bundle could order itself against an earlier
+    /// one's result — and since the bundles are gathered in a dictionary, which
+    /// came first is not defined. The same figure would come out differently
+    /// from one run to the next, by a few points at a time.
+    static func spreadPoints(of routes: [Route], spacing: CGFloat) -> [JointIndex: CGPoint] {
+        var points: [JointIndex: CGPoint] = [:]
 
-        for (index, joint) in route.joints.enumerated() {
-            if index > 0 {
-                let previous = route.joints[index - 1]
+        // A bundle of one falls out of the same arithmetic: its single member
+        // sits at the middle, which is nought from its base.
+        for members in bundles(in: routes).values {
+            let tangent = routes[members[0]].tangent
+
+            // Order by where each line is headed along the spreading direction,
+            // falling back to the order the lines were written.
+            let ordered = members.sorted { left, right in
+                let leading = routes[left].heading(along: tangent)
+                let trailing = routes[right].heading(along: tangent)
+                return leading == trailing
+                    ? routes[left].line < routes[right].line
+                    : leading < trailing
+            }
+
+            let middle = CGFloat(ordered.count - 1) / 2
+            for (position, member) in ordered.enumerated() {
+                let offset = (CGFloat(position) - middle) * spacing
+                let base = routes[member].base
+                points[member] = CGPoint(
+                    x: base.x + tangent.dx * offset,
+                    y: base.y + tangent.dy * offset
+                )
+            }
+        }
+
+        return points
+    }
+
+    /// Which joints are after the same edge or the same waypoint.
+    private static func bundles(in routes: [Route]) -> [Bundle: [JointIndex]] {
+        var bundles: [Bundle: [JointIndex]] = [:]
+
+        for (route, entry) in routes.enumerated() {
+            for (joint, value) in entry.joints.enumerated() {
+                bundles[value.bundle, default: []]
+                    .append(JointIndex(route: route, joint: joint))
+            }
+        }
+
+        return bundles
+    }
+
+    /// The corners one route is drawn through, turns and all.
+    private static func points(
+        of route: Route,
+        at index: Int,
+        spread: [JointIndex: CGPoint]
+    ) -> [CGPoint] {
+        let placed = route.joints.indices.map {
+            spread[JointIndex(route: index, joint: $0)] ?? route.joints[$0].base
+        }
+
+        var points: [CGPoint] = []
+        for (position, joint) in route.joints.enumerated() {
+            if position > 0 {
                 points += route.routing.corners(
-                    from: previous.point,
-                    along: previous.axis,
-                    to: joint.point,
+                    from: placed[position - 1],
+                    along: route.joints[position - 1].axis,
+                    to: placed[position],
                     along: joint.axis
                 )
             }
-            points.append(joint.point)
+            points.append(placed[position])
         }
 
         return points.simplified
@@ -247,68 +334,30 @@ extension LineRouter {
             edges(from: addresses[$0]!, to: addresses[$1]!)
         }
 
-        var joints = stops.enumerated().map { position, node in
+        // A stop is the start of one hop, the end of another, or — at a
+        // waypoint — in the middle of both, taking no edge at all.
+        let stopEdges: [NodeEdge?] = stops.indices.map { position in
+            switch position {
+            case 0: hops[0].start
+            case stops.count - 1: hops[position - 1].end
+            default: nil
+            }
+        }
+
+        let bases = zip(stops, stopEdges).map { node, edge in
             let rect = rects[node]!
-            // A stop is the start of one hop, the end of another, or — at a
-            // waypoint — in the middle of both, where it takes no edge at all.
-            let edge: NodeEdge? =
-                switch position {
-                case 0: hops[0].start
-                case stops.count - 1: hops[position - 1].end
-                default: nil
-                }
-            let base = edge?.point(in: rect) ?? CGPoint(x: rect.midX, y: rect.midY)
-            return Joint(
+            return edge?.point(in: rect) ?? CGPoint(x: rect.midX, y: rect.midY)
+        }
+
+        return stops.indices.map { position in
+            Joint(
                 line: index,
-                node: node,
-                edge: edge,
-                axis: edge?.axis ?? waypointAxes[node] ?? .vertical,
-                base: base,
-                neighbour: base,
-                point: base
+                node: stops[position],
+                edge: stopEdges[position],
+                axis: stopEdges[position]?.axis ?? waypointAxes[stops[position]] ?? .vertical,
+                base: bases[position],
+                neighbour: bases[position == bases.count - 1 ? position - 1 : position + 1]
             )
-        }
-
-        for index in joints.indices {
-            let neighbour = index == joints.count - 1 ? index - 1 : index + 1
-            joints[index].neighbour = joints[neighbour].base
-        }
-
-        return joints
-    }
-
-    /// Holds the lines sharing an edge or a waypoint apart from one another.
-    private static func spread(_ routes: inout [Route], spacing: CGFloat) {
-        var bundles: [Bundle: [(route: Int, joint: Int)]] = [:]
-        for (route, entry) in routes.enumerated() {
-            for (joint, value) in entry.joints.enumerated() {
-                bundles[value.bundle, default: []].append((route, joint))
-            }
-        }
-
-        for members in bundles.values where members.count > 1 {
-            let tangent = routes[members[0].route].joints[members[0].joint].tangent
-
-            // Order by where each line is headed along the spreading direction,
-            // falling back to the order the lines were written, so that a draw
-            // never depends on the traversal order of a dictionary.
-            let ordered = members.sorted { left, right in
-                let a = routes[left.route].joints[left.joint]
-                let b = routes[right.route].joints[right.joint]
-                let alongA = a.neighbour.x * tangent.dx + a.neighbour.y * tangent.dy
-                let alongB = b.neighbour.x * tangent.dx + b.neighbour.y * tangent.dy
-                return alongA == alongB ? a.line < b.line : alongA < alongB
-            }
-
-            let middle = CGFloat(ordered.count - 1) / 2
-            for (position, member) in ordered.enumerated() {
-                let offset = (CGFloat(position) - middle) * spacing
-                let joint = routes[member.route].joints[member.joint]
-                routes[member.route].joints[member.joint].point = CGPoint(
-                    x: joint.base.x + tangent.dx * offset,
-                    y: joint.base.y + tangent.dy * offset
-                )
-            }
         }
     }
 }
