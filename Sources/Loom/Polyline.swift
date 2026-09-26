@@ -1,43 +1,86 @@
 import CoreGraphics
 
+/// One end of a hop: where it is, and which way it points.
+struct HopEnd {
+    /// Where the line meets the node.
+    let point: CGPoint
+
+    /// The direction the line travels here.
+    let axis: Axis
+
+    /// The way out of the node, or `nil` at a waypoint, which has no node to
+    /// be outside of.
+    let facing: CGVector?
+}
+
 extension Line.Routing {
-    /// The corners between two points, given the direction each end faces.
+    /// The corners between two ends of a hop.
     ///
-    /// Endpoints are the caller's; only what goes between them is returned.
-    func corners(
-        from start: CGPoint,
-        along startAxis: Axis,
-        to end: CGPoint,
-        along endAxis: Axis
-    ) -> [CGPoint] {
+    /// The ends themselves are the caller's; only what goes between them is
+    /// returned.
+    func corners(from start: HopEnd, to end: HopEnd, margin: CGFloat) -> [CGPoint] {
         guard self == .orthogonal else {
             return []
         }
 
-        guard startAxis == endAxis else {
-            // The two ends face across each other, so one turn joins them:
-            // set off the way the start faces, and arrive facing the other way.
-            return switch startAxis {
-            case .vertical: [CGPoint(x: start.x, y: end.y)]
-            case .horizontal: [CGPoint(x: end.x, y: start.y)]
+        // Two ends can share an axis and still face the same way rather than at
+        // each other — a line leaving one node's right side for another node's
+        // right side, say. Stepping across halfway between them would then run
+        // the line through whatever it is meant to be going around, so it has
+        // to get clear of both first.
+        if let facing = start.facing, facing == end.facing {
+            return aroundTheOutside(from: start.point, to: end.point, facing: facing, margin: margin)
+        }
+
+        guard start.axis == end.axis else {
+            // The ends face across each other, so one turn joins them: set off
+            // the way the start faces, and arrive facing the other way.
+            return switch start.axis {
+            case .vertical: [CGPoint(x: start.point.x, y: end.point.y)]
+            case .horizontal: [CGPoint(x: end.point.x, y: start.point.y)]
             }
         }
 
-        // Both ends face the same way, so the line has to step sideways
-        // somewhere. Halfway leaves equal room at both ends, and is the one
-        // choice that does not favour either node.
-        return switch startAxis {
+        // Facing each other along one axis, so the line steps sideways
+        // somewhere between them. Halfway leaves equal room at both ends, and
+        // is the one choice that favours neither node.
+        return switch start.axis {
         case .vertical:
             [
-                CGPoint(x: start.x, y: (start.y + end.y) / 2),
-                CGPoint(x: end.x, y: (start.y + end.y) / 2),
+                CGPoint(x: start.point.x, y: (start.point.y + end.point.y) / 2),
+                CGPoint(x: end.point.x, y: (start.point.y + end.point.y) / 2),
             ]
         case .horizontal:
             [
-                CGPoint(x: (start.x + end.x) / 2, y: start.y),
-                CGPoint(x: (start.x + end.x) / 2, y: end.y),
+                CGPoint(x: (start.point.x + end.point.x) / 2, y: start.point.y),
+                CGPoint(x: (start.point.x + end.point.x) / 2, y: end.point.y),
             ]
         }
+    }
+
+    /// Out past whichever end reaches further, across, and back.
+    ///
+    /// Both ends sit on the outward boundary of their own node in this
+    /// direction, so anything beyond the further of the two is beyond both.
+    private func aroundTheOutside(
+        from start: CGPoint,
+        to end: CGPoint,
+        facing: CGVector,
+        margin: CGFloat
+    ) -> [CGPoint] {
+        if facing.dy == 0 {
+            let x =
+                facing.dx > 0
+                ? Swift.max(start.x, end.x) + margin
+                : Swift.min(start.x, end.x) - margin
+            return [CGPoint(x: x, y: start.y), CGPoint(x: x, y: end.y)]
+        }
+
+        let y =
+            facing.dy > 0
+            ? Swift.max(start.y, end.y) + margin
+            : Swift.min(start.y, end.y) - margin
+        return [CGPoint(x: start.x, y: y), CGPoint(x: end.x, y: y)]
     }
 }
 
