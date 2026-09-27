@@ -60,16 +60,21 @@ public extension Figure {
             duplicates.append(.duplicateNodeID(id))
         }
 
+        // A side of a node is somewhere a line can meet, not something that can
+        // be placed, so a node declared with one has been given an identity no
+        // line will match.
+        let sided = ids.filter { $0.edge != nil }.map(FigureIssue.nodeNamedWithASide)
+
         var missing: [FigureIssue] = []
         var reported = Set<NodeID>()
         for line in lines {
             for stop in line.stops
-            where !known.contains(stop) && reported.insert(stop).inserted {
-                missing.append(.lineToUnknownNode(stop))
+            where !known.contains(stop.node) && reported.insert(stop.node).inserted {
+                missing.append(.lineToUnknownNode(stop.node))
             }
         }
 
-        return duplicates + missing
+        return duplicates + sided + missing
     }
 }
 
@@ -81,4 +86,8 @@ public enum FigureIssue: Hashable, Sendable {
     /// A line refers to a node the arrangement does not contain, so it cannot
     /// be drawn.
     case lineToUnknownNode(NodeID)
+
+    /// A node was declared with one of its own sides named, which is an
+    /// identity for a line to meet rather than one a node can have.
+    case nodeNamedWithASide(NodeID)
 }
