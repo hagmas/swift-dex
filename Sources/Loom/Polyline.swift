@@ -114,6 +114,14 @@ private func isCollinear(_ a: CGPoint, _ b: CGPoint, _ c: CGPoint) -> Bool {
 }
 
 extension CGPoint {
+    /// The point, coarse enough to be used as a key.
+    ///
+    /// Ends that were worked out by the same arithmetic land on exactly the
+    /// same point, but rounding keeps a stray fraction from splitting them up.
+    var rounded: CGPoint {
+        CGPoint(x: (x * 100).rounded() / 100, y: (y * 100).rounded() / 100)
+    }
+
     func isClose(to other: CGPoint) -> Bool {
         abs(x - other.x) < 0.01 && abs(y - other.y) < 0.01
     }

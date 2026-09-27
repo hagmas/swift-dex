@@ -66,6 +66,32 @@ public struct Line {
         self.arrow = arrow
     }
 
+    /// Creates a line from a node back to itself.
+    ///
+    /// Name the side the loop should sit on — the whole of it hangs off that
+    /// one side, leaving and arriving there:
+    ///
+    /// ```swift
+    /// Line(looping: .deactivated.trailing, label: "stays")
+    /// ```
+    ///
+    /// A loop always goes round, whatever the figure's routing says, because
+    /// there is no straight reading of coming back to where you started.
+    ///
+    /// - Parameters:
+    ///   - end: The side of the node the loop hangs off.
+    ///   - label: Words to write along the loop.
+    ///   - arrow: Which ends are tipped. The two ends sit a lane apart on the
+    ///     same side, so this is also which way round the loop reads.
+    public init(looping end: NodeID, label: String? = nil, arrow: Arrow = .end) {
+        self.init(from: end, to: end, label: label, arrow: arrow)
+    }
+
+    /// Whether the line comes back to the node it left.
+    var isLoop: Bool {
+        from.node == to.node
+    }
+
     /// Every node the line touches, in order.
     ///
     /// A line is a run of hops between consecutive stops, and each hop picks

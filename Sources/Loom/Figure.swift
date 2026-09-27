@@ -65,6 +65,14 @@ public extension Figure {
         // line will match.
         let sided = ids.filter { $0.edge != nil }.map(FigureIssue.nodeNamedWithASide)
 
+        // A loop hangs off one side, so both ends have to name the same one.
+        // Told nothing, or told two different sides, the only line left to draw
+        // goes through the node.
+        let loops =
+            lines
+            .filter { $0.isLoop && ($0.from.edge == nil || $0.from.edge != $0.to.edge) }
+            .map { FigureIssue.loopWithoutASide($0.from.node) }
+
         var missing: [FigureIssue] = []
         var reported = Set<NodeID>()
         for line in lines {
@@ -74,7 +82,7 @@ public extension Figure {
             }
         }
 
-        return duplicates + sided + missing
+        return duplicates + sided + loops + missing
     }
 }
 
@@ -90,4 +98,12 @@ public enum FigureIssue: Hashable, Sendable {
     /// A node was declared with one of its own sides named, which is an
     /// identity for a line to meet rather than one a node can have.
     case nodeNamedWithASide(NodeID)
+
+    /// A line comes back to the node it left without naming one side for both
+    /// of its ends, so there is nowhere for it to go but through the node.
+    ///
+    /// Write it as ``Line/init(looping:label:arrow:)``. A loop that leaves one
+    /// side and arrives at another has to travel round the node, which nothing
+    /// here does on its own — route it through waypoints instead.
+    case loopWithoutASide(NodeID)
 }
