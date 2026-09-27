@@ -28,7 +28,7 @@ private func leavingBottom(_ line: Int, towards: CGFloat) -> Route {
 }
 
 private func point(_ routes: [Route], line: Int, spacing: CGFloat = 10) -> CGPoint? {
-    LineRouter.spreadPoints(of: routes, spacing: spacing)[JointIndex(route: line, joint: 0)]
+    LineRouter.spread(of: routes, spacing: spacing)[JointIndex(route: line, joint: 0)]?.point
 }
 
 final class SpreadTests: XCTestCase {
@@ -44,7 +44,7 @@ final class SpreadTests: XCTestCase {
             leavingBottom(1, towards: 100),
             leavingBottom(2, towards: 200),
         ]
-        let points = LineRouter.spreadPoints(of: routes, spacing: 10)
+        let points = LineRouter.spread(of: routes, spacing: 10).mapValues(\.point)
 
         // Three lanes ten apart, centred on x = 100.
         XCTAssertEqual(Set(points.values.map(\.x)), [90, 100, 110])
