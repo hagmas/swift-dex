@@ -181,6 +181,16 @@ struct Route {
     }
 }
 
+/// Where a joint ended up, and how many lines were ahead of it getting there.
+struct Placed {
+    /// Where the joint sits once its bundle has been spread out.
+    let point: CGPoint
+
+    /// Which lane of its bundle the joint took, counting from the middle of
+    /// the edge outwards.
+    let lane: Int
+}
+
 /// Where one joint sits among the routes.
 struct JointIndex: Hashable {
     let route: Int
@@ -244,7 +254,7 @@ extension LineRouter {
             )
         }
 
-        let spread = spreadPoints(of: routes, spacing: spacing)
+        let spread = spread(of: routes, spacing: spacing)
 
         return routes.enumerated().map { index, route in
             // Room to get outside a node before turning back towards it. Taken
@@ -270,8 +280,8 @@ extension LineRouter {
     /// one's result — and since the bundles are gathered in a dictionary, which
     /// came first is not defined. The same figure would come out differently
     /// from one run to the next, by a few points at a time.
-    static func spreadPoints(of routes: [Route], spacing: CGFloat) -> [JointIndex: CGPoint] {
-        var points: [JointIndex: CGPoint] = [:]
+    static func spread(of routes: [Route], spacing: CGFloat) -> [JointIndex: Placed] {
+        var placed: [JointIndex: Placed] = [:]
 
         // A bundle of one falls out of the same arithmetic: its single member
         // sits at the middle, which is nought from its base.
@@ -302,15 +312,18 @@ extension LineRouter {
                 for (position, member) in ordered.enumerated() {
                     let offset = (CGFloat(position) - middle) * spacing
                     let base = routes[member].base
-                    points[member] = CGPoint(
-                        x: base.x + tangent.dx * offset,
-                        y: base.y + tangent.dy * offset
+                    placed[member] = Placed(
+                        point: CGPoint(
+                            x: base.x + tangent.dx * offset,
+                            y: base.y + tangent.dy * offset
+                        ),
+                        lane: position
                     )
                 }
             }
         }
 
-        return points
+        return placed
     }
 
     /// Which joints are after the same edge or the same waypoint.
@@ -349,11 +362,12 @@ extension LineRouter {
     private static func points(
         of route: Route,
         at index: Int,
-        spread: [JointIndex: CGPoint],
+        spread: [JointIndex: Placed],
         margin: CGFloat
     ) -> [CGPoint] {
+        let here = route.joints.indices.map { JointIndex(route: index, joint: $0) }
         let placed = route.joints.indices.map {
-            spread[JointIndex(route: index, joint: $0)] ?? route.joints[$0].base
+            spread[here[$0]]?.point ?? route.joints[$0].base
         }
 
         var points: [CGPoint] = []
@@ -366,9 +380,15 @@ extension LineRouter {
                 let isLoop = previous.node.node == joint.node.node
                 let routing: Line.Routing = isLoop ? .orthogonal : route.routing
                 // A loop reaches out about as far as it is wide, so it comes
-                // out square rather than as a long thin bracket.
+                // out square rather than as a long thin bracket. Everything
+                // else reaches out a lane at a time: lines leaving one side
+                // together all turn at the same distance otherwise, and lie on
+                // top of one another the moment they do.
+                let lane = Swift.max(spread[here[position - 1]]?.lane ?? 0, spread[here[position]]?.lane ?? 0)
                 let reach =
-                    isLoop ? previous.base.distance(to: joint.base) : margin
+                    isLoop
+                    ? previous.base.distance(to: joint.base)
+                    : margin * CGFloat(lane + 1)
                 points += routing.corners(
                     from: HopEnd(
                         point: placed[position - 1],
