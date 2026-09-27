@@ -96,6 +96,9 @@ struct RoutedLine {
 
     /// Words written along the line.
     var label: String?
+
+    /// Where those words go.
+    var labelPoint: CGPoint?
 }
 
 /// One line's meeting with one node.
@@ -171,6 +174,11 @@ struct Route {
     let label: String?
     let routing: Line.Routing
     let joints: [Joint]
+
+    /// Whether the line comes back to the node it left.
+    var isLoop: Bool {
+        joints.count == 2 && joints[0].node.node == joints[1].node.node
+    }
 }
 
 /// Where one joint sits among the routes.
@@ -187,6 +195,12 @@ extension [Route] {
 }
 
 extension LineRouter {
+    /// How much of a node a loop hanging off it takes up.
+    ///
+    /// Of the node's shorter side, so a loop on a wide flat box is as tall as
+    /// one on a tall thin box is wide, and neither swallows the node.
+    static let loopSpan: CGFloat = 0.6
+
     /// Every line, reduced to the points it is drawn through.
     ///
     /// Lines that meet the same edge, or pass through the same waypoint, are
@@ -233,19 +247,15 @@ extension LineRouter {
         let spread = spreadPoints(of: routes, spacing: spacing)
 
         return routes.enumerated().map { index, route in
-            RoutedLine(
-                points: points(
-                    of: route,
-                    at: index,
-                    spread: spread,
-                    // Room to get outside a node before turning back towards
-                    // it. Taken from the lane width rather than invented, so a
-                    // figure that wants its lines further apart gets its
-                    // detours further out as well.
-                    margin: spacing * 2
-                ),
+            // Room to get outside a node before turning back towards it. Taken
+            // from the lane width rather than invented, so a figure that wants
+            // its lines further apart gets its detours further out as well.
+            let drawn = points(of: route, at: index, spread: spread, margin: spacing * 2)
+            return RoutedLine(
+                points: drawn,
                 arrow: route.arrow,
-                label: route.label
+                label: route.label,
+                labelPoint: labelPoint(of: route, along: drawn)
             )
         }
     }
@@ -268,24 +278,35 @@ extension LineRouter {
         for members in bundles(in: routes).values {
             let tangent = routes[members[0]].tangent
 
-            // Order by where each line is headed along the spreading direction,
-            // falling back to the order the lines were written.
-            let ordered = members.sorted { left, right in
-                let leading = routes[left].heading(along: tangent)
-                let trailing = routes[right].heading(along: tangent)
-                return leading == trailing
-                    ? routes[left].line < routes[right].line
-                    : leading < trailing
-            }
+            // Lanes exist to separate ends that would land on the very same
+            // point, so they are worked out among exactly those. Most ends on
+            // an edge are all at its middle and make one such group. A loop's
+            // two ends are the exception: the loop has already set them apart
+            // by a span of its own, and nudging them again would either squash
+            // that or blow it out.
+            for together in Dictionary(grouping: members, by: { routes[$0].base.rounded }).values {
+                // Order by where each line is headed, falling back to the order
+                // the lines were written: `sorted(by:)` promises nothing about
+                // equal elements, and a figure that came out differently from
+                // one run to the next would be worse than any ordering.
+                let ordered = together.sorted { left, right in
+                    let here = routes[left].heading(along: tangent)
+                    let there = routes[right].heading(along: tangent)
+                    guard here == there else {
+                        return here < there
+                    }
+                    return (routes[left].line, left.joint) < (routes[right].line, right.joint)
+                }
 
-            let middle = CGFloat(ordered.count - 1) / 2
-            for (position, member) in ordered.enumerated() {
-                let offset = (CGFloat(position) - middle) * spacing
-                let base = routes[member].base
-                points[member] = CGPoint(
-                    x: base.x + tangent.dx * offset,
-                    y: base.y + tangent.dy * offset
-                )
+                let middle = CGFloat(ordered.count - 1) / 2
+                for (position, member) in ordered.enumerated() {
+                    let offset = (CGFloat(position) - middle) * spacing
+                    let base = routes[member].base
+                    points[member] = CGPoint(
+                        x: base.x + tangent.dx * offset,
+                        y: base.y + tangent.dy * offset
+                    )
+                }
             }
         }
 
@@ -306,6 +327,24 @@ extension LineRouter {
         return bundles
     }
 
+    /// Where a line's words go.
+    ///
+    /// Halfway along, so the words sit on the line and split it. A loop is the
+    /// exception: halfway along a loop is the middle of its far side, which is
+    /// the very part that makes it read as going round, so the words stand off
+    /// beyond it instead.
+    private static func labelPoint(of route: Route, along points: [CGPoint]) -> CGPoint? {
+        guard route.label != nil, let middle = points.middle else {
+            return nil
+        }
+        guard route.isLoop, let facing = route.joints[0].facing else {
+            return middle
+        }
+
+        let clear = route.joints[0].base.distance(to: route.joints[1].base)
+        return CGPoint(x: middle.x + facing.dx * clear, y: middle.y + facing.dy * clear)
+    }
+
     /// The corners one route is drawn through, turns and all.
     private static func points(
         of route: Route,
@@ -321,14 +360,23 @@ extension LineRouter {
         for (position, joint) in route.joints.enumerated() {
             if position > 0 {
                 let previous = route.joints[position - 1]
-                points += route.routing.corners(
+                // A hop that starts and ends at one node is a loop, and a loop
+                // drawn straight is a line back on top of itself. There is no
+                // straight reading of going round, so it goes round either way.
+                let isLoop = previous.node.node == joint.node.node
+                let routing: Line.Routing = isLoop ? .orthogonal : route.routing
+                // A loop reaches out about as far as it is wide, so it comes
+                // out square rather than as a long thin bracket.
+                let reach =
+                    isLoop ? previous.base.distance(to: joint.base) : margin
+                points += routing.corners(
                     from: HopEnd(
                         point: placed[position - 1],
                         axis: previous.axis,
                         facing: previous.facing
                     ),
                     to: HopEnd(point: placed[position], axis: joint.axis, facing: joint.facing),
-                    margin: margin
+                    margin: reach
                 )
             }
             points.append(placed[position])
@@ -372,9 +420,28 @@ extension LineRouter {
             }
         }
 
-        let bases = zip(stops, stopEdges).map { stop, edge in
+        var bases = zip(stops, stopEdges).map { stop, edge in
             let rect = rects[stop.node]!
             return edge?.point(in: rect) ?? CGPoint(x: rect.midX, y: rect.midY)
+        }
+
+        // A loop's two ends would otherwise be the same point, left to the
+        // bundle to prise apart by one lane — which is the right gap between
+        // two lines running side by side, and far too small for something meant
+        // to read as going round. So a loop sets its own: a share of the node
+        // it hangs off, which keeps it in proportion to the box whatever size
+        // the box turns out to be.
+        if line.isLoop, let edge = stopEdges.first ?? nil, stopEdges.allSatisfy({ $0 == edge }) {
+            let rect = rects[stops[0].node]!
+            let span = Swift.min(rect.width, rect.height) * Self.loopSpan
+            let across = edge.axis == .horizontal ? CGVector(dx: 0, dy: 1) : CGVector(dx: 1, dy: 0)
+            bases = bases.indices.map { position in
+                let offset = position == 0 ? -span / 2 : span / 2
+                return CGPoint(
+                    x: bases[position].x + across.dx * offset,
+                    y: bases[position].y + across.dy * offset
+                )
+            }
         }
 
         return stops.indices.map { position in

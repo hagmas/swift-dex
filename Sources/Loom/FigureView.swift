@@ -96,7 +96,7 @@ private struct LineView: View {
                     .fill(color)
             }
 
-            if let label = route.label, let middle = points.middle {
+            if let label = route.label, let middle = route.labelPoint {
                 Text(label)
                     .font(.caption)
                     .padding(.horizontal, 4)
