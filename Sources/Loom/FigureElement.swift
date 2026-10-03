@@ -51,6 +51,73 @@ public enum FigureBuilder {
     ) -> ElementPair<Accumulated, Next> {
         ElementPair(accumulated, next)
     }
+
+    /// Keeps an element that an `if` may or may not have reached.
+    public static func buildOptional<E: FigureElement>(_ element: E?) -> PerhapsElement<E> {
+        PerhapsElement(element)
+    }
+
+    /// Takes the `if` branch of an `if`/`else`.
+    public static func buildEither<First: FigureElement, Second: FigureElement>(
+        first: First
+    ) -> EitherElement<First, Second> {
+        .first(first)
+    }
+
+    /// Takes the `else` branch of an `if`/`else`.
+    public static func buildEither<First: FigureElement, Second: FigureElement>(
+        second: Second
+    ) -> EitherElement<First, Second> {
+        .second(second)
+    }
+}
+
+/// An element an `if` may or may not have reached.
+///
+/// Absent, it contributes nothing at all — not a gap. A node that is not there
+/// is not a hole where it would have been; the arrangement closes up, and the
+/// nodes that remain move to suit, which is the whole point of writing the
+/// figure as a function of what it should be showing.
+public struct PerhapsElement<Wrapped: FigureElement>: FigureElement {
+    private let wrapped: Wrapped?
+
+    init(_ wrapped: Wrapped?) {
+        self.wrapped = wrapped
+    }
+
+    /// The element, or nothing.
+    @ViewBuilder public var elementBody: some View {
+        if let wrapped {
+            wrapped.elementBody
+        }
+    }
+
+    /// The element's placements, or none.
+    public var placements: [Placement] {
+        wrapped?.placements ?? []
+    }
+}
+
+/// Whichever branch of an `if`/`else` was taken.
+public enum EitherElement<First: FigureElement, Second: FigureElement>: FigureElement {
+    case first(First)
+    case second(Second)
+
+    /// The branch that was taken.
+    @ViewBuilder public var elementBody: some View {
+        switch self {
+        case .first(let element): element.elementBody
+        case .second(let element): element.elementBody
+        }
+    }
+
+    /// The placements of the branch that was taken.
+    public var placements: [Placement] {
+        switch self {
+        case .first(let element): element.placements
+        case .second(let element): element.placements
+        }
+    }
 }
 
 /// Two elements, side by side in the tree.

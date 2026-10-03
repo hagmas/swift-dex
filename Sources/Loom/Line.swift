@@ -146,13 +146,38 @@ public extension Line {
 /// Collects the lines of a figure written as a block.
 @resultBuilder
 public enum LineBuilder {
-    /// Gathers the lines written one per statement.
-    public static func buildBlock(_ lines: Line...) -> [Line] {
+    /// Takes a line written on its own.
+    public static func buildExpression(_ line: Line) -> [Line] {
+        [line]
+    }
+
+    /// Takes a ready-made array of lines.
+    public static func buildExpression(_ lines: [Line]) -> [Line] {
         lines
     }
 
-    /// Passes an array of lines through unchanged.
-    public static func buildBlock(_ lines: [Line]) -> [Line] {
+    /// Gathers everything the block produced.
+    public static func buildBlock(_ lines: [Line]...) -> [Line] {
+        lines.flatMap { $0 }
+    }
+
+    /// Keeps the lines an `if` may or may not have reached.
+    public static func buildOptional(_ lines: [Line]?) -> [Line] {
+        lines ?? []
+    }
+
+    /// Takes the `if` branch of an `if`/`else`.
+    public static func buildEither(first lines: [Line]) -> [Line] {
         lines
+    }
+
+    /// Takes the `else` branch of an `if`/`else`.
+    public static func buildEither(second lines: [Line]) -> [Line] {
+        lines
+    }
+
+    /// Gathers the lines a `for` produced.
+    public static func buildArray(_ lines: [[Line]]) -> [Line] {
+        lines.flatMap { $0 }
     }
 }

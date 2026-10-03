@@ -48,6 +48,13 @@ public struct FigureView<Content: Figure>: View {
             figure.arrangement.elementBody
         }
         .environment(\.waypointSpans, WaypointSpans.spans(for: figure.lines, spacing: spacing))
+        // The lines are read outside the arrangement, in the space the figure
+        // was given rather than the one it takes up. An arrangement that grows
+        // or shrinks drags its own space with it, and an anchor resolved
+        // against a space that is itself moving comes out somewhere the node
+        // is not — which never shows while a figure is still, and shows up
+        // badly the moment one animates.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .backgroundPreferenceValue(NodeAnchorsPreference.self) { anchors in
             GeometryReader { proxy in
                 let placements = figure.arrangement.placements

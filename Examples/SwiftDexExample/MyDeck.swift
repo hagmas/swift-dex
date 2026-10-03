@@ -8,6 +8,7 @@ struct MyDeck: Deck {
             .next(customViewsFlow, transition: .customPush())
             .next(customeAnimationFlow, transition: .customPush())
             .next(layoutFlow, transition: .customPush())
+            .next(AboutFigure(), transition: .customPush())
             .next(Title(title: "Thank you"), transition: .customPush())
     }
 }

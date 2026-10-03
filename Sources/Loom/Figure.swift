@@ -48,11 +48,18 @@ public extension Figure {
     /// Problems that make the figure not mean what it says.
     ///
     /// The arrangement is a closed tree, so it can be walked before anything is
-    /// drawn — which is the point of it being closed. Worth checking in a test
-    /// for any figure whose lines were generated rather than typed.
+    /// drawn — which is the point of it being closed.
+    ///
+    /// Only what is wrong whatever the figure is showing. A line naming a node
+    /// the arrangement does not hold is *not* among them: it is simply not
+    /// drawn, which is what lets a figure's lines be written once while its
+    /// arrangement decides what is there. The mistake that reading looks like
+    /// — a misspelled identity — cannot survive the compiler, since identities
+    /// are declared rather than written out at each use. What is left cannot be
+    /// told apart from a node that is merely not showing yet, and a warning
+    /// that cries wolf on a correct figure is worse than none.
     func issues() -> [FigureIssue] {
         let ids = nodeIDs
-        let known = Set(ids)
 
         var seen = Set<NodeID>()
         var duplicates: [FigureIssue] = []
@@ -73,27 +80,14 @@ public extension Figure {
             .filter { $0.isLoop && ($0.from.edge == nil || $0.from.edge != $0.to.edge) }
             .map { FigureIssue.loopWithoutASide($0.from.node) }
 
-        var missing: [FigureIssue] = []
-        var reported = Set<NodeID>()
-        for line in lines {
-            for stop in line.stops
-            where !known.contains(stop.node) && reported.insert(stop.node).inserted {
-                missing.append(.lineToUnknownNode(stop.node))
-            }
-        }
-
-        return duplicates + sided + loops + missing
+        return duplicates + sided + loops
     }
 }
 
-/// Something wrong with a figure, found by walking its arrangement.
+/// Something wrong with a figure whatever it happens to be showing.
 public enum FigureIssue: Hashable, Sendable {
     /// Two nodes claim the same identity, so a line to it is ambiguous.
     case duplicateNodeID(NodeID)
-
-    /// A line refers to a node the arrangement does not contain, so it cannot
-    /// be drawn.
-    case lineToUnknownNode(NodeID)
 
     /// A node was declared with one of its own sides named, which is an
     /// identity for a line to meet rather than one a node can have.

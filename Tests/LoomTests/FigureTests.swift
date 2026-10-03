@@ -74,11 +74,11 @@ final class FigureTests: XCTestCase {
         )
     }
 
-    func test_aLineToAMissingNodeIsReported() {
-        XCTAssertEqual(
-            FigureWithADanglingLine().issues(),
-            [.lineToUnknownNode(.absent)]
-        )
+    func test_aLineToAMissingNodeIsNotAMistake() {
+        // It is simply not drawn. Which node the arrangement holds is a
+        // question about what the figure is showing, not about whether it is
+        // well formed — and the figure may well be showing it a moment later.
+        XCTAssertEqual(FigureWithADanglingLine().issues(), [])
     }
 
     func test_aFigureWithoutLinesIsAllowed() {
