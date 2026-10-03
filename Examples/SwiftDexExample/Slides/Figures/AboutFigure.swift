@@ -41,6 +41,7 @@ private struct GrowingFlow: View {
     var body: some View {
         ActionReader(Grow.self, elementID: elementID, clicks: 2) { progress in
             FigureView(DataFlow(reached: reached(progress)), routing: .orthogonal)
+                .figureAtBodyTextSize()
         } animation: { _ in
             .bouncy(duration: 0.8)
         }
