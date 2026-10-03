@@ -88,15 +88,13 @@ private struct DataFlow: Figure {
         }
     }
 
+    /// Written once, with no conditions of their own: a line whose nodes are
+    /// not there yet is simply not drawn.
     var lines: [Line] {
         Line(from: .view, to: .model, label: "observes")
-        if reached >= 1 {
-            Line(from: .model, to: .store, label: "reads")
-        }
-        if reached >= 2 {
-            Line(from: .store, to: .remote, label: "fetches")
-            Line(looping: .remote.trailing, label: "retries")
-        }
+        Line(from: .model, to: .store, label: "reads")
+        Line(from: .store, to: .remote, label: "fetches")
+        Line(looping: .remote.trailing, label: "retries")
     }
 }
 
