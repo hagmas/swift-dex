@@ -17,7 +17,7 @@ public protocol FigureElement {
     associatedtype ElementBody: View
 
     /// The rendered form of this element.
-    @ViewBuilder var elementBody: ElementBody { get }
+    @MainActor @ViewBuilder var elementBody: ElementBody { get }
 
     /// What this element contributes to the shape of the arrangement.
     ///
