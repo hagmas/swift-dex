@@ -90,10 +90,8 @@ final class ExplicitAnchorTests: XCTestCase {
         XCTAssertEqual(NodeID.above.node, NodeID.above)
     }
 
-    func test_aMissingNodeIsReportedByItsPlainIdentity() {
-        let figure = Stacked(drawn: [Line(from: .above.bottom, to: .absent.top)])
-
-        XCTAssertEqual(figure.issues(), [.lineToUnknownNode(.absent)])
+    func test_aLineToAMissingNodeIsDroppedRatherThanDrawn() {
+        XCTAssertEqual(routes(Line(from: .above.bottom, to: .absent.top)).count, 0)
     }
 
     func test_aNamedSideOnAKnownNodeIsNotAMistake() {
