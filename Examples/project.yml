@@ -17,6 +17,9 @@ targets:
         SWIFT_VERSION: 6.0
     dependencies:
       - package: SwiftDex
+        product: SwiftDex
+      - package: SwiftDex
+        product: Loom
     sources:
         - SwiftDexExample
 
