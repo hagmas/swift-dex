@@ -15,7 +15,7 @@ struct FigureStyles: StandardLayoutSlide {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            "A **`BoxStyle`** belongs to the figure, not to the node's identity."
+            "**`BoxStyle`** and **`LineStyle`** belong to the figure, not to the node's identity."
             Converting(elementID: .element(0))
         }
     }
@@ -74,12 +74,21 @@ private extension BoxStyle {
     )
 }
 
+private extension LineStyle {
+    /// Conformance to a protocol, the way UML draws realization.
+    static let conformance = LineStyle(dash: [5, 3], arrowHead: .hollow)
+
+    /// A use that is not ownership.
+    static let dependency = LineStyle(dash: [5, 3], arrowHead: .open)
+}
+
 private extension NodeID {
     static let view = NodeID("view")
     static let model = NodeID("model")
     static let user = NodeID("user")
     static let settings = NodeID("settings")
     static let point = NodeID("point")
+    static let identifiable = NodeID("identifiable")
 }
 
 private struct Types: Figure {
@@ -101,14 +110,20 @@ private struct Types: Figure {
                 Box(.point, title: "Point")
                     .boxStyle(.structType)
             }
+            Row(spacing: 32) {
+                Empty()
+                Box(.identifiable, title: "Identifiable")
+                Empty()
+            }
         }
     }
 
     var lines: [Line] {
-        Line(from: .view, to: .model)
+        Line(from: .view, to: .model, style: .dependency)
         Line(from: .model, to: .user)
         Line(from: .model, to: .settings)
         Line(from: .user, to: .point)
+        Line(from: .user, to: .identifiable, style: .conformance)
     }
 }
 
