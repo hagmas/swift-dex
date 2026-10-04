@@ -197,6 +197,14 @@ struct Placed {
     let lane: Int
 }
 
+/// The joints of one line that take one place in a bundle.
+private struct Lane {
+    let members: [JointIndex]
+    let heading: CGFloat
+    let line: Int
+    let joint: Int
+}
+
 /// Where one joint sits among the routes.
 struct JointIndex: Hashable {
     let route: Int
@@ -238,31 +246,37 @@ extension LineRouter {
     ) -> [RoutedLine] {
         var routes: [Route] = []
 
+        // A line with several nodes at one end is routed as one branch per
+        // node. A branch to a node that is not there is dropped on its own, so
+        // a fan can grow a branch at a time as its nodes appear.
         for (index, line) in lines.enumerated() {
-            guard
-                let joints = joints(
-                    for: line,
-                    line: index,
-                    rects: rects,
-                    addresses: addresses,
-                    waypointAxes: waypointAxes
+            for stops in line.branches {
+                guard
+                    let joints = joints(
+                        through: stops,
+                        isLoop: line.isLoop,
+                        line: index,
+                        rects: rects,
+                        addresses: addresses,
+                        waypointAxes: waypointAxes
+                    )
+                else {
+                    continue
+                }
+                routes.append(
+                    Route(
+                        arrow: line.arrow,
+                        label: line.label,
+                        routing: line.routing ?? routing,
+                        joints: joints
+                    )
                 )
-            else {
-                continue
             }
-            routes.append(
-                Route(
-                    arrow: line.arrow,
-                    label: line.label,
-                    routing: line.routing ?? routing,
-                    joints: joints
-                )
-            )
         }
 
         let spread = spread(of: routes, spacing: spacing)
 
-        return routes.enumerated().map { index, route in
+        let drawn = routes.enumerated().map { index, route in
             // Room to get outside a node before turning back towards it. Taken
             // from the lane width rather than invented, so a figure that wants
             // its lines further apart gets its detours further out as well.
@@ -275,6 +289,8 @@ extension LineRouter {
                 labelPoint: labelPoint(of: route, along: drawn)
             )
         }
+
+        return drawnOnce(drawn)
     }
 
     /// Where every joint ends up, once the lines sharing an edge or a waypoint
@@ -302,30 +318,45 @@ extension LineRouter {
             // by a span of its own, and nudging them again would either squash
             // that or blow it out.
             for together in Dictionary(grouping: members, by: { routes[$0].base.rounded }).values {
-                // Order by where each line is headed, falling back to the order
+                // The branches of one line are one line where they meet: they
+                // share a point and a lane, so they run as a single trunk until
+                // they part. Only separate lines are held apart.
+                let lanes = Dictionary(grouping: together, by: { routes[$0].line }).values.map { branches in
+                    Lane(
+                        members: branches,
+                        // A trunk is headed between its branches, so it takes
+                        // its place in the bundle from where they go on average.
+                        heading: branches.map { routes[$0].heading(along: tangent) }.reduce(0, +)
+                            / CGFloat(branches.count),
+                        line: routes[branches[0]].line,
+                        joint: branches.map(\.joint).min()!
+                    )
+                }
+
+                // Order by where each lane is headed, falling back to the order
                 // the lines were written: `sorted(by:)` promises nothing about
                 // equal elements, and a figure that came out differently from
                 // one run to the next would be worse than any ordering.
-                let ordered = together.sorted { left, right in
-                    let here = routes[left].heading(along: tangent)
-                    let there = routes[right].heading(along: tangent)
-                    guard here == there else {
-                        return here < there
+                let ordered = lanes.sorted { left, right in
+                    guard left.heading == right.heading else {
+                        return left.heading < right.heading
                     }
-                    return (routes[left].line, left.joint) < (routes[right].line, right.joint)
+                    return (left.line, left.joint) < (right.line, right.joint)
                 }
 
                 let middle = CGFloat(ordered.count - 1) / 2
-                for (position, member) in ordered.enumerated() {
+                for (position, lane) in ordered.enumerated() {
                     let offset = (CGFloat(position) - middle) * spacing
-                    let base = routes[member].base
-                    placed[member] = Placed(
-                        point: CGPoint(
-                            x: base.x + tangent.dx * offset,
-                            y: base.y + tangent.dy * offset
-                        ),
-                        lane: position
-                    )
+                    for member in lane.members {
+                        let base = routes[member].base
+                        placed[member] = Placed(
+                            point: CGPoint(
+                                x: base.x + tangent.dx * offset,
+                                y: base.y + tangent.dy * offset
+                            ),
+                            lane: position
+                        )
+                    }
                 }
             }
         }
@@ -345,6 +376,61 @@ extension LineRouter {
         }
 
         return bundles
+    }
+
+    /// The routed lines, with every part of a line drawn once however many
+    /// branches it has.
+    ///
+    /// Branches meet at a shared end and run together from it, so drawn whole
+    /// they would lie on top of one another along the trunk. That reads as one
+    /// line only while the line is solid: dashes are counted from where each
+    /// branch starts, so two dashed branches over one trunk fill in each
+    /// other's gaps. So the first branch is drawn whole, and every other one
+    /// starts where it leaves the branches before it — and without an
+    /// arrowhead at the shared end, which the first branch already has.
+    ///
+    /// The words belong to the line, not to any one branch, so they go on the
+    /// trunk: halfway along the stretch every branch runs together from the
+    /// end they share. Where the branches part at once — lines leaving one
+    /// point in different directions, as straight routing draws a fan — there
+    /// is no trunk, and the words go on the first branch instead.
+    private static func drawnOnce(_ drawn: [RoutedLine]) -> [RoutedLine] {
+        var drawn = drawn
+        let lines = Dictionary(grouping: drawn.indices, by: { drawn[$0].line })
+
+        for branches in lines.values where branches.count > 1 {
+            let branches = branches.sorted()
+
+            // Measured from whichever end the branches share: the start of a
+            // line that fans out, the end of one that gathers in. Neither, when
+            // the branches leave their shared node from different sides, and
+            // then there is nothing to share.
+            let firsts = branches.compactMap { drawn[$0].points.first }
+            let lasts = branches.compactMap { drawn[$0].points.last }
+            let sharedStart = firsts.allSatisfy { $0.isClose(to: firsts[0]) }
+            guard sharedStart || lasts.allSatisfy({ $0.isClose(to: lasts[0]) }) else {
+                continue
+            }
+            let runs = branches.map { sharedStart ? drawn[$0].points : drawn[$0].points.reversed() }
+
+            for (position, branch) in branches.enumerated() where position > 0 {
+                drawn[branch].label = nil
+                drawn[branch].labelPoint = nil
+
+                let shared = runs[..<position].map { runs[position].sharedLength(with: $0) }.max() ?? 0
+                let rest = runs[position].dropping(shared)
+                drawn[branch].points = sharedStart ? rest : rest.reversed()
+                drawn[branch].arrow = drawn[branch].arrow.without(atStart: sharedStart)
+            }
+
+            let first = branches[0]
+            let trunk = runs.dropFirst().map { runs[0].sharedLength(with: $0) }.min() ?? 0
+            if drawn[first].label != nil, trunk > 0.5, let point = runs[0].point(along: trunk / 2) {
+                drawn[first].labelPoint = point
+            }
+        }
+
+        return drawn
     }
 
     /// Where a line's words go.
@@ -413,13 +499,13 @@ extension LineRouter {
     }
 
     private static func joints(
-        for line: Line,
+        through stops: [NodeID],
+        isLoop: Bool,
         line index: Int,
         rects: [NodeID: CGRect],
         addresses: [NodeID: NodeAddress],
         waypointAxes: [NodeID: Axis]
     ) -> [Joint]? {
-        let stops = line.stops
         guard stops.allSatisfy({ rects[$0.node] != nil && addresses[$0.node] != nil }) else {
             return nil
         }
@@ -458,7 +544,7 @@ extension LineRouter {
         // to read as going round. So a loop sets its own: a share of the node
         // it hangs off, which keeps it in proportion to the box whatever size
         // the box turns out to be.
-        if line.isLoop, let edge = stopEdges.first ?? nil, stopEdges.allSatisfy({ $0 == edge }) {
+        if isLoop, let edge = stopEdges.first ?? nil, stopEdges.allSatisfy({ $0 == edge }) {
             let rect = rects[stops[0].node]!
             let span = Swift.min(rect.width, rect.height) * Self.loopSpan
             let across = edge.axis == .horizontal ? CGVector(dx: 0, dy: 1) : CGVector(dx: 1, dy: 0)

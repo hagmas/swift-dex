@@ -17,14 +17,32 @@ import Foundation
 /// Line(from: .viewModel, to: .store, through: .sideChannel)
 /// ```
 ///
+/// One line can fan out to several nodes, or gather several into one. It is
+/// drawn as a single trunk at the shared end that branches towards the others —
+/// the way a class diagram draws subclasses meeting at one arrowhead:
+///
+/// ```swift
+/// Line(from: .model, to: .user, .settings)
+/// Line(from: .dog, .cat, to: .animal, style: .inheritance)
+/// ```
+///
+/// Lines written separately are separate relationships, and are held apart
+/// where they meet the same side of a node even when they go to different
+/// places. Saying which lines belong together is the author's call, not
+/// something worked out from where they happen to go.
+///
 /// A line carries no identity of its own. Identity is opt-in everywhere in a
 /// figure, and most lines are never addressed by anything.
 public struct Line {
-    /// The node the line leaves.
-    public let from: NodeID
+    /// The nodes the line leaves.
+    ///
+    /// More than one only when ``to`` has one.
+    public let from: [NodeID]
 
-    /// The node the line arrives at.
-    public let to: NodeID
+    /// The nodes the line arrives at.
+    ///
+    /// More than one only when ``from`` has one.
+    public let to: [NodeID]
 
     /// The waypoints the line is routed through, in the order it meets them.
     public let waypoints: [NodeID]
@@ -63,6 +81,88 @@ public struct Line {
         arrow: Arrow = .end,
         style: LineStyle? = nil
     ) {
+        self.init(
+            from: [from],
+            to: [to],
+            through: through,
+            label: label,
+            routing: routing,
+            arrow: arrow,
+            style: style
+        )
+    }
+
+    /// Creates a line from one node that branches out to several.
+    ///
+    /// ```swift
+    /// Line(from: .model, to: .user, .settings)
+    /// ```
+    ///
+    /// The parameters are those of ``init(from:to:through:label:routing:arrow:style:)``.
+    /// Waypoints are passed through by the trunk, before it branches; the label
+    /// sits on the trunk.
+    public init(
+        from: NodeID,
+        to first: NodeID,
+        _ second: NodeID,
+        _ rest: NodeID...,
+        through: NodeID...,
+        label: String? = nil,
+        routing: Routing? = nil,
+        arrow: Arrow = .end,
+        style: LineStyle? = nil
+    ) {
+        self.init(
+            from: [from],
+            to: [first, second] + rest,
+            through: through,
+            label: label,
+            routing: routing,
+            arrow: arrow,
+            style: style
+        )
+    }
+
+    /// Creates a line from several nodes that gathers into one.
+    ///
+    /// ```swift
+    /// Line(from: .dog, .cat, to: .animal, style: .inheritance)
+    /// ```
+    ///
+    /// The parameters are those of ``init(from:to:through:label:routing:arrow:style:)``.
+    /// Waypoints are passed through by the trunk, after it has gathered; the
+    /// label sits on the trunk.
+    public init(
+        from first: NodeID,
+        _ second: NodeID,
+        _ rest: NodeID...,
+        to: NodeID,
+        through: NodeID...,
+        label: String? = nil,
+        routing: Routing? = nil,
+        arrow: Arrow = .end,
+        style: LineStyle? = nil
+    ) {
+        self.init(
+            from: [first, second] + rest,
+            to: [to],
+            through: through,
+            label: label,
+            routing: routing,
+            arrow: arrow,
+            style: style
+        )
+    }
+
+    private init(
+        from: [NodeID],
+        to: [NodeID],
+        through: [NodeID],
+        label: String?,
+        routing: Routing?,
+        arrow: Arrow,
+        style: LineStyle?
+    ) {
         self.from = from
         self.to = to
         self.waypoints = through
@@ -96,16 +196,19 @@ public struct Line {
 
     /// Whether the line comes back to the node it left.
     var isLoop: Bool {
-        from.node == to.node
+        from.count == 1 && to.count == 1 && from[0].node == to[0].node
     }
 
-    /// Every node the line touches, in order.
+    /// Every node each branch of the line touches, in order — one branch for
+    /// each node at the end that has several, and just the one otherwise.
     ///
-    /// A line is a run of hops between consecutive stops, and each hop picks
+    /// A branch is a run of hops between consecutive stops, and each hop picks
     /// its own edges — which is why a line leaves its first node aimed at the
     /// first waypoint rather than at its eventual destination.
-    public var stops: [NodeID] {
-        [from] + waypoints + [to]
+    public var branches: [[NodeID]] {
+        from.flatMap { start in
+            to.map { end in [start] + waypoints + [end] }
+        }
     }
 }
 
@@ -127,6 +230,16 @@ public extension Line {
 
         var tipsEnd: Bool {
             self == .end || self == .both
+        }
+
+        /// The same arrowheads, less the one at the start or at the end.
+        func without(atStart start: Bool) -> Arrow {
+            switch (self, start) {
+            case (.both, true): .end
+            case (.both, false): .start
+            case (.start, true), (.end, false): .none
+            default: self
+            }
         }
     }
 

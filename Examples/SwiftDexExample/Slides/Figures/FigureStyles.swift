@@ -120,10 +120,9 @@ private struct Types: Figure {
 
     var lines: [Line] {
         Line(from: .view, to: .model, style: .dependency)
-        Line(from: .model, to: .user)
-        Line(from: .model, to: .settings)
+        Line(from: .model, to: .settings, .user)
         Line(from: .user, to: .point)
-        Line(from: .user, to: .identifiable, style: .conformance)
+        Line(from: .settings, .user, to: .identifiable, style: .conformance)
     }
 }
 

@@ -77,8 +77,8 @@ public extension Figure {
         // goes through the node.
         let loops =
             lines
-            .filter { $0.isLoop && ($0.from.edge == nil || $0.from.edge != $0.to.edge) }
-            .map { FigureIssue.loopWithoutASide($0.from.node) }
+            .filter { $0.isLoop && ($0.from[0].edge == nil || $0.from[0].edge != $0.to[0].edge) }
+            .map { FigureIssue.loopWithoutASide($0.from[0].node) }
 
         return duplicates + sided + loops
     }
