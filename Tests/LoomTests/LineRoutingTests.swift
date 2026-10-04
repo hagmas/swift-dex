@@ -55,6 +55,21 @@ private struct Detour: Figure {
     }
 }
 
+/// A line to a node that is not there, ahead of one that is.
+private struct Partial: Figure {
+    var arrangement: some FigureElement {
+        Column {
+            Row { Box(.source, title: "Source") }
+            Row { Box(.below, title: "Below") }
+        }
+    }
+
+    var lines: [Line] {
+        Line(from: .source, to: .offset)
+        Line(from: .source, to: .below)
+    }
+}
+
 private let rects: [NodeID: CGRect] = [
     // Bottom edge at (150, 50).
     .source: CGRect(x: 100, y: 0, width: 100, height: 50),
@@ -84,6 +99,16 @@ private func isAxisAligned(_ points: [CGPoint]) -> Bool {
 }
 
 final class LineRoutingTests: XCTestCase {
+    /// A line that is not drawn must not shift the ones after it.
+    ///
+    /// A routed line is matched back to the line it came from by position, to
+    /// find its style, so an off-by-one here gives a line someone else's.
+    func test_aRouteKnowsWhichLineItCameFrom() {
+        let drawn = routes(Partial(), routing: .straight)
+
+        XCTAssertEqual(drawn.map(\.line), [1])
+    }
+
     func test_straightRoutingJoinsTheEndsDirectly() {
         let points = routes(Descent(), routing: .straight)[0].points
 

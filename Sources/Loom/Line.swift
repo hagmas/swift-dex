@@ -38,6 +38,9 @@ public struct Line {
     /// Which ends are tipped with an arrowhead.
     public var arrow: Arrow
 
+    /// How the line looks, or `nil` to follow the figure.
+    public var style: LineStyle?
+
     /// Creates a line between two nodes.
     ///
     /// - Parameters:
@@ -50,13 +53,15 @@ public struct Line {
     ///     kind of line throughout.
     ///   - arrow: Which ends are tipped. Defaults to the arriving end, since
     ///     `from`/`to` already state a direction.
+    ///   - style: How the line looks. Defaults to the figure's line style.
     public init(
         from: NodeID,
         to: NodeID,
         through: NodeID...,
         label: String? = nil,
         routing: Routing? = nil,
-        arrow: Arrow = .end
+        arrow: Arrow = .end,
+        style: LineStyle? = nil
     ) {
         self.from = from
         self.to = to
@@ -64,6 +69,7 @@ public struct Line {
         self.label = label
         self.routing = routing
         self.arrow = arrow
+        self.style = style
     }
 
     /// Creates a line from a node back to itself.
@@ -83,8 +89,9 @@ public struct Line {
     ///   - label: Words to write along the loop.
     ///   - arrow: Which ends are tipped. The two ends sit a lane apart on the
     ///     same side, so this is also which way round the loop reads.
-    public init(looping end: NodeID, label: String? = nil, arrow: Arrow = .end) {
-        self.init(from: end, to: end, label: label, arrow: arrow)
+    ///   - style: How the loop looks. Defaults to the figure's line style.
+    public init(looping end: NodeID, label: String? = nil, arrow: Arrow = .end, style: LineStyle? = nil) {
+        self.init(from: end, to: end, label: label, arrow: arrow, style: style)
     }
 
     /// Whether the line comes back to the node it left.

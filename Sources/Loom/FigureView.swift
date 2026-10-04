@@ -11,32 +11,25 @@ import SwiftUI
 /// arriving at a box never draws across it.
 public struct FigureView<Content: Figure>: View {
     private let figure: Content
-    private let color: Color
-    private let width: CGFloat
     private let spacing: CGFloat
     private let routing: Line.Routing
 
     @Environment(\.figureScale) private var scale
+    @Environment(\.lineStyle) private var lineStyle
 
     /// Renders a figure.
     ///
     /// - Parameters:
     ///   - figure: The figure to draw.
-    ///   - color: The colour of the lines.
-    ///   - width: The stroke width of the lines.
     ///   - spacing: How far apart lines sharing an edge or a waypoint are held.
     ///   - routing: How lines get where they are going. A line can override it,
     ///     but a figure almost always wants one kind of line throughout.
     public init(
         _ figure: Content,
-        color: Color = .black,
-        width: CGFloat = 1.5,
         spacing: CGFloat = 10,
         routing: Line.Routing = .straight
     ) {
         self.figure = figure
-        self.color = color
-        self.width = width
         self.spacing = spacing
         self.routing = routing
     }
@@ -47,9 +40,10 @@ public struct FigureView<Content: Figure>: View {
         // gives the outermost container a direction, which is the same one
         // `Placement.addresses(in:)` reads a line's leaving edge from.
         let spacing = spacing * scale
+        let lines = figure.lines
 
         ScaledVStack(alignment: .center, spacing: 8, content: figure.arrangement.elementBody)
-            .environment(\.waypointSpans, WaypointSpans.spans(for: figure.lines, spacing: spacing))
+            .environment(\.waypointSpans, WaypointSpans.spans(for: lines, spacing: spacing))
             // The lines are read outside the arrangement, in the space the figure
             // was given rather than the one it takes up. An arrangement that grows
             // or shrinks drags its own space with it, and an anchor resolved
@@ -61,7 +55,7 @@ public struct FigureView<Content: Figure>: View {
                 GeometryReader { proxy in
                     let placements = figure.arrangement.placements
                     let routes = LineRouter.routes(
-                        for: figure.lines,
+                        for: lines,
                         rects: anchors.mapValues { proxy[$0] },
                         addresses: Placement.addresses(in: placements),
                         waypointAxes: Placement.waypointAxes(in: placements),
@@ -69,7 +63,12 @@ public struct FigureView<Content: Figure>: View {
                         spacing: spacing
                     )
                     ForEach(routes.indices, id: \.self) { index in
-                        LineView(route: routes[index], color: color, width: width * scale, scale: scale)
+                        let route = routes[index]
+                        LineView(
+                            route: route,
+                            style: lines[route.line].style ?? lineStyle,
+                            scale: scale
+                        )
                     }
                 }
             }
@@ -79,12 +78,15 @@ public struct FigureView<Content: Figure>: View {
 /// One line, drawn through the points it was routed along.
 private struct LineView: View {
     let route: RoutedLine
-    let color: Color
-    let width: CGFloat
+    let style: LineStyle
     let scale: CGFloat
 
+    private var width: CGFloat {
+        style.width * scale
+    }
+
     private var head: CGFloat {
-        width * 5
+        style.arrowHead.size.map { $0 * scale } ?? width * 5
     }
 
     var body: some View {
@@ -94,48 +96,76 @@ private struct LineView: View {
             Path { path in
                 path.addLines(stroked(points))
             }
-            .stroke(color, lineWidth: width)
+            .stroke(style.color, style: StrokeStyle(lineWidth: width, dash: style.dash.map { $0 * scale }))
 
             if route.arrow.tipsEnd, points.count >= 2 {
-                ArrowHead(tip: points[points.count - 1], from: points[points.count - 2], size: head)
-                    .fill(color)
+                arrowHead(at: points[points.count - 1], from: points[points.count - 2])
             }
 
             if route.arrow.tipsStart, points.count >= 2 {
-                ArrowHead(tip: points[0], from: points[1], size: head)
-                    .fill(color)
+                arrowHead(at: points[0], from: points[1])
             }
 
             if let label = route.label, let middle = route.labelPoint {
                 Text(label)
-                    .font(.system(size: 10 * scale))
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 4 * scale)
+                    .font(.system(size: style.labelFontSize * scale))
+                    .foregroundStyle(style.labelColor)
+                    .padding(.horizontal, style.labelPadding * scale)
                     // Opaque, so the line reads as split by the words rather
-                    // than running under them. It assumes a white page, and on
-                    // a background that is not a flat colour the line shows
-                    // through.
-                    .background(.white)
+                    // than running under them. On a background that is not a
+                    // flat colour, the line shows through.
+                    .background(style.labelBackground)
                     .position(middle)
             }
+        }
+    }
+
+    @ViewBuilder
+    private func arrowHead(at tip: CGPoint, from: CGPoint) -> some View {
+        // An outline is stroked centred on its path, so its rounded tip
+        // reaches half a width past the point it is drawn to. Drawn that much
+        // short, it ends where a filled head would.
+        let drawnTip = pulled(tip, towards: from, by: width / 2)
+
+        switch style.arrowHead.shape {
+        case .filled:
+            ArrowHeadShape(tip: tip, from: from, size: head, closed: true)
+                .fill(style.color)
+
+        case .hollow:
+            ArrowHeadShape(tip: drawnTip, from: from, size: head, closed: true)
+                .stroke(style.color, style: StrokeStyle(lineWidth: width, lineJoin: .round))
+
+        case .open:
+            ArrowHeadShape(tip: drawnTip, from: from, size: head, closed: false)
+                .stroke(style.color, style: StrokeStyle(lineWidth: width, lineCap: .round, lineJoin: .round))
         }
     }
 }
 
 private extension LineView {
-    /// The points the stroke runs through, stopped short of any arrowhead.
+    /// How far short of a tipped end the stroke stops.
     ///
-    /// A stroke ends square across its full width, and an arrowhead narrows to
-    /// a point, so a line drawn right up to the tip pokes out either side of
-    /// it — more visibly the thicker the line. Stopping halfway into the head
-    /// leaves the end where the head is still twice the line's width.
+    /// A stroke ends square across its full width. Run up to the point of a
+    /// filled head it pokes out either side, so it stops halfway in, where the
+    /// head is still twice the line's width. A hollow head must not have the
+    /// line showing inside it, so the stroke stops at its base. An open head
+    /// is two strokes meeting at a point, and the line meets them there.
+    var inset: CGFloat {
+        switch style.arrowHead.shape {
+        case .filled: head / 2
+        case .hollow: width / 2 + head
+        case .open: width / 2
+        }
+    }
+
+    /// The points the stroke runs through, stopped short of any arrowhead.
     func stroked(_ points: [CGPoint]) -> [CGPoint] {
         guard points.count >= 2 else {
             return points
         }
 
         var points = points
-        let inset = head / 2
         if route.arrow.tipsEnd {
             points[points.count - 1] = pulled(points[points.count - 1], towards: points[points.count - 2], by: inset)
         }
@@ -158,11 +188,13 @@ private extension LineView {
     }
 }
 
-/// A filled triangle at `tip`, pointing away from `from`.
-private struct ArrowHead: Shape {
+/// A triangle at `tip`, pointing away from `from` — or, left open, just the
+/// two sides that meet at the tip.
+private struct ArrowHeadShape: Shape {
     let tip: CGPoint
     let from: CGPoint
     let size: CGFloat
+    let closed: Bool
 
     func path(in rect: CGRect) -> Path {
         let dx = tip.x - from.x
@@ -179,11 +211,20 @@ private struct ArrowHead: Shape {
         let uy = dy / length
         let base = CGPoint(x: tip.x - ux * size, y: tip.y - uy * size)
         let half = size * 0.4
+        let left = CGPoint(x: base.x - uy * half, y: base.y + ux * half)
+        let right = CGPoint(x: base.x + uy * half, y: base.y - ux * half)
 
-        path.move(to: tip)
-        path.addLine(to: CGPoint(x: base.x - uy * half, y: base.y + ux * half))
-        path.addLine(to: CGPoint(x: base.x + uy * half, y: base.y - ux * half))
-        path.closeSubpath()
+        if closed {
+            path.move(to: tip)
+            path.addLine(to: left)
+            path.addLine(to: right)
+            path.closeSubpath()
+        }
+        else {
+            path.move(to: left)
+            path.addLine(to: tip)
+            path.addLine(to: right)
+        }
         return path
     }
 }

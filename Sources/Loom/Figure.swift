@@ -96,7 +96,7 @@ public enum FigureIssue: Hashable, Sendable {
     /// A line comes back to the node it left without naming one side for both
     /// of its ends, so there is nowhere for it to go but through the node.
     ///
-    /// Write it as ``Line/init(looping:label:arrow:)``. A loop that leaves one
+    /// Write it as ``Line/init(looping:label:arrow:style:)``. A loop that leaves one
     /// side and arrives at another has to travel round the node, which nothing
     /// here does on its own — route it through waypoints instead.
     case loopWithoutASide(NodeID)

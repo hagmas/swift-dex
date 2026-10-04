@@ -88,6 +88,12 @@ enum LineRouter {
 
 /// A line reduced to the points it is drawn through.
 struct RoutedLine {
+    /// Which of the figure's lines this is, by its position among them.
+    ///
+    /// Routing is geometry alone. How the line looks is the figure's business,
+    /// so it is looked up from the line itself rather than carried through.
+    var line: Int
+
     /// The corners of the line, from where it leaves to where it arrives.
     var points: [CGPoint]
 
@@ -262,6 +268,7 @@ extension LineRouter {
             // its lines further apart gets its detours further out as well.
             let drawn = points(of: route, at: index, spread: spread, margin: spacing * 2)
             return RoutedLine(
+                line: route.joints[0].line,
                 points: drawn,
                 arrow: route.arrow,
                 label: route.label,
