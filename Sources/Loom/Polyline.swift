@@ -139,22 +139,25 @@ extension [CGPoint] {
     /// Halfway by distance rather than halfway between the ends, so a label on
     /// a line that turns sits on the run rather than beside it.
     var middle: CGPoint? {
-        guard count >= 2 else {
-            return first
-        }
+        point(along: length / 2)
+    }
 
-        let lengths = zip(self, dropFirst()).map { $0.distance(to: $1) }
-        let half = lengths.reduce(0, +) / 2
-        guard half > 0 else {
+    /// How far the line travels from end to end.
+    var length: CGFloat {
+        zip(self, dropFirst()).map { $0.distance(to: $1) }.reduce(0, +)
+    }
+
+    /// The point `distance` along the line from its first point.
+    func point(along distance: CGFloat) -> CGPoint? {
+        guard count >= 2, distance > 0 else {
             return first
         }
 
         var travelled: CGFloat = 0
-        for (index, length) in lengths.enumerated() {
-            if travelled + length >= half {
-                let along = (half - travelled) / length
-                let start = self[index]
-                let end = self[index + 1]
+        for (start, end) in zip(self, dropFirst()) {
+            let length = start.distance(to: end)
+            if length > 0, travelled + length >= distance {
+                let along = (distance - travelled) / length
                 return CGPoint(
                     x: start.x + (end.x - start.x) * along,
                     y: start.y + (end.y - start.y) * along
@@ -164,5 +167,69 @@ extension [CGPoint] {
         }
 
         return last
+    }
+
+    /// The line with its first `distance` cut away.
+    func dropping(_ distance: CGFloat) -> [CGPoint] {
+        guard distance > 0, let start = point(along: distance) else {
+            return self
+        }
+
+        var travelled: CGFloat = 0
+        var rest = [start]
+        for (from, to) in zip(self, dropFirst()) {
+            travelled += from.distance(to: to)
+            if travelled > distance + 0.01 {
+                rest.append(to)
+            }
+        }
+        return rest
+    }
+
+    /// How far this line and `other` run together from their first points
+    /// before they part.
+    ///
+    /// Measured along the run rather than by matching corners: a branch that
+    /// goes straight on and one that turns off it share the first stretch even
+    /// though only one of them has a corner where the other leaves.
+    func sharedLength(with other: [CGPoint]) -> CGFloat {
+        guard let start = first, let otherStart = other.first, start.isClose(to: otherStart) else {
+            return 0
+        }
+
+        var shared: CGFloat = 0
+        var here = 1
+        var there = 1
+        var position = start
+
+        while here < count, there < other.count {
+            let ahead = self[here]
+            let otherAhead = other[there]
+            let reach = position.distance(to: ahead)
+            let otherReach = position.distance(to: otherAhead)
+            guard reach > 0, otherReach > 0 else {
+                if reach == 0 { here += 1 }
+                if otherReach == 0 { there += 1 }
+                continue
+            }
+
+            // Both heading the same way from here, or they have parted.
+            let direction = CGVector(dx: (ahead.x - position.x) / reach, dy: (ahead.y - position.y) / reach)
+            let otherDirection = CGVector(
+                dx: (otherAhead.x - position.x) / otherReach,
+                dy: (otherAhead.y - position.y) / otherReach
+            )
+            guard abs(direction.dx - otherDirection.dx) < 0.001, abs(direction.dy - otherDirection.dy) < 0.001 else {
+                break
+            }
+
+            let step = Swift.min(reach, otherReach)
+            shared += step
+            position = CGPoint(x: position.x + direction.dx * step, y: position.y + direction.dy * step)
+            if reach <= otherReach { here += 1 }
+            if otherReach <= reach { there += 1 }
+        }
+
+        return shared
     }
 }
