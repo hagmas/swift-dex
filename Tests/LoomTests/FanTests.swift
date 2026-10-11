@@ -57,12 +57,19 @@ final class FanTests: XCTestCase {
             drawn[0].points,
             [CGPoint(x: 150, y: 50), CGPoint(x: 150, y: 100), CGPoint(x: 50, y: 100), CGPoint(x: 50, y: 150)]
         )
-        // The second branch starts where it leaves the first, so the trunk is
-        // drawn once and a dashed line keeps its dashes.
         XCTAssertEqual(
             drawn[1].points,
-            [CGPoint(x: 150, y: 100), CGPoint(x: 250, y: 100), CGPoint(x: 250, y: 150)]
+            [CGPoint(x: 150, y: 50), CGPoint(x: 150, y: 100), CGPoint(x: 250, y: 100), CGPoint(x: 250, y: 150)]
         )
+    }
+
+    /// The trunk is drawn once, so a dashed line keeps its dashes: the second
+    /// branch is marked with the stretch the first one draws.
+    func test_theTrunkIsDrawnByTheFirstBranch() {
+        let drawn = routes([Line(from: .top, to: .left, .right)])
+
+        XCTAssertNil(drawn[0].drawnElsewhere)
+        XCTAssertEqual(drawn[1].drawnElsewhere, Overlap(length: 50, atStart: true))
     }
 
     /// The same two connections written as two lines are two relationships,
@@ -80,9 +87,8 @@ final class FanTests: XCTestCase {
         XCTAssertEqual(drawn[0].points.last, CGPoint(x: 150, y: 50))
         XCTAssertEqual(drawn[0].arrow, .end)
 
-        // The second branch stops where it joins the first, and leaves the
-        // arrowhead to it.
-        XCTAssertEqual(drawn[1].points.last, CGPoint(x: 150, y: 100))
+        // The second branch leaves the trunk, and the arrowhead, to the first.
+        XCTAssertEqual(drawn[1].drawnElsewhere, Overlap(length: 50, atStart: false))
         XCTAssertEqual(drawn[1].arrow, .none)
     }
 

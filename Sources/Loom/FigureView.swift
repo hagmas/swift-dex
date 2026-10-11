@@ -94,7 +94,7 @@ private struct LineView: View {
 
         ZStack {
             Path { path in
-                path.addLines(stroked(points))
+                path.addRoundedLines(stroked(visible(points)), radius: style.cornerRadius * scale)
             }
             .stroke(style.color, style: StrokeStyle(lineWidth: width, dash: style.dash.map { $0 * scale }))
 
@@ -159,6 +159,22 @@ private extension LineView {
         }
     }
 
+    /// The points this branch draws itself, leaving out the stretch an earlier
+    /// branch of the same line draws instead.
+    ///
+    /// It sets off from that stretch a corner's radius early, so a rounded
+    /// corner where it leaves the trunk curves off the trunk rather than
+    /// starting beside it. Square corners have no radius, and it sets off from
+    /// the very point the route turns at.
+    func visible(_ points: [CGPoint]) -> [CGPoint] {
+        guard let overlap = route.drawnElsewhere else {
+            return points
+        }
+
+        let cut = Swift.max(overlap.length - style.cornerRadius * scale, 0)
+        return overlap.atStart ? points.dropping(cut) : Array(Array(points.reversed()).dropping(cut).reversed())
+    }
+
     /// The points the stroke runs through, stopped short of any arrowhead.
     func stroked(_ points: [CGPoint]) -> [CGPoint] {
         guard points.count >= 2 else {
@@ -185,6 +201,52 @@ private extension LineView {
         }
         let step = min(distance, length) / length
         return CGPoint(x: point.x + dx * step, y: point.y + dy * step)
+    }
+}
+
+private extension Path {
+    /// Lines through `points`, eased round each corner by up to `radius`.
+    ///
+    /// Each corner gets as much of the runs either side of it as it can have
+    /// without taking any from the next corner: a run between two corners is
+    /// split between them, and a run to an end of the line belongs wholly to
+    /// the one corner it has.
+    mutating func addRoundedLines(_ points: [CGPoint], radius: CGFloat) {
+        guard radius > 0, points.count > 2 else {
+            addLines(points)
+            return
+        }
+
+        move(to: points[0])
+        for index in 1..<(points.count - 1) {
+            let before = points[index].distance(to: points[index - 1])
+            let after = points[index].distance(to: points[index + 1])
+            let room = Swift.min(
+                index == 1 ? before : before / 2,
+                index == points.count - 2 ? after : after / 2
+            )
+            // An arc leaves the run as far from the corner as the radius over
+            // the tangent of half the angle inside the corner — exactly the
+            // radius at a right angle, further at a sharper turn. So the room
+            // caps that distance, not the radius itself.
+            let inside = angle(at: points[index], between: points[index - 1], and: points[index + 1])
+            let rounding = Swift.min(radius, room * tan(inside / 2))
+            if rounding > 0.01 {
+                addArc(tangent1End: points[index], tangent2End: points[index + 1], radius: rounding)
+            }
+            else {
+                addLine(to: points[index])
+            }
+        }
+        addLine(to: points[points.count - 1])
+    }
+
+    /// The angle at `corner` between the runs to `before` and to `after`.
+    private func angle(at corner: CGPoint, between before: CGPoint, and after: CGPoint) -> CGFloat {
+        let one = atan2(before.y - corner.y, before.x - corner.x)
+        let other = atan2(after.y - corner.y, after.x - corner.x)
+        let difference = abs(one - other)
+        return difference > .pi ? 2 * .pi - difference : difference
     }
 }
 
