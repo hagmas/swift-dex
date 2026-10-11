@@ -94,7 +94,7 @@ private struct LineView: View {
 
         ZStack {
             Path { path in
-                path.addRoundedLines(stroked(visible(points)), radius: style.cornerRadius * scale)
+                path.addRoundedLines(stroked(ownPart(of: points)), radius: style.cornerRadius * scale)
             }
             .stroke(style.color, style: StrokeStyle(lineWidth: width, dash: style.dash.map { $0 * scale }))
 
@@ -166,7 +166,7 @@ private extension LineView {
     /// corner where it leaves the trunk curves off the trunk rather than
     /// starting beside it. Square corners have no radius, and it sets off from
     /// the very point the route turns at.
-    func visible(_ points: [CGPoint]) -> [CGPoint] {
+    func ownPart(of points: [CGPoint]) -> [CGPoint] {
         guard let overlap = route.drawnElsewhere else {
             return points
         }
