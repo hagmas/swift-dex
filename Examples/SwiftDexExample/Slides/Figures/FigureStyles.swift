@@ -41,6 +41,7 @@ private struct Converting: View {
     var body: some View {
         ActionReader(Convert.self, elementID: elementID, clicks: 1) { progress in
             FigureView(Types(converted: converted(progress)), routing: .orthogonal)
+                .lineStyle(.rounded)
                 .figureAtBodyTextSize()
         } animation: { _ in
             .smooth(duration: 0.8)
@@ -75,11 +76,14 @@ private extension BoxStyle {
 }
 
 private extension LineStyle {
+    /// Every line in the figure turns its corners the same way.
+    static let rounded = LineStyle(cornerRadius: 8)
+
     /// Conformance to a protocol, the way UML draws realization.
-    static let conformance = LineStyle(dash: [5, 3], arrowHead: .hollow)
+    static let conformance = LineStyle(cornerRadius: 8, dash: [5, 3], arrowHead: .hollow)
 
     /// A use that is not ownership.
-    static let dependency = LineStyle(dash: [5, 3], arrowHead: .open)
+    static let dependency = LineStyle(cornerRadius: 8, dash: [5, 3], arrowHead: .open)
 }
 
 private extension NodeID {

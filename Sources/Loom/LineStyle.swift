@@ -28,6 +28,14 @@ public struct LineStyle: Sendable {
     /// The thickness of the line.
     public var width: CGFloat
 
+    /// The radius the line's corners are rounded to, or `0` for square ones.
+    ///
+    /// Only ever the corners a route already has: a line still goes where its
+    /// routing sends it, and rounding just eases it round each turn. A corner
+    /// between two short runs is rounded less, so the line never turns before
+    /// it has arrived.
+    public var cornerRadius: CGFloat
+
     /// The lengths of alternating dashes and gaps, or empty for a solid line.
     ///
     /// Arrowheads are always drawn solid.
@@ -59,6 +67,7 @@ public struct LineStyle: Sendable {
     public init(
         color: Color = .black,
         width: CGFloat = 1.5,
+        cornerRadius: CGFloat = 0,
         dash: [CGFloat] = [],
         arrowHead: ArrowHead = .filled,
         labelFontSize: CGFloat = 10,
@@ -68,6 +77,7 @@ public struct LineStyle: Sendable {
     ) {
         self.color = color
         self.width = width
+        self.cornerRadius = cornerRadius
         self.dash = dash
         self.arrowHead = arrowHead
         self.labelFontSize = labelFontSize

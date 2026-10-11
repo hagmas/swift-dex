@@ -105,6 +105,24 @@ struct RoutedLine {
 
     /// Where those words go.
     var labelPoint: CGPoint?
+
+    /// How much of the line, from one end, an earlier branch of the same line
+    /// already draws — or `nil` if the line is drawn whole.
+    var drawnElsewhere: Overlap?
+}
+
+/// A stretch at one end of a branch that another branch draws instead.
+///
+/// The router says how long it is and leaves the cutting to whatever draws the
+/// line, which is where the line's corners are known: a rounded corner starts
+/// turning before the point the route turns at, so a branch has to set off
+/// from the trunk that much earlier to meet it.
+struct Overlap: Equatable {
+    /// How far along the branch the stretch reaches.
+    let length: CGFloat
+
+    /// Whether it is at the start of the branch, rather than the end.
+    let atStart: Bool
 }
 
 /// One line's meeting with one node.
@@ -386,8 +404,9 @@ extension LineRouter {
     /// line only while the line is solid: dashes are counted from where each
     /// branch starts, so two dashed branches over one trunk fill in each
     /// other's gaps. So the first branch is drawn whole, and every other one
-    /// starts where it leaves the branches before it — and without an
-    /// arrowhead at the shared end, which the first branch already has.
+    /// is marked with how much of it the branches before it already draw —
+    /// and loses its arrowhead at the shared end, which the first branch
+    /// already has.
     ///
     /// The words belong to the line, not to any one branch, so they go on the
     /// trunk: halfway along the stretch every branch runs together from the
@@ -418,8 +437,7 @@ extension LineRouter {
                 drawn[branch].labelPoint = nil
 
                 let shared = runs[..<position].map { runs[position].sharedLength(with: $0) }.max() ?? 0
-                let rest = runs[position].dropping(shared)
-                drawn[branch].points = sharedStart ? rest : rest.reversed()
+                drawn[branch].drawnElsewhere = Overlap(length: shared, atStart: sharedStart)
                 drawn[branch].arrow = drawn[branch].arrow.without(atStart: sharedStart)
             }
 
