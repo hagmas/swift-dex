@@ -62,8 +62,7 @@ public struct FigureView<Content: Figure>: View {
                         routing: routing,
                         spacing: spacing
                     )
-                    ForEach(routes.indices, id: \.self) { index in
-                        let route = routes[index]
+                    ForEach(routes) { route in
                         LineView(
                             route: route,
                             style: lines[route.line].style ?? lineStyle,

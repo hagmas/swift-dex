@@ -80,7 +80,17 @@ public extension Figure {
             .filter { $0.isLoop && ($0.from[0].edge == nil || $0.from[0].edge != $0.to[0].edge) }
             .map { FigureIssue.loopWithoutASide($0.from[0].node) }
 
-        return duplicates + sided + loops
+        // A line is known by its route and its name, so that a line still
+        // there after a change stays the same line. Two that share both are one
+        // line as far as that goes, and only the order they were written in
+        // keeps them apart — which shifts the moment one of them is not drawn.
+        var keys = Set<LineKey>()
+        var indistinguishable: [FigureIssue] = []
+        for key in lines.flatMap(\.branchKeys) where !keys.insert(key).inserted {
+            indistinguishable.append(.indistinguishableLines(key.route))
+        }
+
+        return duplicates + sided + loops + indistinguishable
     }
 }
 
@@ -96,8 +106,16 @@ public enum FigureIssue: Hashable, Sendable {
     /// A line comes back to the node it left without naming one side for both
     /// of its ends, so there is nowhere for it to go but through the node.
     ///
-    /// Write it as ``Line/init(looping:label:arrow:style:)``. A loop that leaves one
+    /// Write it as ``Line/init(looping:label:arrow:style:id:)``. A loop that leaves one
     /// side and arrives at another has to travel round the node, which nothing
     /// here does on its own — route it through waypoints instead.
     case loopWithoutASide(NodeID)
+
+    /// Two lines take the same route with the same words on them, or none, so
+    /// nothing tells them apart when the figure changes.
+    ///
+    /// They are still drawn. But a figure that shows one of them only some of
+    /// the time can mistake one for the other, and readers cannot tell them
+    /// apart either. Give them different labels, or give one an ``Line/id``.
+    case indistinguishableLines([NodeID])
 }

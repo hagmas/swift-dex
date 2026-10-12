@@ -87,7 +87,14 @@ enum LineRouter {
 }
 
 /// A line reduced to the points it is drawn through.
-struct RoutedLine {
+struct RoutedLine: Identifiable {
+    /// What this branch is known by from one rendering to the next.
+    ///
+    /// Unique among the routed lines: two branches the figure cannot tell apart
+    /// — which ``Figure/issues()`` reports — are kept apart by the order they
+    /// were written in, so that drawing them never breaks.
+    var id: DrawnLineID
+
     /// Which of the figure's lines this is, by its position among them.
     ///
     /// Routing is geometry alone. How the line looks is the figure's business,
@@ -109,6 +116,12 @@ struct RoutedLine {
     /// How much of the line, from one end, an earlier branch of the same line
     /// already draws — or `nil` if the line is drawn whole.
     var drawnElsewhere: Overlap?
+}
+
+/// A branch's key, and which of the branches sharing that key it is.
+struct DrawnLineID: Hashable {
+    let key: LineKey
+    let occurrence: Int
 }
 
 /// A stretch at one end of a branch that another branch draws instead.
@@ -263,12 +276,13 @@ extension LineRouter {
         spacing: CGFloat
     ) -> [RoutedLine] {
         var routes: [Route] = []
+        var keys: [LineKey] = []
 
         // A line with several nodes at one end is routed as one branch per
         // node. A branch to a node that is not there is dropped on its own, so
         // a fan can grow a branch at a time as its nodes appear.
         for (index, line) in lines.enumerated() {
-            for stops in line.branches {
+            for (stops, key) in zip(line.branches, line.branchKeys) {
                 guard
                     let joints = joints(
                         through: stops,
@@ -281,6 +295,7 @@ extension LineRouter {
                 else {
                     continue
                 }
+                keys.append(key)
                 routes.append(
                     Route(
                         arrow: line.arrow,
@@ -294,12 +309,16 @@ extension LineRouter {
 
         let spread = spread(of: routes, spacing: spacing)
 
+        var seen: [LineKey: Int] = [:]
         let drawn = routes.enumerated().map { index, route in
             // Room to get outside a node before turning back towards it. Taken
             // from the lane width rather than invented, so a figure that wants
             // its lines further apart gets its detours further out as well.
             let drawn = points(of: route, at: index, spread: spread, margin: spacing * 2)
+            let key = keys[index]
+            defer { seen[key, default: 0] += 1 }
             return RoutedLine(
+                id: DrawnLineID(key: key, occurrence: seen[key, default: 0]),
                 line: route.joints[0].line,
                 points: drawn,
                 arrow: route.arrow,
