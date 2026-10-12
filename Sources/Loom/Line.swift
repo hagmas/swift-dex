@@ -59,6 +59,16 @@ public struct Line {
     /// How the line looks, or `nil` to follow the figure.
     public var style: LineStyle?
 
+    /// A name that tells this line apart from another taking the same route,
+    /// or `nil` to tell them apart by their labels.
+    ///
+    /// A line is known by the route it takes and the words on it, so that when
+    /// a figure changes, a line that is still there stays the same line and
+    /// only the lines that are new are drawn in. Two lines with the same route
+    /// and the same words — or no words — cannot be told apart that way, and
+    /// ``Figure/issues()`` says so; give one of them a name.
+    public var id: String?
+
     /// Creates a line between two nodes.
     ///
     /// - Parameters:
@@ -72,6 +82,8 @@ public struct Line {
     ///   - arrow: Which ends are tipped. Defaults to the arriving end, since
     ///     `from`/`to` already state a direction.
     ///   - style: How the line looks. Defaults to the figure's line style.
+    ///   - id: A name telling this line apart from another taking the same
+    ///     route with the same words. Rarely needed.
     public init(
         from: NodeID,
         to: NodeID,
@@ -79,7 +91,8 @@ public struct Line {
         label: String? = nil,
         routing: Routing? = nil,
         arrow: Arrow = .end,
-        style: LineStyle? = nil
+        style: LineStyle? = nil,
+        id: String? = nil
     ) {
         self.init(
             from: [from],
@@ -88,7 +101,8 @@ public struct Line {
             label: label,
             routing: routing,
             arrow: arrow,
-            style: style
+            style: style,
+            id: id
         )
     }
 
@@ -98,7 +112,7 @@ public struct Line {
     /// Line(from: .model, to: .user, .settings)
     /// ```
     ///
-    /// The parameters are those of ``init(from:to:through:label:routing:arrow:style:)``.
+    /// The parameters are those of ``init(from:to:through:label:routing:arrow:style:id:)``.
     /// Waypoints are passed through by the trunk, before it branches; the label
     /// sits on the trunk.
     public init(
@@ -110,7 +124,8 @@ public struct Line {
         label: String? = nil,
         routing: Routing? = nil,
         arrow: Arrow = .end,
-        style: LineStyle? = nil
+        style: LineStyle? = nil,
+        id: String? = nil
     ) {
         self.init(
             from: [from],
@@ -119,7 +134,8 @@ public struct Line {
             label: label,
             routing: routing,
             arrow: arrow,
-            style: style
+            style: style,
+            id: id
         )
     }
 
@@ -129,7 +145,7 @@ public struct Line {
     /// Line(from: .dog, .cat, to: .animal, style: .inheritance)
     /// ```
     ///
-    /// The parameters are those of ``init(from:to:through:label:routing:arrow:style:)``.
+    /// The parameters are those of ``init(from:to:through:label:routing:arrow:style:id:)``.
     /// Waypoints are passed through by the trunk, after it has gathered; the
     /// label sits on the trunk.
     public init(
@@ -141,7 +157,8 @@ public struct Line {
         label: String? = nil,
         routing: Routing? = nil,
         arrow: Arrow = .end,
-        style: LineStyle? = nil
+        style: LineStyle? = nil,
+        id: String? = nil
     ) {
         self.init(
             from: [first, second] + rest,
@@ -150,7 +167,8 @@ public struct Line {
             label: label,
             routing: routing,
             arrow: arrow,
-            style: style
+            style: style,
+            id: id
         )
     }
 
@@ -161,7 +179,8 @@ public struct Line {
         label: String?,
         routing: Routing?,
         arrow: Arrow,
-        style: LineStyle?
+        style: LineStyle?,
+        id: String?
     ) {
         self.from = from
         self.to = to
@@ -170,6 +189,7 @@ public struct Line {
         self.routing = routing
         self.arrow = arrow
         self.style = style
+        self.id = id
     }
 
     /// Creates a line from a node back to itself.
@@ -190,13 +210,26 @@ public struct Line {
     ///   - arrow: Which ends are tipped. The two ends sit a lane apart on the
     ///     same side, so this is also which way round the loop reads.
     ///   - style: How the loop looks. Defaults to the figure's line style.
-    public init(looping end: NodeID, label: String? = nil, arrow: Arrow = .end, style: LineStyle? = nil) {
-        self.init(from: end, to: end, label: label, arrow: arrow, style: style)
+    ///   - id: A name telling this loop apart from another on the same side
+    ///     with the same words. Rarely needed.
+    public init(
+        looping end: NodeID,
+        label: String? = nil,
+        arrow: Arrow = .end,
+        style: LineStyle? = nil,
+        id: String? = nil
+    ) {
+        self.init(from: end, to: end, label: label, arrow: arrow, style: style, id: id)
     }
 
     /// Whether the line comes back to the node it left.
     var isLoop: Bool {
         from.count == 1 && to.count == 1 && from[0].node == to[0].node
+    }
+
+    /// What each branch of the line is known by, in the order of ``branches``.
+    var branchKeys: [LineKey] {
+        branches.map { LineKey(route: $0, name: id.map(LineKey.Name.id) ?? .label(label)) }
     }
 
     /// Every node each branch of the line touches, in order — one branch for
@@ -261,6 +294,27 @@ public extension Line {
         /// collapse and the line comes out straight.
         case orthogonal
     }
+}
+
+/// What one branch of a line is known by, from one rendering of a figure to
+/// the next.
+///
+/// Lines are written afresh every time a figure is read, so a line's place in
+/// the list says nothing: a line added ahead of it would move it. A branch is
+/// known instead by the route it takes, sides and waypoints included, and by
+/// its line's name — the label, unless the line was given an ``Line/id``.
+/// A line that changes its route is a different line, and is drawn in anew
+/// rather than jumping from one route to the other, which it could not
+/// interpolate between anyway.
+struct LineKey: Hashable {
+    /// What, besides its route, tells a line apart.
+    enum Name: Hashable {
+        case label(String?)
+        case id(String)
+    }
+
+    let route: [NodeID]
+    let name: Name
 }
 
 /// Collects the lines of a figure written as a block.
