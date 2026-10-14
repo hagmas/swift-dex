@@ -39,8 +39,9 @@ private struct GrowingFlow: View {
     let elementID: ElementID
 
     var body: some View {
-        ActionReader(Grow.self, elementID: elementID, clicks: 2) { progress in
+        ActionReader(Grow.self, elementID: elementID, clicks: 3) { progress in
             FigureView(DataFlow(reached: reached(progress)), routing: .orthogonal)
+                .figureAnimation(.phased(linesFrom: 0.8))
                 .figureAtBodyTextSize()
         } animation: { _ in
             .bouncy(duration: 0.8)
@@ -51,13 +52,13 @@ private struct GrowingFlow: View {
     private func reached(_ progress: ActionProgress<Grow>) -> Int {
         switch progress {
         case .idle(let previous, _):
-            previous == nil ? 0 : 2
+            previous == nil ? 0 : 3
 
         case .active(_, let step):
             step
 
         case .completed:
-            2
+            3
         }
     }
 }
@@ -70,7 +71,8 @@ private extension NodeID {
 }
 
 private struct DataFlow: Figure {
-    /// How much of the flow to show.
+    /// How much of the flow to show: two steps of growing, then one of
+    /// losing the view at the top.
     ///
     /// Nothing but a number. The arrangement and the lines are both written as
     /// functions of it, so the two can never disagree about what is showing.
@@ -78,7 +80,9 @@ private struct DataFlow: Figure {
 
     var arrangement: some FigureElement {
         Column(spacing: 48) {
-            Row { Box(.view, title: "View") }
+            if reached < 3 {
+                Row { Box(.view, title: "View") }
+            }
             Row { Box(.model, title: "ViewModel") }
             if reached >= 1 {
                 Row { Box(.store, title: "Store") }
