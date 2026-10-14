@@ -276,13 +276,13 @@ extension LineRouter {
         spacing: CGFloat
     ) -> [RoutedLine] {
         var routes: [Route] = []
-        var keys: [LineKey] = []
+        let ids = drawnIDs(for: lines) { rects[$0] != nil && addresses[$0] != nil }
 
         // A line with several nodes at one end is routed as one branch per
         // node. A branch to a node that is not there is dropped on its own, so
         // a fan can grow a branch at a time as its nodes appear.
         for (index, line) in lines.enumerated() {
-            for (stops, key) in zip(line.branches, line.branchKeys) {
+            for stops in line.branches {
                 guard
                     let joints = joints(
                         through: stops,
@@ -295,7 +295,6 @@ extension LineRouter {
                 else {
                     continue
                 }
-                keys.append(key)
                 routes.append(
                     Route(
                         arrow: line.arrow,
@@ -309,16 +308,13 @@ extension LineRouter {
 
         let spread = spread(of: routes, spacing: spacing)
 
-        var seen: [LineKey: Int] = [:]
         let drawn = routes.enumerated().map { index, route in
             // Room to get outside a node before turning back towards it. Taken
             // from the lane width rather than invented, so a figure that wants
             // its lines further apart gets its detours further out as well.
             let drawn = points(of: route, at: index, spread: spread, margin: spacing * 2)
-            let key = keys[index]
-            defer { seen[key, default: 0] += 1 }
             return RoutedLine(
-                id: DrawnLineID(key: key, occurrence: seen[key, default: 0]),
+                id: ids[index],
                 line: route.joints[0].line,
                 points: drawn,
                 arrow: route.arrow,
@@ -413,6 +409,26 @@ extension LineRouter {
         }
 
         return bundles
+    }
+
+    /// What each branch that can be drawn is known by, in the order the
+    /// branches are routed.
+    ///
+    /// A branch can be drawn when every node it passes is there. Worked out
+    /// from that alone, without any geometry, so that the figure can know which
+    /// lines it has before it knows where anything is.
+    static func drawnIDs(for lines: [Line], present: (NodeID) -> Bool) -> [DrawnLineID] {
+        var seen: [LineKey: Int] = [:]
+        var ids: [DrawnLineID] = []
+
+        for line in lines {
+            for (stops, key) in zip(line.branches, line.branchKeys) where stops.allSatisfy({ present($0.node) }) {
+                ids.append(DrawnLineID(key: key, occurrence: seen[key, default: 0]))
+                seen[key, default: 0] += 1
+            }
+        }
+
+        return ids
     }
 
     /// The routed lines, with every part of a line drawn once however many

@@ -186,6 +186,52 @@ extension [CGPoint] {
         return rest
     }
 
+    /// The line as far as `distance` along it, and no further.
+    func keeping(_ distance: CGFloat) -> [CGPoint] {
+        guard count >= 2 else {
+            return self
+        }
+        guard distance > 0, let end = point(along: distance) else {
+            return [self[0]]
+        }
+
+        var travelled: CGFloat = 0
+        var kept = [self[0]]
+        for (from, to) in zip(self, dropFirst()) {
+            travelled += from.distance(to: to)
+            guard travelled < distance - 0.01 else {
+                break
+            }
+            kept.append(to)
+        }
+        kept.append(end)
+        return kept
+    }
+
+    /// How far along the line the point nearest to `point` is.
+    func distance(alongTo point: CGPoint) -> CGFloat {
+        var travelled: CGFloat = 0
+        var best = (gap: CGFloat.infinity, along: CGFloat(0))
+
+        for (from, to) in zip(self, dropFirst()) {
+            let length = from.distance(to: to)
+            guard length > 0 else {
+                continue
+            }
+            let dx = (to.x - from.x) / length
+            let dy = (to.y - from.y) / length
+            let onto = Swift.min(Swift.max((point.x - from.x) * dx + (point.y - from.y) * dy, 0), length)
+            let nearest = CGPoint(x: from.x + dx * onto, y: from.y + dy * onto)
+            let gap = nearest.distance(to: point)
+            if gap < best.gap {
+                best = (gap, travelled + onto)
+            }
+            travelled += length
+        }
+
+        return best.along
+    }
+
     /// How far this line and `other` run together from their first points
     /// before they part.
     ///
