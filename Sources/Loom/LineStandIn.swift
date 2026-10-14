@@ -1,30 +1,38 @@
 import SwiftUI
 
-extension AnyTransition {
-    /// How an element of an arrangement comes and goes: fading, and reporting
-    /// how far it has come as it arrives.
-    static var figureElement: AnyTransition {
-        .asymmetric(
-            insertion: .modifier(active: NodeArrival(progress: 0), identity: NodeArrival(progress: 1)),
-            removal: .opacity
-        )
+/// How an element of an arrangement comes and goes: fading in and out, and
+/// reporting how far it has come as it arrives.
+struct ElementEntrance: Transition {
+    func body(content: Content, phase: TransitionPhase) -> some View {
+        content.modifier(NodeArrival(progress: phase.isIdentity ? 1 : 0))
     }
+}
 
-    /// How the stand-in for a line arrives when the figure arrives all at
-    /// once: the line is drawn in over the animation it arrived in.
-    ///
-    /// It leaves at once. A view on its way out reports nothing, so there is
-    /// no way to tell its line how far through leaving it is — and the node
-    /// the line went to may be gone too, leaving nowhere to route it. Lines
-    /// simply go when their nodes start to.
-    static func lineStandIn(_ id: DrawnLineID) -> AnyTransition {
-        .asymmetric(
-            insertion: .modifier(
-                active: LineArrival(id: id, progress: 0),
-                identity: LineArrival(id: id, progress: 1)
-            ),
-            removal: .identity
-        )
+/// How the stand-in for a line comes and goes.
+///
+/// Arriving all at once, the line is drawn in over the animation it arrived
+/// in. Arriving in phases, this does nothing, and ``LineStandIn`` does the
+/// drawing in once the nodes have settled — it must not report anything
+/// itself, or it would report the line as drawn over the stand-in's own
+/// report that it is still waiting.
+///
+/// It leaves at once. A view on its way out reports nothing, so there is no
+/// way to tell its line how far through leaving it is — and the node the line
+/// went to may be gone too, leaving nowhere to route it. Lines simply go when
+/// their nodes start to.
+struct LineEntrance: Transition {
+    let id: DrawnLineID
+
+    /// Whether this transition draws the line in, rather than ``LineStandIn``.
+    let drawsIn: Bool
+
+    func body(content: Content, phase: TransitionPhase) -> some View {
+        if drawsIn {
+            content.modifier(LineArrival(id: id, progress: phase == .willAppear ? 0 : 1))
+        }
+        else {
+            content
+        }
     }
 }
 

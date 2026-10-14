@@ -57,7 +57,7 @@ public struct FigureView<Content: Figure>: View {
                 ZStack {
                     ForEach(drawable, id: \.self) { id in
                         LineStandIn(id: id, drawn: phases == nil ? nil : settled >= watch.settling(for: id))
-                            .transition(phases == nil ? .lineStandIn(id) : .identity)
+                            .transition(LineEntrance(id: id, drawsIn: phases == nil))
                     }
                 }
             }
