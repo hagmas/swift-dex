@@ -16,7 +16,7 @@ public struct FigureView<Content: Figure>: View {
 
     @Environment(\.figureScale) private var scale
     @Environment(\.lineStyle) private var lineStyle
-    @Environment(\.figureAnimation) private var phases
+    @Environment(\.figureAnimation) private var figureAnimation
 
     /// How many nodes' phases have finished, which is what lines appearing in
     /// phases wait for — see ``LinePhaseTracker``.
@@ -49,15 +49,15 @@ public struct FigureView<Content: Figure>: View {
         let lines = figure.lines
         let present = Set(figure.nodeIDs)
         let drawable = LineRouter.drawnIDs(for: lines, present: present.contains)
-        let _ = phases == nil ? () : phaseTracker.note(drawable)
+        let _ = figureAnimation == nil ? () : phaseTracker.note(drawable)
 
         ScaledVStack(alignment: .center, spacing: 8, content: figure.arrangement.elementBody)
             .environment(\.waypointSpans, WaypointSpans.spans(for: lines, spacing: spacing))
             .background {
                 ZStack {
                     ForEach(drawable, id: \.self) { id in
-                        LineStandIn(id: id, shown: phases == nil ? nil : finished >= phaseTracker.phase(for: id))
-                            .transition(LineAppearTransition(id: id, drawsIn: phases == nil))
+                        LineStandIn(id: id, shown: figureAnimation == nil ? nil : finished >= phaseTracker.phase(for: id))
+                            .transition(LineAppearTransition(id: id, drawsIn: figureAnimation == nil))
                     }
                 }
             }
@@ -95,7 +95,7 @@ public struct FigureView<Content: Figure>: View {
             // Lines asked to start before the nodes settle start once the
             // appearing nodes have come far enough.
             .onPreferenceChange(ElementAppearPreference.self) { slowest in
-                guard let from = phases?.linesFrom, slowest >= from, let early = phaseTracker.takeEarly() else {
+                guard let from = figureAnimation?.linesFrom, slowest >= from, let early = phaseTracker.takeEarly() else {
                     return
                 }
                 withAnimation(early.animation) {
@@ -122,11 +122,11 @@ private extension FigureView {
     /// it can only be waited for from here: a completion added further in
     /// waits only for what animates further in.
     func runPhases(in transaction: inout Transaction) {
-        guard let phases else {
+        guard let figureAnimation else {
             return
         }
         let animated = transaction.animation != nil
-        if let nodes = phases.nodes, animated {
+        if let nodes = figureAnimation.nodes, animated {
             transaction.animation = nodes
         }
         guard let phase = phaseTracker.takeUnannounced() else {
@@ -140,10 +140,10 @@ private extension FigureView {
             Task { @MainActor in finish.wrappedValue = Swift.max(finish.wrappedValue, phase) }
             return
         }
-        let lines = phases.lines ?? transaction.animation
+        let lines = figureAnimation.lines ?? transaction.animation
         // Settling is still the fallback for lines asked to start early: a
         // change that brings in no node has nothing to measure.
-        if phases.linesFrom != nil {
+        if figureAnimation.linesFrom != nil {
             phaseTracker.showEarly(phase, in: lines)
         }
         transaction.addAnimationCompletion {
