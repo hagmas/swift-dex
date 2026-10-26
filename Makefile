@@ -12,3 +12,10 @@ format:
 .PHONY: lint
 lint:
 	swift format lint -s -p -r $(SWIFT_FILE_PATHS)
+
+# Loom's workbench: figures played through their changes, with a frame meter.
+# `make lab ARGS=--autoplay` plays every way of appearing, prints what the
+# meter saw, and quits.
+.PHONY: lab
+lab:
+	swift run --package-path Examples/LoomLab LoomLab $(ARGS)

@@ -21,6 +21,10 @@ SwiftDex is a Swift Package Manager library for creating presentations in SwiftU
 - `make proj` - Generate Xcode project for the example app using XcodeGen
 - The example project is in `Examples/SwiftDexExample.xcodeproj`
 
+### Loom Lab
+- `make lab` - Open Loom's workbench (`Examples/LoomLab`, a package of its own): a figure played through its steps, with a meter for late frames
+- `make lab ARGS=--autoplay` - Play every way of appearing, print what the meter saw, and quit. Use it to check a change to Loom's animation without anyone watching: image rendering cannot show animation
+
 ### Development Dependencies
 Development dependencies (swift-docc-plugin, swift-format, XcodeGen) are only included when `SWIFT_DEX_DEVELOPMENT` environment variable is set.
 
