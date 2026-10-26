@@ -89,6 +89,7 @@ public struct PerhapsElement<Wrapped: FigureElement>: FigureElement {
     @ViewBuilder public var elementBody: some View {
         if let wrapped {
             wrapped.elementBody
+                .transition(ElementAppearTransition())
         }
     }
 
@@ -106,8 +107,8 @@ public enum EitherElement<First: FigureElement, Second: FigureElement>: FigureEl
     /// The branch that was taken.
     @ViewBuilder public var elementBody: some View {
         switch self {
-        case .first(let element): element.elementBody
-        case .second(let element): element.elementBody
+        case .first(let element): element.elementBody.transition(ElementAppearTransition())
+        case .second(let element): element.elementBody.transition(ElementAppearTransition())
         }
     }
 

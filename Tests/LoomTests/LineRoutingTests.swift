@@ -166,6 +166,23 @@ final class LineRoutingTests: XCTestCase {
 }
 
 final class PolylineTests: XCTestCase {
+    /// A line being drawn in is cut at its tip, keeping every corner it has
+    /// already passed.
+    func test_keepingStopsPartWayAlongARun() {
+        let line = [CGPoint(x: 0, y: 0), CGPoint(x: 0, y: 10), CGPoint(x: 20, y: 10)]
+
+        XCTAssertEqual(line.keeping(15), [CGPoint(x: 0, y: 0), CGPoint(x: 0, y: 10), CGPoint(x: 5, y: 10)])
+        XCTAssertEqual(line.keeping(5), [CGPoint(x: 0, y: 0), CGPoint(x: 0, y: 5)])
+    }
+
+    /// Nothing of it yet, and all of it.
+    func test_keepingAtEitherEnd() {
+        let line = [CGPoint(x: 0, y: 0), CGPoint(x: 0, y: 10), CGPoint(x: 20, y: 10)]
+
+        XCTAssertEqual(line.keeping(0), [CGPoint(x: 0, y: 0)])
+        XCTAssertEqual(line.keeping(30), line)
+    }
+
     func test_repeatedPointsAreDropped() {
         let points = [CGPoint(x: 0, y: 0), CGPoint(x: 0, y: 0), CGPoint(x: 0, y: 10)]
 

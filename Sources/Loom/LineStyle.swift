@@ -47,6 +47,9 @@ public struct LineStyle: Sendable {
     /// line says, and ``Line/arrow`` decides it.
     public var arrowHead: ArrowHead
 
+    /// How the line appears when it is added to a figure that is changing.
+    public var appear: Appear
+
     /// The point size of the line's label.
     public var labelFontSize: CGFloat
 
@@ -70,6 +73,7 @@ public struct LineStyle: Sendable {
         cornerRadius: CGFloat = 0,
         dash: [CGFloat] = [],
         arrowHead: ArrowHead = .filled,
+        appear: Appear = .draw,
         labelFontSize: CGFloat = 10,
         labelColor: Color = .black,
         labelBackground: Color = .white,
@@ -80,6 +84,7 @@ public struct LineStyle: Sendable {
         self.cornerRadius = cornerRadius
         self.dash = dash
         self.arrowHead = arrowHead
+        self.appear = appear
         self.labelFontSize = labelFontSize
         self.labelColor = labelColor
         self.labelBackground = labelBackground
@@ -88,6 +93,22 @@ public struct LineStyle: Sendable {
 
     /// The style a line has when nothing says otherwise.
     public static let standard = LineStyle()
+}
+
+public extension LineStyle {
+    /// How a line appears.
+    ///
+    /// Either way it takes the animation the figure was changed in — or, when
+    /// the figure appears in phases, the lines' phase. It disappears at once,
+    /// whichever it is.
+    enum Appear: Hashable, Sendable {
+        /// Drawn from where it leaves to where it arrives, its arrowhead
+        /// travelling with the tip.
+        case draw
+
+        /// Faded in where it lies.
+        case fade
+    }
 }
 
 /// The mark at a tipped end of a line.

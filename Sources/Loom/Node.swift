@@ -37,8 +37,8 @@ public protocol Node: FigureElement {
 public extension Node {
     var elementBody: some View {
         body
-            .anchorPreference(key: NodeAnchorsPreference.self, value: .bounds) {
-                [id: $0]
+            .anchorPreference(key: FigureMarksPreference.self, value: .bounds) {
+                FigureMarks(anchors: [id: $0])
             }
     }
 
@@ -47,17 +47,26 @@ public extension Node {
     }
 }
 
-/// Where each node ended up, in the figure's coordinate space.
+/// What the parts of a figure report upwards, for the lines to be drawn from.
 ///
-/// Nodes are placed by SwiftUI, so this is the only channel through which a
-/// line learns a node's position.
-struct NodeAnchorsPreference: PreferenceKey {
-    static let defaultValue: [NodeID: Anchor<CGRect>] = [:]
+/// Where each node ended up, in the figure's coordinate space — nodes are
+/// placed by SwiftUI, so this is the only channel through which a line learns
+/// a node's position — and how much of each line has appeared, from none
+/// of it to all.
+///
+/// The two travel together because the lines can only read one preference,
+/// and both have to arrive frame by frame while the figure animates.
+struct FigureMarks {
+    var anchors: [NodeID: Anchor<CGRect>] = [:]
+    var lines: [DrawnLineID: CGFloat] = [:]
+}
 
-    static func reduce(
-        value: inout [NodeID: Anchor<CGRect>],
-        nextValue: () -> [NodeID: Anchor<CGRect>]
-    ) {
-        value.merge(nextValue()) { $1 }
+struct FigureMarksPreference: PreferenceKey {
+    static let defaultValue = FigureMarks()
+
+    static func reduce(value: inout FigureMarks, nextValue: () -> FigureMarks) {
+        let next = nextValue()
+        value.anchors.merge(next.anchors) { $1 }
+        value.lines.merge(next.lines) { $1 }
     }
 }
