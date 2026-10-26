@@ -51,7 +51,7 @@ public extension Node {
 ///
 /// Where each node ended up, in the figure's coordinate space — nodes are
 /// placed by SwiftUI, so this is the only channel through which a line learns
-/// a node's position — and how far each line is through arriving, from none
+/// a node's position — and how much of each line has appeared, from none
 /// of it to all.
 ///
 /// The two travel together because the lines can only read one preference,

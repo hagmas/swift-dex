@@ -18,10 +18,10 @@ public struct FigureView<Content: Figure>: View {
     @Environment(\.lineStyle) private var lineStyle
     @Environment(\.figureAnimation) private var phases
 
-    /// How many times the figure has settled after lines appeared, which is
-    /// what lines arriving in phases wait for.
-    @State private var settled = 0
-    @State private var watch = ArrivalWatch()
+    /// How many nodes' phases have finished, which is what lines appearing in
+    /// phases wait for — see ``LinePhaseTracker``.
+    @State private var finished = 0
+    @State private var phaseTracker = LinePhaseTracker()
 
     /// Renders a figure.
     ///
@@ -49,15 +49,15 @@ public struct FigureView<Content: Figure>: View {
         let lines = figure.lines
         let present = Set(figure.nodeIDs)
         let drawable = LineRouter.drawnIDs(for: lines, present: present.contains)
-        let _ = phases == nil ? () : watch.note(drawable)
+        let _ = phases == nil ? () : phaseTracker.note(drawable)
 
         ScaledVStack(alignment: .center, spacing: 8, content: figure.arrangement.elementBody)
             .environment(\.waypointSpans, WaypointSpans.spans(for: lines, spacing: spacing))
             .background {
                 ZStack {
                     ForEach(drawable, id: \.self) { id in
-                        LineStandIn(id: id, drawn: phases == nil ? nil : settled >= watch.settling(for: id))
-                            .transition(LineEntrance(id: id, drawsIn: phases == nil))
+                        LineStandIn(id: id, shown: phases == nil ? nil : finished >= phaseTracker.phase(for: id))
+                            .transition(LineAppearTransition(id: id, drawsIn: phases == nil))
                     }
                 }
             }
@@ -84,29 +84,29 @@ public struct FigureView<Content: Figure>: View {
                             route: route,
                             style: lines[route.line].style ?? lineStyle,
                             scale: scale,
-                            arrival: marks.lines[route.id] ?? 1
+                            appeared: marks.lines[route.id] ?? 1
                         )
                     }
                 }
             }
             .transaction { transaction in
-                arrive(in: &transaction)
+                runPhases(in: &transaction)
             }
             // Lines asked to start before the nodes settle start once the
-            // arriving nodes have come far enough.
-            .onPreferenceChange(NodeArrivalPreference.self) { slowest in
-                guard let from = phases?.linesFrom, slowest >= from, let due = watch.takeDue() else {
+            // appearing nodes have come far enough.
+            .onPreferenceChange(ElementAppearPreference.self) { slowest in
+                guard let from = phases?.linesFrom, slowest >= from, let early = phaseTracker.takeEarly() else {
                     return
                 }
-                withAnimation(due.animation) {
-                    settled = Swift.max(settled, due.settling)
+                withAnimation(early.animation) {
+                    finished = Swift.max(finished, early.phase)
                 }
             }
             // A figure that first appears has nothing to wait for, and no
-            // change for the lines it starts with to have arrived in.
+            // change for the lines it starts with to have appeared in.
             .onAppear {
-                if let settling = watch.takeUnannounced() {
-                    settled = Swift.max(settled, settling)
+                if let phase = phaseTracker.takeUnannounced() {
+                    finished = Swift.max(finished, phase)
                 }
             }
     }
@@ -121,7 +121,7 @@ private extension FigureView {
     /// — over the whole figure, since that is where the nodes are moving — and
     /// it can only be waited for from here: a completion added further in
     /// waits only for what animates further in.
-    func arrive(in transaction: inout Transaction) {
+    func runPhases(in transaction: inout Transaction) {
         guard let phases else {
             return
         }
@@ -129,26 +129,26 @@ private extension FigureView {
         if let nodes = phases.nodes, animated {
             transaction.animation = nodes
         }
-        guard let settling = watch.takeUnannounced() else {
+        guard let phase = phaseTracker.takeUnannounced() else {
             return
         }
 
-        let settle = $settled
+        let finish = $finished
         guard animated else {
             // Not animated, so there is nothing to wait for. Not now, though:
             // the change is still being made.
-            Task { @MainActor in settle.wrappedValue = Swift.max(settle.wrappedValue, settling) }
+            Task { @MainActor in finish.wrappedValue = Swift.max(finish.wrappedValue, phase) }
             return
         }
         let lines = phases.lines ?? transaction.animation
         // Settling is still the fallback for lines asked to start early: a
         // change that brings in no node has nothing to measure.
         if phases.linesFrom != nil {
-            watch.startEarly(settling, in: lines)
+            phaseTracker.showEarly(phase, in: lines)
         }
         transaction.addAnimationCompletion {
             withAnimation(lines) {
-                settle.wrappedValue = Swift.max(settle.wrappedValue, settling)
+                finish.wrappedValue = Swift.max(finish.wrappedValue, phase)
             }
         }
     }
@@ -160,8 +160,8 @@ private struct LineView: View {
     let style: LineStyle
     let scale: CGFloat
 
-    /// How much of the line has arrived, from none of it to all.
-    let arrival: CGFloat
+    /// How much of the line has appeared, from none of it to all.
+    let appeared: CGFloat
 
     private var width: CGFloat {
         style.width * scale
@@ -202,7 +202,7 @@ private struct LineView: View {
                     .opacity(labelShown(at: middle, along: own))
             }
         }
-        .opacity(style.entrance == .fade ? arrival : 1)
+        .opacity(style.appear == .fade ? appeared : 1)
     }
 
     @ViewBuilder
@@ -244,17 +244,17 @@ private extension LineView {
         }
     }
 
-    /// As much of the line as has arrived.
+    /// As much of the line as has appeared.
     ///
     /// A line that is drawn in grows from where it leaves, and is cut short at
     /// the tip rather than trimmed as a shape, so that everything which reads
     /// the end of the line — the arrowhead, and the stroke stopping short of
     /// it — finds it at the tip as the tip moves.
     func shown(_ points: [CGPoint]) -> [CGPoint] {
-        guard style.entrance == .draw, arrival < 1 else {
+        guard style.appear == .draw, appeared < 1 else {
             return points
         }
-        return points.keeping(points.length * arrival)
+        return points.keeping(points.length * appeared)
     }
 
     /// How much of the label shows, given how far the line has been drawn.
@@ -262,10 +262,10 @@ private extension LineView {
     /// None until the tip reaches it, so the words never hang in the air
     /// ahead of the line, then quickly all of it once the tip is past.
     func labelShown(at point: CGPoint, along points: [CGPoint]) -> CGFloat {
-        guard style.entrance == .draw, arrival < 1 else {
+        guard style.appear == .draw, appeared < 1 else {
             return 1
         }
-        let drawn = points.length * arrival
+        let drawn = points.length * appeared
         let passed = drawn - points.distance(alongTo: point)
         let fade = style.labelFontSize * scale * 2
         return Swift.min(Swift.max(passed / fade, 0), 1)
