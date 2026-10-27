@@ -33,7 +33,7 @@ import Foundation
 ///
 /// A line carries no identity of its own. Identity is opt-in everywhere in a
 /// figure, and most lines are never addressed by anything.
-public struct Line {
+public struct Line: Sendable {
     /// The nodes the line leaves.
     ///
     /// More than one only when ``to`` has one.
