@@ -3,35 +3,41 @@ import SwiftUI
 
 // Run with `swift run --package-path Examples/LoomLab LoomLab`, adding
 // `--autoplay` to play every way of appearing, print what the frame meter
-// saw, and quit.
+// saw, and quit, or `--snapshot <folder>` to draw every scenario into images
+// there and quit.
 
-private final class AppDelegate: NSObject, NSApplicationDelegate {
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        true
+/// The lab as an app: one window, so that it has a proper toolbar for the
+/// sidebar's button to sit in.
+private struct LoomLabApp: App {
+    static var autoplay = false
+
+    var body: some Scene {
+        Window("Loom Lab", id: "lab") {
+            LabView(autoplay: Self.autoplay)
+                .onAppear {
+                    NSApp.activate()
+                }
+        }
+        .defaultSize(width: 1100, height: 820)
     }
 }
 
 MainActor.assumeIsolated {
-    let autoplay = CommandLine.arguments.contains("--autoplay")
-    let delegate = AppDelegate()
-
-    let app = NSApplication.shared
-    app.delegate = delegate
-    app.setActivationPolicy(.regular)
-
-    let window = NSWindow(
-        contentRect: NSRect(x: 0, y: 0, width: 1000, height: 800),
-        styleMask: [.titled, .closable, .resizable, .miniaturizable],
-        backing: .buffered,
-        defer: false
-    )
-    window.title = "Loom Lab"
-    window.contentView = NSHostingView(rootView: LabView(autoplay: autoplay))
-    window.center()
-    window.makeKeyAndOrderFront(nil)
-    app.activate()
-
-    withExtendedLifetime(delegate) {
-        app.run()
+    let arguments = CommandLine.arguments
+    if let flag = arguments.firstIndex(of: "--snapshot"), arguments.indices.contains(flag + 1) {
+        do {
+            try Snapshot.write(to: URL(filePath: arguments[flag + 1]))
+            exit(0)
+        }
+        catch {
+            print(error)
+            exit(1)
+        }
     }
+
+    LoomLabApp.autoplay = arguments.contains("--autoplay")
+    // Run from a package rather than a bundle, the app would otherwise start
+    // without a Dock icon or a menu bar.
+    NSApplication.shared.setActivationPolicy(.regular)
+    LoomLabApp.main()
 }

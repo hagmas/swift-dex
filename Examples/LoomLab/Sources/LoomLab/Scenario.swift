@@ -22,7 +22,17 @@ struct Scenario: Identifiable, Sendable {
 
 extension Scenario {
     /// Every scenario the lab knows.
-    static let all: [Scenario] = [.growingFlow]
+    static let all: [Scenario] = [
+        .growingFlow,
+        .growingFan,
+        .classDiagram,
+        .stateMachine,
+        .layers,
+        .layersStraight,
+        .flowchart,
+        .hub,
+        .ragged,
+    ]
 
     /// Nodes added two steps running, one of them with a loop, then the one at
     /// the top taken away — the figure on the example deck's Figures slide.
