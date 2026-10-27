@@ -33,7 +33,13 @@ extension Scenario {
 
     /// A flowchart whose "no" branch loops back up round the side.
     static let flowchart = Scenario(name: "Flowchart", steps: 0) { _ in
-        AnyView(FigureView(Flowchart(), routing: .orthogonal))
+        AnyView(FigureView(Flowchart(aligned: false), routing: .orthogonal))
+    }
+
+    /// The same flowchart with its boxes lined up on a spine, so the lines
+    /// down it run straight.
+    static let flowchartAligned = Scenario(name: "Flowchart, aligned", steps: 0) { _ in
+        AnyView(FigureView(Flowchart(aligned: true), routing: .orthogonal))
     }
 
     /// One node many others point at.
@@ -208,11 +214,17 @@ private struct Layers: Figure {
 }
 
 private struct Flowchart: Figure {
+    /// Whether the boxes are lined up on the column's spine.
+    ///
+    /// Without it, the waypoint beside "Fetch data" pulls that row's middle
+    /// off the others', and every line through it bends.
+    var aligned: Bool
+
     var arrangement: some FigureElement {
-        Column(spacing: 40) {
+        Column(alignment: aligned ? .columnSpine : .center, spacing: 40) {
             Row { Box(.start, title: "Start") }
             Row(spacing: 64) {
-                Box(.fetch, title: "Fetch data")
+                Box(.fetch, title: "Fetch data").aligned(on: .columnSpine)
                 Waypoint(.back)
             }
             Row { Box(.valid, title: "Valid?") }
