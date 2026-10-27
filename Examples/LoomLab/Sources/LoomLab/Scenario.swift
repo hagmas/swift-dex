@@ -30,6 +30,7 @@ extension Scenario {
         .layers,
         .layersStraight,
         .flowchart,
+        .flowchartAligned,
         .hub,
         .ragged,
     ]
