@@ -9,8 +9,8 @@ import SwiftUI
 /// struct RefactorFigure: Figure {
 ///     var arrangement: some FigureElement {
 ///         Column(spacing: 40) {
-///             Row { Box(.viewModel, title: "ViewModel") }
-///             Row { Box(.repository, title: "Repository") }
+///             Row { TextNode(.viewModel, title: "ViewModel") }
+///             Row { TextNode(.repository, title: "Repository") }
 ///         }
 ///     }
 ///

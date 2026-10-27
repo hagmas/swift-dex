@@ -12,12 +12,12 @@ private struct OffsetFigure: Figure {
     var arrangement: some FigureElement {
         Column {
             Row {
-                Box(.first, title: "First")
-                Box(.second, title: "Second")
+                TextNode(.first, title: "First")
+                TextNode(.second, title: "Second")
             }
             Row {
                 Empty()
-                Box(.third, title: "Third")
+                TextNode(.third, title: "Third")
             }
         }
     }

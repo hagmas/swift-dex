@@ -13,11 +13,11 @@ private struct Growing: Figure {
 
     var arrangement: some FigureElement {
         Column {
-            Row { Box(.first, title: "First") }
+            Row { TextNode(.first, title: "First") }
             if showsSecond {
-                Row { Box(.second, title: "Second") }
+                Row { TextNode(.second, title: "Second") }
             }
-            Row { Box(.third, title: "Third") }
+            Row { TextNode(.third, title: "Third") }
         }
     }
 
@@ -38,10 +38,10 @@ private struct Either: Figure {
     var arrangement: some FigureElement {
         Row {
             if swapped {
-                Box(.second, title: "Second")
+                TextNode(.second, title: "Second")
             }
             else {
-                Box(.first, title: "First")
+                TextNode(.first, title: "First")
             }
         }
     }

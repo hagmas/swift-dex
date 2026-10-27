@@ -19,10 +19,10 @@ private struct Stacked<Lines: Sequence<Line>>: Figure {
 
     var arrangement: some FigureElement {
         Column {
-            Row { Box(.above, title: "Above") }
+            Row { TextNode(.above, title: "Above") }
             Row {
-                Box(.below, title: "Below")
-                Box(.beside, title: "Beside")
+                TextNode(.below, title: "Below")
+                TextNode(.beside, title: "Beside")
             }
         }
     }
@@ -150,7 +150,7 @@ final class ExplicitAnchorTests: XCTestCase {
     func test_aNodeDeclaredWithASideIsReported() {
         struct Sided: Figure {
             var arrangement: some FigureElement {
-                Row { Box(.above.top, title: "Above") }
+                Row { TextNode(.above.top, title: "Above") }
             }
         }
 

@@ -15,10 +15,10 @@ final class EmptyTests: XCTestCase {
     func test_aHoleTakesNoHeightOfItsOwn() {
         let withHole = Row {
             Empty()
-            Box(.box, title: "Box")
+            TextNode(.box, title: "Box")
         }
         let without = Row {
-            Box(.box, title: "Box")
+            TextNode(.box, title: "Box")
         }
 
         let room = CGSize(width: 1000, height: 1000)

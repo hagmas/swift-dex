@@ -13,13 +13,13 @@
         var arrangement: some FigureElement {
             Column(spacing: 48) {
                 Row(spacing: 32) {
-                    Box(.viewModel, title: "ViewModel")
+                    TextNode(.viewModel, title: "ViewModel")
                     Waypoint(.sideChannel)
                 }
-                Row { Box(.repository, title: "Repository") }
+                Row { TextNode(.repository, title: "Repository") }
                 Row(spacing: 32) {
-                    Box(.apiClient, title: "APIClient")
-                    Box(.cache, title: "Cache (on disk)")
+                    TextNode(.apiClient, title: "APIClient")
+                    TextNode(.cache, title: "Cache (on disk)")
                 }
             }
         }

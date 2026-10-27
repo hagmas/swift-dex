@@ -52,7 +52,7 @@ extension Scenario {
     static let ragged = Scenario(name: "Ragged titles", steps: 0) { _ in
         AnyView(
             FigureView(Ragged(), routing: .orthogonal)
-                .boxStyle(BoxStyle(maxWidth: 180))
+                .nodeStyle(NodeStyle(maxWidth: 180))
         )
     }
 
@@ -65,10 +65,10 @@ extension Scenario {
     }
 }
 
-private extension BoxStyle {
-    static let protocolType = BoxStyle(fill: Color(white: 0.96), fontWeight: .medium)
-    static let classType = BoxStyle(fill: Color(red: 0.89, green: 0.93, blue: 1), stroke: .blue)
-    static let structType = BoxStyle(fill: Color(red: 1, green: 0.94, blue: 0.86), stroke: .orange, cornerRadius: 2)
+private extension NodeStyle {
+    static let protocolType = NodeStyle(fill: Color(white: 0.96), fontWeight: .medium)
+    static let classType = NodeStyle(fill: Color(red: 0.89, green: 0.93, blue: 1), stroke: .blue)
+    static let structType = NodeStyle(fill: Color(red: 1, green: 0.94, blue: 0.86), stroke: .orange, cornerRadius: 2)
 }
 
 private extension LineStyle {
@@ -138,15 +138,15 @@ private struct ClassDiagram: Figure {
     var arrangement: some FigureElement {
         Column(spacing: 56) {
             Row(spacing: 40) {
-                Box(.named, title: "Named").boxStyle(.protocolType)
-                Box(.animal, title: "Animal").boxStyle(.classType)
+                TextNode(.named, title: "Named").nodeStyle(.protocolType)
+                TextNode(.animal, title: "Animal").nodeStyle(.classType)
             }
             Row(spacing: 24) {
-                Box(.dog, title: "Dog").boxStyle(.classType)
-                Box(.cat, title: "Cat").boxStyle(.classType)
-                Box(.bird, title: "Bird").boxStyle(.classType)
+                TextNode(.dog, title: "Dog").nodeStyle(.classType)
+                TextNode(.cat, title: "Cat").nodeStyle(.classType)
+                TextNode(.bird, title: "Bird").nodeStyle(.classType)
             }
-            Row { Box(.food, title: "Food").boxStyle(.structType) }
+            Row { TextNode(.food, title: "Food").nodeStyle(.structType) }
         }
     }
 
@@ -161,12 +161,12 @@ private struct StateMachine: Figure {
     var arrangement: some FigureElement {
         Column(spacing: 56) {
             Row(spacing: 48) {
-                Box(.idle, title: "Idle")
-                Box(.loading, title: "Loading")
+                TextNode(.idle, title: "Idle")
+                TextNode(.loading, title: "Loading")
             }
             Row(spacing: 48) {
-                Box(.failed, title: "Failed")
-                Box(.loaded, title: "Loaded")
+                TextNode(.failed, title: "Failed")
+                TextNode(.loaded, title: "Loaded")
                 Waypoint(.retry)
             }
         }
@@ -187,18 +187,18 @@ private struct Layers: Figure {
     var arrangement: some FigureElement {
         Column(spacing: 64) {
             Row(spacing: 24) {
-                Box(.home, title: "HomeView")
-                Box(.search, title: "SearchView")
-                Box(.profile, title: "ProfileView")
+                TextNode(.home, title: "HomeView")
+                TextNode(.search, title: "SearchView")
+                TextNode(.profile, title: "ProfileView")
             }
             Row(spacing: 24) {
-                Box(.feedModel, title: "FeedModel")
-                Box(.userModel, title: "UserModel")
+                TextNode(.feedModel, title: "FeedModel")
+                TextNode(.userModel, title: "UserModel")
             }
             Row(spacing: 24) {
-                Box(.api, title: "APIClient")
-                Box(.cache, title: "Cache")
-                Box(.auth, title: "Auth")
+                TextNode(.api, title: "APIClient")
+                TextNode(.cache, title: "Cache")
+                TextNode(.auth, title: "Auth")
             }
         }
     }
@@ -222,14 +222,14 @@ private struct Flowchart: Figure {
 
     var arrangement: some FigureElement {
         Column(alignment: aligned ? .columnSpine : .center, spacing: 40) {
-            Row { Box(.start, title: "Start") }
+            Row { TextNode(.start, title: "Start") }
             Row(spacing: 64) {
-                Box(.fetch, title: "Fetch data").aligned(on: .columnSpine)
+                TextNode(.fetch, title: "Fetch data").aligned(on: .columnSpine)
                 Waypoint(.back)
             }
-            Row { Box(.valid, title: "Valid?") }
-            Row { Box(.save, title: "Save") }
-            Row { Box(.done, title: "Done") }
+            Row { TextNode(.valid, title: "Valid?") }
+            Row { TextNode(.save, title: "Save") }
+            Row { TextNode(.done, title: "Done") }
         }
     }
 
@@ -246,17 +246,17 @@ private struct Hub: Figure {
     var arrangement: some FigureElement {
         Column(spacing: 48) {
             Row(spacing: 32) {
-                Box(.north, title: "Logger")
-                Box(.northEast, title: "Metrics")
+                TextNode(.north, title: "Logger")
+                TextNode(.northEast, title: "Metrics")
             }
             Row(spacing: 32) {
-                Box(.west, title: "Settings")
-                Box(.core, title: "Core")
-                Box(.east, title: "Network")
+                TextNode(.west, title: "Settings")
+                TextNode(.core, title: "Core")
+                TextNode(.east, title: "Network")
             }
             Row(spacing: 32) {
-                Box(.southWest, title: "Storage")
-                Box(.south, title: "UI")
+                TextNode(.southWest, title: "Storage")
+                TextNode(.south, title: "UI")
             }
         }
     }
@@ -275,13 +275,13 @@ private struct Ragged: Figure {
     var arrangement: some FigureElement {
         Column(spacing: 48) {
             Row(spacing: 24) {
-                Box(.short, title: "DB")
-                Box(.long, title: "A service whose name goes on for a while")
-                Box(.tiny, title: "X")
+                TextNode(.short, title: "DB")
+                TextNode(.long, title: "A service whose name goes on for a while")
+                TextNode(.tiny, title: "X")
             }
             Row(spacing: 24) {
                 Empty()
-                Box(.longer, title: "Something with an even longer name than that one, really")
+                TextNode(.longer, title: "Something with an even longer name than that one, really")
                 Empty()
             }
         }
@@ -299,12 +299,12 @@ private struct GrowingFan: Figure {
 
     var arrangement: some FigureElement {
         Column(spacing: 56) {
-            Row { Box(.source, title: "Source") }
+            Row { TextNode(.source, title: "Source") }
             Row(spacing: 24) {
-                Box(.stage1, title: "Parse")
-                if step >= 1 { Box(.stage2, title: "Validate") }
-                if step >= 2 { Box(.stage3, title: "Enrich") }
-                if step >= 3 { Box(.stage4, title: "Store") }
+                TextNode(.stage1, title: "Parse")
+                if step >= 1 { TextNode(.stage2, title: "Validate") }
+                if step >= 2 { TextNode(.stage3, title: "Enrich") }
+                if step >= 3 { TextNode(.stage4, title: "Store") }
             }
         }
     }

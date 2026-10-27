@@ -13,8 +13,8 @@ private struct Pair<Lines: Sequence<Line>>: Figure {
 
     var arrangement: some FigureElement {
         Column {
-            Row { Box(.one, title: "One") }
-            Row { Box(.two, title: "Two") }
+            Row { TextNode(.one, title: "One") }
+            Row { TextNode(.two, title: "Two") }
         }
     }
 

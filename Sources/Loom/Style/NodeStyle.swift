@@ -1,72 +1,77 @@
 import SwiftUI
 
-/// How a ``Box`` looks.
+/// How a ``Node`` is framed, and how the text in it is set.
 ///
-/// A style decides everything about a box's appearance at once. Styles do not
-/// combine: the one nearest the box wins outright, and whatever it leaves out
+/// The frame — outline, fill, padding, widths — is drawn by the figure around
+/// whatever a node shows, and the text settings are passed to the node's
+/// content, so a style applies alike to a ``TextNode`` and to a node of your
+/// own.
+///
+/// A style decides everything about a node's appearance at once. Styles do not
+/// combine: the one nearest the node wins outright, and whatever it leaves out
 /// comes from its own defaults, never from a style further out.
 ///
 /// ```swift
-/// extension BoxStyle {
-///     static let classType = BoxStyle(fill: .blue.opacity(0.12), stroke: .blue)
-///     static let structType = BoxStyle(fill: .orange.opacity(0.12), stroke: .orange)
+/// extension NodeStyle {
+///     static let classType = NodeStyle(fill: .blue.opacity(0.12), stroke: .blue)
+///     static let structType = NodeStyle(fill: .orange.opacity(0.12), stroke: .orange)
 /// }
 ///
 /// Row {
-///     Box(.user, title: "User").boxStyle(.classType)
-///     Box(.point, title: "Point").boxStyle(.structType)
+///     TextNode(.user, title: "User").nodeStyle(.classType)
+///     TextNode(.point, title: "Point").nodeStyle(.structType)
 /// }
 /// ```
 ///
 /// Applied to a ``FigureView`` a style is the figure's own; applied to a
-/// ``Row`` or ``Column`` it covers everything inside; applied to a box it
-/// covers that box alone.
+/// ``Row`` or ``Column`` it covers everything inside; applied to a node it
+/// covers that node alone.
 ///
 /// Every number is in points, in the figure's own terms. A figure is not told
 /// how big it will be shown: a host that wants it larger scales the whole of it.
 ///
 /// Colours are fixed rather than following the system's appearance. A figure
 /// is content, not interface, and should look the same wherever it is shown.
-public struct BoxStyle: Sendable {
-    /// The colour inside the box.
+public struct NodeStyle: Sendable {
+    /// The colour inside the node.
     public var fill: Color
 
-    /// The colour of the box's outline.
+    /// The colour of the node's outline.
     public var stroke: Color
 
-    /// The thickness of the box's outline.
+    /// The thickness of the node's outline.
     public var strokeWidth: CGFloat
 
-    /// The colour of the title.
+    /// The colour of the node's text.
     public var textColor: Color
 
-    /// The point size of the title.
+    /// The point size of the node's text.
     public var fontSize: CGFloat
 
-    /// The weight of the title.
+    /// The weight of the node's text.
     public var fontWeight: Font.Weight
 
     /// How the lines of a title that wraps line up with each other, and where
-    /// a title narrower than the box sits within it.
+    /// a title narrower than the node sits within it.
     public var textAlignment: TextAlignment
 
     /// The space between the title and the outline.
     public var padding: EdgeInsets
 
-    /// The radius of the box's corners.
+    /// The radius of the node's corners.
     public var cornerRadius: CGFloat
 
-    /// The width a box will not shrink below.
+    /// The width a node will not shrink below.
     ///
-    /// Ragged box widths are the first thing that makes a figure look untidy,
+    /// Ragged node widths are the first thing that makes a figure look untidy,
     /// so the default is a width rather than none. It is also how wide an
-    /// ``Empty`` is unless told otherwise, so a hole lines up with the boxes
+    /// ``Empty`` is unless told otherwise, so a hole lines up with the nodes
     /// around it.
     public var minWidth: CGFloat
 
-    /// The width a box will not grow beyond, or `nil` for no limit.
+    /// The width a node will not grow beyond, or `nil` for no limit.
     ///
-    /// A title too long to fit wraps, and the box grows taller instead.
+    /// A title too long to fit wraps, and the node grows taller instead.
     public var maxWidth: CGFloat?
 
     /// Creates a style.
@@ -96,39 +101,39 @@ public struct BoxStyle: Sendable {
         self.maxWidth = maxWidth
     }
 
-    /// The style a box has when nothing says otherwise.
-    public static let standard = BoxStyle()
+    /// The style a node has when nothing says otherwise.
+    public static let standard = NodeStyle()
 }
 
 extension EnvironmentValues {
-    @Entry var boxStyle: BoxStyle = .standard
+    @Entry var nodeStyle: NodeStyle = .standard
 }
 
 public extension View {
-    /// Sets the style of every box in this view — for a ``FigureView``, every
-    /// box in the figure that does not have a style of its own.
-    func boxStyle(_ style: BoxStyle) -> some View {
-        environment(\.boxStyle, style)
+    /// Sets the style of every node in this view — for a ``FigureView``, every
+    /// node in the figure that does not have a style of its own.
+    func nodeStyle(_ style: NodeStyle) -> some View {
+        environment(\.nodeStyle, style)
     }
 }
 
 public extension FigureElement {
-    /// Sets the style of every box in this element that does not have a style
+    /// Sets the style of every node in this element that does not have a style
     /// of its own.
-    func boxStyle(_ style: BoxStyle) -> BoxStyled<Self> {
-        BoxStyled(self, style: style)
+    func nodeStyle(_ style: NodeStyle) -> NodeStyled<Self> {
+        NodeStyled(self, style: style)
     }
 }
 
-/// An element whose boxes have been given a style.
+/// An element whose nodes have been given a style.
 ///
 /// It adds nothing to the arrangement's shape: a styled row is still the same
 /// row, in the same place.
-public struct BoxStyled<Wrapped: FigureElement>: FigureElement {
+public struct NodeStyled<Wrapped: FigureElement>: FigureElement {
     private let wrapped: Wrapped
-    private let style: BoxStyle
+    private let style: NodeStyle
 
-    init(_ wrapped: Wrapped, style: BoxStyle) {
+    init(_ wrapped: Wrapped, style: NodeStyle) {
         self.wrapped = wrapped
         self.style = style
     }
@@ -136,7 +141,7 @@ public struct BoxStyled<Wrapped: FigureElement>: FigureElement {
     /// The element, with the style in its environment.
     public var elementBody: some View {
         wrapped.elementBody
-            .environment(\.boxStyle, style)
+            .environment(\.nodeStyle, style)
     }
 
     /// The element's placements, unchanged.
