@@ -8,7 +8,7 @@ struct LabView: View {
     /// saw, and quit.
     let autoplay: Bool
 
-    @State private var scenarioName = Scenario.all[0].name
+    @State private var selection: String? = Scenario.all[0].name
     @State private var step = 0
     @State private var appear = AppearMode.phasedEarly
     @State private var motion = Motion.bouncy
@@ -16,24 +16,30 @@ struct LabView: View {
     @State private var playing = false
 
     private var scenario: Scenario {
-        Scenario.all.first { $0.name == scenarioName } ?? Scenario.all[0]
+        Scenario.all.first { $0.name == selection } ?? Scenario.all[0]
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            scenario.figure(step)
-                .modifier(Appearing(mode: appear))
-                .figureScale(2)
-                .padding(40)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(.white)
+        NavigationSplitView {
+            List(Scenario.all, selection: $selection) { scenario in
+                Text(scenario.name)
+                    .tag(scenario.name)
+            }
+            .navigationSplitViewColumnWidth(min: 160, ideal: 200)
+        } detail: {
+            VStack(spacing: 0) {
+                canvas
 
-            Divider()
+                Divider()
 
-            controls
-                .padding()
+                controls
+                    .padding()
+            }
         }
-        .frame(minWidth: 640, minHeight: 760)
+        .frame(minWidth: 800, minHeight: 760)
+        .onChange(of: selection) {
+            step = 0
+        }
         .task {
             guard autoplay else {
                 return
@@ -47,16 +53,30 @@ struct LabView: View {
         }
     }
 
+    /// The figure, in a space it can scroll in.
+    ///
+    /// However large the figure grows, it never asks the window for more room:
+    /// a figure that does not fit is panned across rather than pushing the
+    /// sidebar aside. One that does fit sits in the middle.
+    private var canvas: some View {
+        GeometryReader { viewport in
+            ScrollView([.horizontal, .vertical]) {
+                scenario.figure(step)
+                    .modifier(Appearing(mode: appear))
+                    .figureScale(2)
+                    .padding(40)
+                    .frame(minWidth: viewport.size.width, minHeight: viewport.size.height)
+            }
+        }
+        .background(.white)
+        .background(FrameMeter.Ticks(meter: meter))
+    }
+
     /// What to play on one row, and playing it on the next, so that neither
     /// is squeezed when the window is narrow.
     private var controls: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 16) {
-                Picker("Scenario", selection: $scenarioName) {
-                    ForEach(Scenario.all) { Text($0.name).tag($0.id) }
-                }
-                .fixedSize()
-
                 Picker("Appear", selection: $appear) {
                     ForEach(AppearMode.allCases) { Text($0.rawValue).tag($0) }
                 }
@@ -78,7 +98,7 @@ struct LabView: View {
                 Button("Play") {
                     Task { await play() }
                 }
-                .disabled(playing)
+                .disabled(playing || scenario.steps == 0)
 
                 Spacer(minLength: 16)
 
@@ -106,7 +126,7 @@ struct LabView: View {
         try? await Task.sleep(for: .seconds(0.5))
 
         meter.start()
-        for next in 1...scenario.steps {
+        for next in stride(from: 1, through: scenario.steps, by: 1) {
             change(to: next)
             // Long enough for lines appearing in phases to finish too.
             try? await Task.sleep(for: .seconds(1.6))
