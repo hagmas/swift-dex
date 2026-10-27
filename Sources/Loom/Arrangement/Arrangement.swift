@@ -146,7 +146,10 @@ private struct Hole: View {
     @Environment(\.figureScale) private var scale
 
     var body: some View {
+        // Told no height, it is given none rather than left to choose: a
+        // `Color.clear` with no height takes all it is offered, which stretches
+        // the row it sits in.
         Color.clear
-            .frame(width: (width ?? style.minWidth) * scale, height: height.map { $0 * scale })
+            .frame(width: (width ?? style.minWidth) * scale, height: (height ?? 0) * scale)
     }
 }
