@@ -42,6 +42,12 @@ extension Scenario {
         AnyView(FigureView(Flowchart(aligned: true), routing: .orthogonal))
     }
 
+    /// Nodes of every shape, with lines sitting side by side and a loop on
+    /// them, so that their ends are off the middle of a side.
+    static let shapes = Scenario(name: "Shapes", steps: 0) { _ in
+        AnyView(FigureView(Shapes(), routing: .orthogonal))
+    }
+
     /// One node many others point at.
     static let hub = Scenario(name: "Hub", steps: 0) { _ in
         AnyView(FigureView(Hub(), routing: .orthogonal))
@@ -68,7 +74,26 @@ extension Scenario {
 private extension NodeStyle {
     static let protocolType = NodeStyle(fill: Color(white: 0.96), fontWeight: .medium)
     static let classType = NodeStyle(fill: Color(red: 0.89, green: 0.93, blue: 1), stroke: .blue)
-    static let structType = NodeStyle(fill: Color(red: 1, green: 0.94, blue: 0.86), stroke: .orange, cornerRadius: 2)
+    static let structType = NodeStyle(
+        shape: .roundedRectangle(cornerRadius: 2),
+        fill: Color(red: 1, green: 0.94, blue: 0.86),
+        stroke: .orange
+    )
+
+    // Shapes
+    static let state = NodeStyle.standard.with {
+        $0.shape = .circle
+        $0.minWidth = 0
+    }
+    static let decision = NodeStyle.standard.with {
+        $0.shape = .diamond
+        $0.minWidth = 0
+    }
+    static let terminal = NodeStyle.standard.with { $0.shape = .capsule }
+    static let note = NodeStyle.standard.with {
+        $0.shape = .ellipse
+        $0.minWidth = 0
+    }
 }
 
 private extension LineStyle {
@@ -110,6 +135,15 @@ private extension NodeID {
     static let save = NodeID("save")
     static let done = NodeID("done")
     static let back = NodeID("back")
+
+    // Shapes
+    static let begin = NodeID("begin")
+    static let ready = NodeID("ready")
+    static let saving = NodeID("saving")
+    static let check = NodeID("check")
+    static let ok = NodeID("ok")
+    static let retrying = NodeID("retrying")
+    static let aside = NodeID("aside")
 
     // Hub
     static let core = NodeID("core")
@@ -311,5 +345,36 @@ private struct GrowingFan: Figure {
 
     var lines: [Line] {
         Line(from: .source, to: .stage1, .stage2, .stage3, .stage4, label: "feeds")
+    }
+}
+
+private struct Shapes: Figure {
+    var arrangement: some FigureElement {
+        Column(alignment: .columnSpine, spacing: 32) {
+            Row { TextNode(.begin, title: "Begin").nodeStyle(.terminal) }
+            Row(spacing: 48) {
+                TextNode(.ready, title: "Ready").nodeStyle(.state).aligned(on: .columnSpine)
+                TextNode(.aside, title: "Logs").nodeStyle(.note)
+            }
+            Row(spacing: 48) {
+                TextNode(.saving, title: "Saving").nodeStyle(.state)
+                TextNode(.check, title: "Valid?").nodeStyle(.decision).aligned(on: .columnSpine)
+            }
+            Row(spacing: 48) {
+                TextNode(.ok, title: "Done").nodeStyle(.state)
+                TextNode(.retrying, title: "Retry").nodeStyle(.state)
+            }
+        }
+    }
+
+    var lines: [Line] {
+        Line(from: .begin, to: .ready)
+        Line(from: .ready, to: .aside)
+        Line(from: .ready, to: .check, label: "submit")
+        Line(from: .ready.leading, to: .saving.top, label: "autosave")
+        Line(from: .saving, to: .check)
+        Line(from: .check, to: .ok, .retrying)
+        Line(from: .retrying.top, to: .check.trailing)
+        Line(looping: .retrying.trailing, label: "wait")
     }
 }

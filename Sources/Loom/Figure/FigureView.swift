@@ -74,6 +74,7 @@ public struct FigureView<Content: Figure>: View {
                     let routes = LineRouter.routes(
                         for: lines,
                         rects: marks.anchors.mapValues { proxy[$0] },
+                        outlines: marks.outlines,
                         addresses: Placement.addresses(in: placements),
                         waypointAxes: Placement.waypointAxes(in: placements),
                         routing: routing,

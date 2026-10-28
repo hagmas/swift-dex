@@ -67,11 +67,11 @@ private extension NodeStyle {
     )
 
     static let structType = NodeStyle(
+        shape: .roundedRectangle(cornerRadius: 2),
         fill: Color(red: 1.0, green: 0.93, blue: 0.85),
         stroke: Color(red: 0.85, green: 0.45, blue: 0.1),
         strokeWidth: 1.5,
-        fontWeight: .semibold,
-        cornerRadius: 2
+        fontWeight: .semibold
     )
 }
 

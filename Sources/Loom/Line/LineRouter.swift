@@ -270,6 +270,7 @@ extension LineRouter {
     static func routes(
         for lines: [Line],
         rects: [NodeID: CGRect],
+        outlines: [NodeID: Outline] = [:],
         addresses: [NodeID: NodeAddress],
         waypointAxes: [NodeID: Axis],
         routing: Line.Routing,
@@ -312,7 +313,12 @@ extension LineRouter {
             // Room to get outside a node before turning back towards it. Taken
             // from the lane width rather than invented, so a figure that wants
             // its lines further apart gets its detours further out as well.
-            let drawn = points(of: route, at: index, spread: spread, margin: spacing * 2)
+            let drawn = metOutlines(
+                points(of: route, at: index, spread: spread, margin: spacing * 2),
+                of: route,
+                rects: rects,
+                outlines: outlines
+            )
             return RoutedLine(
                 id: ids[index],
                 line: route.joints[0].line,
@@ -504,6 +510,106 @@ extension LineRouter {
         return CGPoint(x: middle.x + facing.dx * clear, y: middle.y + facing.dy * clear)
     }
 
+    /// The points, with the ends carried on to the outlines of the nodes they
+    /// meet.
+    ///
+    /// Everything about a route is worked out on the rectangle around each
+    /// node — which side, which lane, where to turn, how far a loop reaches
+    /// out — and only then are the two ends moved: straight on towards the
+    /// node, the way the line was already going, until they reach its outline.
+    /// On a rectangle that is no move at all. On a circle or a diamond it is
+    /// what keeps a line in a side lane, or the end of a loop, from stopping
+    /// in the air beside the node. Working the turns out on the outline instead
+    /// would let a loop off a diamond cut across its point.
+    private static func metOutlines(
+        _ points: [CGPoint],
+        of route: Route,
+        rects: [NodeID: CGRect],
+        outlines: [NodeID: Outline]
+    ) -> [CGPoint] {
+        guard points.count >= 2, let first = route.joints.first, let last = route.joints.last else {
+            return points
+        }
+        var points = points
+        points[0] = onOutline(points[0], at: first, rects: rects, outlines: outlines)
+        points[points.count - 1] = onOutline(points[points.count - 1], at: last, rects: rects, outlines: outlines)
+        return points
+    }
+
+    /// `point`, carried on into its node until it reaches the node's outline —
+    /// or left where it is if it never does, which happens only when a lane
+    /// runs past the side of a narrow shape.
+    private static func onOutline(
+        _ point: CGPoint,
+        at joint: Joint,
+        rects: [NodeID: CGRect],
+        outlines: [NodeID: Outline]
+    ) -> CGPoint {
+        guard let facing = joint.facing, let rect = rects[joint.node.node], let outline = outlines[joint.node.node]
+        else {
+            return point
+        }
+        let path = outline.path(in: rect)
+        let depth = facing.dx != 0 ? rect.width : rect.height
+        let inward = CGVector(dx: -facing.dx, dy: -facing.dy)
+        func at(_ distance: CGFloat) -> CGPoint {
+            CGPoint(x: point.x + inward.dx * distance, y: point.y + inward.dy * distance)
+        }
+        guard !path.contains(point), path.contains(at(depth / 2)) else {
+            return point
+        }
+
+        // The outline is somewhere between the rectangle's side and the middle.
+        var outside: CGFloat = 0
+        var inside = depth / 2
+        for _ in 0..<24 {
+            let middle = (outside + inside) / 2
+            if path.contains(at(middle)) {
+                inside = middle
+            }
+            else {
+                outside = middle
+            }
+        }
+        return at(inside)
+    }
+
+    /// Lines up the two ends of each hop that face each other all but level.
+    ///
+    /// Nodes of different heights in one row are centred on it, but layout
+    /// rounds each one onto the pixel grid on its own, which can leave their
+    /// middles a fraction of a point apart. Taken at their word, the ends are
+    /// joined by a step of that fraction halfway along — a kink where the
+    /// author wrote a straight line. Anything less than a point off is that
+    /// rounding, so both ends meet in between.
+    private static func level(_ placed: inout [CGPoint], of route: Route) {
+        for position in placed.indices.dropFirst() {
+            let start = route.joints[position - 1]
+            let end = route.joints[position]
+            guard let outward = start.facing, let inward = end.facing,
+                outward.dx == -inward.dx, outward.dy == -inward.dy,
+                start.node.node != end.node.node
+            else {
+                continue
+            }
+
+            switch start.axis {
+            case .horizontal:
+                let middle = (placed[position - 1].y + placed[position].y) / 2
+                if abs(placed[position - 1].y - placed[position].y) < 1 {
+                    placed[position - 1].y = middle
+                    placed[position].y = middle
+                }
+            case .vertical:
+                let middle = (placed[position - 1].x + placed[position].x) / 2
+                if abs(placed[position - 1].x - placed[position].x) < 1 {
+                    placed[position - 1].x = middle
+                    placed[position].x = middle
+                }
+            }
+        }
+    }
+
     /// The corners one route is drawn through, turns and all.
     private static func points(
         of route: Route,
@@ -512,9 +618,10 @@ extension LineRouter {
         margin: CGFloat
     ) -> [CGPoint] {
         let here = route.joints.indices.map { JointIndex(route: index, joint: $0) }
-        let placed = route.joints.indices.map {
+        var placed = route.joints.indices.map {
             spread[here[$0]]?.point ?? route.joints[$0].base
         }
+        level(&placed, of: route)
 
         var points: [CGPoint] = []
         for (position, joint) in route.joints.enumerated() {

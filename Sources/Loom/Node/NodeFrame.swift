@@ -8,23 +8,94 @@ import SwiftUI
 /// text settings are passed to the content rather than applied to a text of
 /// the frame's own, so any text a node draws takes them.
 struct NodeFrame<Content: View>: View {
+    let id: NodeID
     let content: Content
 
     @Environment(\.nodeStyle) private var style
     @Environment(\.figureScale) private var scale
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: style.cornerRadius * scale)
+        let outline = NodeOutline(shape: style.shape, scale: scale)
 
         content
             .font(.system(size: style.fontSize * scale, weight: style.fontWeight))
             .foregroundStyle(style.textColor)
             .multilineTextAlignment(style.textAlignment)
-            .padding(style.padding * scale)
+            .modifier(Enclosure(shape: style.shape, padding: style.padding * scale))
             .frame(minWidth: style.minWidth * scale, alignment: Alignment(style.textAlignment))
             .modifier(WidthLimit(maxWidth: style.maxWidth.map { $0 * scale }))
-            .background(shape.fill(style.fill))
-            .overlay(shape.strokeBorder(style.stroke, lineWidth: style.strokeWidth * scale))
+            .background {
+                if style.shape != .none {
+                    outline.fill(style.fill)
+                }
+            }
+            .overlay {
+                if style.shape != .none {
+                    outline.strokeBorder(style.stroke, lineWidth: style.strokeWidth * scale)
+                }
+            }
+            // Lines meet the outline, so they are told what it is.
+            .transformPreference(FigureMarksPreference.self) { marks in
+                marks.outlines[id] = Outline(shape: style.shape, scale: scale)
+            }
+    }
+}
+
+/// Makes room around the content for its outline, and centres it there.
+///
+/// A rectangle needs only the padding. A circle, an ellipse or a diamond has to
+/// reach round the content's corners, which takes more — see
+/// ``NodeShape/enclosure(of:padding:)``.
+private struct Enclosure: ViewModifier {
+    let shape: NodeShape
+    let padding: EdgeInsets
+
+    func body(content: Content) -> some View {
+        switch shape {
+        case .roundedRectangle, .capsule, .none:
+            content.padding(padding)
+        case .circle, .ellipse, .diamond:
+            EnclosureLayout(shape: shape, padding: padding) { content }
+        }
+    }
+}
+
+private struct EnclosureLayout: Layout {
+    let shape: NodeShape
+    let padding: EdgeInsets
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard let content = subviews.first else {
+            return .zero
+        }
+        return shape.enclosure(of: content.sizeThatFits(contentProposal(within: proposal)), padding: padding)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard let content = subviews.first else {
+            return
+        }
+        let size = content.sizeThatFits(contentProposal(within: proposal))
+        content.place(
+            at: CGPoint(x: bounds.midX, y: bounds.midY),
+            anchor: .center,
+            proposal: ProposedViewSize(size)
+        )
+    }
+
+    /// How wide the content may be, if the whole frame is to fit `proposal`.
+    private func contentProposal(within proposal: ProposedViewSize) -> ProposedViewSize {
+        guard let width = proposal.width else {
+            return .unspecified
+        }
+        let room = Swift.max(width - padding.leading - padding.trailing, 0)
+        let content: CGFloat =
+            switch shape {
+            case .ellipse: room / 2.squareRoot()
+            case .diamond: room / 2
+            default: room
+            }
+        return ProposedViewSize(width: content, height: nil)
     }
 }
 
