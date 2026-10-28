@@ -55,14 +55,14 @@ private struct GrowingFlow: Figure {
     var arrangement: some FigureElement {
         Column(spacing: 48) {
             if step < 3 {
-                Row { Box(.view, title: "View") }
+                Row { TextNode(.view, title: "View") }
             }
-            Row { Box(.model, title: "ViewModel") }
+            Row { TextNode(.model, title: "ViewModel") }
             if step >= 1 {
-                Row { Box(.store, title: "Store") }
+                Row { TextNode(.store, title: "Store") }
             }
             if step >= 2 {
-                Row { Box(.remote, title: "Remote") }
+                Row { TextNode(.remote, title: "Remote") }
             }
         }
     }

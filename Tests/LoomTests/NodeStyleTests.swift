@@ -12,20 +12,20 @@ private struct StyledFigure: Figure {
     var arrangement: some FigureElement {
         Column {
             Row {
-                Box(.first, title: "First")
-                    .boxStyle(BoxStyle(fill: .blue))
-                Box(.second, title: "Second")
+                TextNode(.first, title: "First")
+                    .nodeStyle(NodeStyle(fill: .blue))
+                TextNode(.second, title: "Second")
             }
-            .boxStyle(BoxStyle(fill: .orange))
+            .nodeStyle(NodeStyle(fill: .orange))
             Row {
                 Empty()
-                Box(.third, title: "Third")
+                TextNode(.third, title: "Third")
             }
         }
     }
 }
 
-final class BoxStyleTests: XCTestCase {
+final class NodeStyleTests: XCTestCase {
     /// A style is how a node looks, not where it is or what it is called, so
     /// styling an element leaves the arrangement exactly as it was.
     func test_aStyleLeavesTheTreeAlone() {

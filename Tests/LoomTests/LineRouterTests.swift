@@ -18,11 +18,11 @@ private extension NodeID {
 private struct Stacked: Figure {
     var arrangement: some FigureElement {
         Column {
-            Row { Box(.top, title: "Top") }
-            Row { Box(.middle, title: "Middle") }
+            Row { TextNode(.top, title: "Top") }
+            Row { TextNode(.middle, title: "Middle") }
             Row {
-                Box(.left, title: "Left")
-                Box(.right, title: "Right")
+                TextNode(.left, title: "Left")
+                TextNode(.right, title: "Right")
             }
         }
     }

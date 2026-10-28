@@ -10,12 +10,12 @@ public extension HorizontalAlignment {
     ///
     /// ```swift
     /// Column(alignment: .columnSpine) {
-    ///     Row { Box(.start, title: "Start") }
+    ///     Row { TextNode(.start, title: "Start") }
     ///     Row(spacing: 64) {
-    ///         Box(.fetch, title: "Fetch data").aligned(on: .columnSpine)
+    ///         TextNode(.fetch, title: "Fetch data").aligned(on: .columnSpine)
     ///         Waypoint(.back)
     ///     }
-    ///     Row { Box(.valid, title: "Valid?") }
+    ///     Row { TextNode(.valid, title: "Valid?") }
     /// }
     /// ```
     ///

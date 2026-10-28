@@ -14,8 +14,8 @@ private extension NodeID {
 private struct Descent: Figure {
     var arrangement: some FigureElement {
         Column {
-            Row { Box(.source, title: "Source") }
-            Row { Box(.offset, title: "Offset") }
+            Row { TextNode(.source, title: "Source") }
+            Row { TextNode(.offset, title: "Offset") }
         }
     }
 
@@ -28,8 +28,8 @@ private struct Descent: Figure {
 private struct Aligned: Figure {
     var arrangement: some FigureElement {
         Column {
-            Row { Box(.source, title: "Source") }
-            Row { Box(.below, title: "Below") }
+            Row { TextNode(.source, title: "Source") }
+            Row { TextNode(.below, title: "Below") }
         }
     }
 
@@ -43,10 +43,10 @@ private struct Detour: Figure {
     var arrangement: some FigureElement {
         Column {
             Row {
-                Box(.source, title: "Source")
+                TextNode(.source, title: "Source")
                 Waypoint(.waypoint, axis: .vertical)
             }
-            Row { Box(.offset, title: "Offset") }
+            Row { TextNode(.offset, title: "Offset") }
         }
     }
 
@@ -59,8 +59,8 @@ private struct Detour: Figure {
 private struct Partial: Figure {
     var arrangement: some FigureElement {
         Column {
-            Row { Box(.source, title: "Source") }
-            Row { Box(.below, title: "Below") }
+            Row { TextNode(.source, title: "Source") }
+            Row { TextNode(.below, title: "Below") }
         }
     }
 
@@ -147,8 +147,8 @@ final class LineRoutingTests: XCTestCase {
         struct Stubborn: Figure {
             var arrangement: some FigureElement {
                 Column {
-                    Row { Box(.source, title: "Source") }
-                    Row { Box(.offset, title: "Offset") }
+                    Row { TextNode(.source, title: "Source") }
+                    Row { TextNode(.offset, title: "Offset") }
                 }
             }
             var lines: [Line] {

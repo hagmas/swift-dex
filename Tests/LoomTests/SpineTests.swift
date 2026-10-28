@@ -11,9 +11,9 @@ private extension NodeID {
 private struct Aligned: Figure {
     var arrangement: some FigureElement {
         Column(alignment: .columnSpine) {
-            Row { Box(.start, title: "Start") }
+            Row { TextNode(.start, title: "Start") }
             Row {
-                Box(.fetch, title: "Fetch").aligned(on: .columnSpine)
+                TextNode(.fetch, title: "Fetch").aligned(on: .columnSpine)
                 Waypoint(.back)
             }
         }

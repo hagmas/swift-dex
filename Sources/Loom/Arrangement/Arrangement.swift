@@ -116,7 +116,7 @@ public struct Empty: FigureElement {
     /// Creates a hole.
     ///
     /// - Parameters:
-    ///   - width: How wide the hole is, or `nil` for the ``BoxStyle/minWidth``
+    ///   - width: How wide the hole is, or `nil` for the ``NodeStyle/minWidth``
     ///     of the boxes around it, so a row of default boxes lines up with a
     ///     row containing one.
     ///   - height: How tall the hole is, or `nil` to take no vertical space of
@@ -142,7 +142,7 @@ private struct Hole: View {
     let width: CGFloat?
     let height: CGFloat?
 
-    @Environment(\.boxStyle) private var style
+    @Environment(\.nodeStyle) private var style
     @Environment(\.figureScale) private var scale
 
     var body: some View {

@@ -10,7 +10,7 @@ import SwiftUI
 ///
 /// ```swift
 /// Row {
-///     Box(.viewModel, title: "ViewModel")
+///     TextNode(.viewModel, title: "ViewModel")
 ///     Waypoint(.sideChannel)
 /// }
 ///
@@ -27,7 +27,7 @@ import SwiftUI
 /// direction in which lines reach back into the layout, and it is safe because
 /// it is a count, not a judgement: nothing about where a node sits is up for
 /// reconsideration. A waypoint no line uses takes no space at all.
-public struct Waypoint: Node {
+public struct Waypoint: Connectable {
     /// The identity lines refer to.
     public let id: NodeID
 
@@ -51,9 +51,12 @@ public struct Waypoint: Node {
         self.axis = axis
     }
 
-    /// The content and behavior of the view.
-    public var body: some View {
+    /// The space the waypoint holds open, reporting where it is.
+    ///
+    /// A waypoint is not a node: it has nothing to show, and so no frame.
+    public var elementBody: some View {
         WaypointBody(id: id, axis: axis)
+            .reportsBounds(as: id)
     }
 
     /// The waypoint, and the direction it sends its lines.

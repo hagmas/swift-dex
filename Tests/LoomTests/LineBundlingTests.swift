@@ -17,10 +17,10 @@ private extension NodeID {
 private struct Fork: Figure {
     var arrangement: some FigureElement {
         Column {
-            Row { Box(.source, title: "Source") }
+            Row { TextNode(.source, title: "Source") }
             Row {
-                Box(.left, title: "Left")
-                Box(.right, title: "Right")
+                TextNode(.left, title: "Left")
+                TextNode(.right, title: "Right")
             }
         }
     }
@@ -39,10 +39,10 @@ private struct Detour: Figure {
     var arrangement: some FigureElement {
         Column {
             Row {
-                Box(.source, title: "Source")
+                TextNode(.source, title: "Source")
                 Waypoint(.waypoint)
             }
-            Row { Box(.left, title: "Left") }
+            Row { TextNode(.left, title: "Left") }
         }
     }
 
@@ -120,7 +120,7 @@ final class LineBundlingTests: XCTestCase {
     func test_aLineNamingAMissingNodeIsDropped() {
         struct Dangling: Figure {
             var arrangement: some FigureElement {
-                Row { Box(.source, title: "Source") }
+                Row { TextNode(.source, title: "Source") }
             }
             var lines: [Line] {
                 Line(from: .source, to: NodeID("absent"))

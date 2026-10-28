@@ -16,10 +16,10 @@ private struct Tree: Figure {
 
     var arrangement: some FigureElement {
         Column {
-            Row { Box(.top, title: "Top") }
+            Row { TextNode(.top, title: "Top") }
             Row {
-                Box(.left, title: "Left")
-                Box(.right, title: "Right")
+                TextNode(.left, title: "Left")
+                TextNode(.right, title: "Right")
             }
         }
     }

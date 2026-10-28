@@ -13,12 +13,12 @@ private struct WellFormedFigure: Figure {
     var arrangement: some FigureElement {
         Column {
             Row {
-                Box(.first, title: "First")
-                Box(.second, title: "Second")
+                TextNode(.first, title: "First")
+                TextNode(.second, title: "Second")
             }
             Row {
                 Empty()
-                Box(.third, title: "Third")
+                TextNode(.third, title: "Third")
             }
         }
     }
@@ -32,8 +32,8 @@ private struct WellFormedFigure: Figure {
 private struct FigureWithADuplicate: Figure {
     var arrangement: some FigureElement {
         Row {
-            Box(.first, title: "First")
-            Box(.first, title: "First again")
+            TextNode(.first, title: "First")
+            TextNode(.first, title: "First again")
         }
     }
 }
@@ -41,7 +41,7 @@ private struct FigureWithADuplicate: Figure {
 private struct FigureWithADanglingLine: Figure {
     var arrangement: some FigureElement {
         Row {
-            Box(.first, title: "First")
+            TextNode(.first, title: "First")
         }
     }
 

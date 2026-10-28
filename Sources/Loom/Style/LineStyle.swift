@@ -2,7 +2,7 @@ import SwiftUI
 
 /// How a ``Line`` looks.
 ///
-/// Like ``BoxStyle``, a style decides everything at once and styles do not
+/// Like ``NodeStyle``, a style decides everything at once and styles do not
 /// combine: a line's own style wins outright over the figure's, and whatever
 /// it leaves out comes from its own defaults.
 ///
@@ -20,7 +20,7 @@ import SwiftUI
 ///
 /// Every number is in points, in the figure's own terms, and colours are fixed
 /// rather than following the system's appearance — for the same reasons as
-/// ``BoxStyle``.
+/// ``NodeStyle``.
 public struct LineStyle: Sendable {
     /// The colour of the line and its arrowheads.
     public var color: Color

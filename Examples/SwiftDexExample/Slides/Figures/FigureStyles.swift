@@ -15,7 +15,7 @@ struct FigureStyles: StandardLayoutSlide {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            "**`BoxStyle`** and **`LineStyle`** belong to the figure, not to the node's identity."
+            "**`NodeStyle`** and **`LineStyle`** belong to the figure, not to the node's identity."
             Converting(elementID: .element(0))
         }
     }
@@ -59,14 +59,14 @@ private struct Converting: View {
     }
 }
 
-private extension BoxStyle {
-    static let classType = BoxStyle(
+private extension NodeStyle {
+    static let classType = NodeStyle(
         fill: Color(red: 0.88, green: 0.93, blue: 1.0),
         stroke: Color(red: 0.2, green: 0.4, blue: 0.85),
         strokeWidth: 1.5
     )
 
-    static let structType = BoxStyle(
+    static let structType = NodeStyle(
         fill: Color(red: 1.0, green: 0.93, blue: 0.85),
         stroke: Color(red: 0.85, green: 0.45, blue: 0.1),
         strokeWidth: 1.5,
@@ -102,21 +102,21 @@ private struct Types: Figure {
     var arrangement: some FigureElement {
         Column(spacing: 40) {
             Row(spacing: 32) {
-                Box(.view, title: "ProfileView")
-                Box(.model, title: "ProfileModel")
+                TextNode(.view, title: "ProfileView")
+                TextNode(.model, title: "ProfileModel")
             }
-            .boxStyle(.classType)
+            .nodeStyle(.classType)
             Row(spacing: 32) {
-                Box(.settings, title: "Settings")
-                    .boxStyle(.structType)
-                Box(.user, title: "User")
-                    .boxStyle(converted ? .structType : .classType)
-                Box(.point, title: "Point")
-                    .boxStyle(.structType)
+                TextNode(.settings, title: "Settings")
+                    .nodeStyle(.structType)
+                TextNode(.user, title: "User")
+                    .nodeStyle(converted ? .structType : .classType)
+                TextNode(.point, title: "Point")
+                    .nodeStyle(.structType)
             }
             Row(spacing: 32) {
                 Empty()
-                Box(.identifiable, title: "Identifiable")
+                TextNode(.identifiable, title: "Identifiable")
                 Empty()
             }
         }

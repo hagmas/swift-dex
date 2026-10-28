@@ -17,7 +17,7 @@ public extension View {
     ///
     /// ```swift
     /// FigureView(RefactorFigure())
-    ///     .figureScale(44.0 / BoxStyle.standard.fontSize)
+    ///     .figureScale(44.0 / NodeStyle.standard.fontSize)
     /// ```
     ///
     /// Not `scaleEffect`: that enlarges what has already been drawn, so text

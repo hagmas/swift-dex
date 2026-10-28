@@ -1,50 +1,22 @@
 import SwiftUI
 
-/// A rounded rectangle with a label in it — the node nine figures out of ten
-/// are made of.
+/// A node's content, framed as its style says.
 ///
-/// `Box` is to ``Node`` what `Text` is to `View`: the concrete type you reach
-/// for until you need your own.
-///
-/// ```swift
-/// Box(.repository, title: "Repository")
-/// ```
-///
-/// How it looks is up to the ``BoxStyle`` around it.
-public struct Box: Node {
-    /// The identity lines refer to.
-    public let id: NodeID
+/// Every node is drawn through this: its content says what it is, and the
+/// frame — outline, fill, padding, widths — is the figure's, so that nodes of
+/// every kind can be styled alike and lines know the outline they meet. The
+/// text settings are passed to the content rather than applied to a text of
+/// the frame's own, so any text a node draws takes them.
+struct NodeFrame<Content: View>: View {
+    let content: Content
 
-    /// The text shown in the box.
-    public var title: String
-
-    /// Creates a box.
-    ///
-    /// - Parameters:
-    ///   - id: The identity lines refer to.
-    ///   - title: The text shown in the box.
-    public init(_ id: NodeID, title: String) {
-        self.id = id
-        self.title = title
-    }
-
-    /// The content and behavior of the view.
-    public var body: some View {
-        BoxView(title: title)
-    }
-}
-
-/// A box as drawn, in whatever style it finds itself in.
-private struct BoxView: View {
-    let title: String
-
-    @Environment(\.boxStyle) private var style
+    @Environment(\.nodeStyle) private var style
     @Environment(\.figureScale) private var scale
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: style.cornerRadius * scale)
 
-        Text(title)
+        content
             .font(.system(size: style.fontSize * scale, weight: style.fontWeight))
             .foregroundStyle(style.textColor)
             .multilineTextAlignment(style.textAlignment)

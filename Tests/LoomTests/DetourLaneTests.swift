@@ -17,10 +17,10 @@ private struct Stack<Lines: Sequence<Line>>: Figure {
 
     var arrangement: some FigureElement {
         Column(spacing: 40) {
-            Row { Box(.top, title: "Top") }
-            Row { Box(.near, title: "Near") }
-            Row { Box(.far, title: "Far") }
-            Row { Box(.further, title: "Further") }
+            Row { TextNode(.top, title: "Top") }
+            Row { TextNode(.near, title: "Near") }
+            Row { TextNode(.far, title: "Far") }
+            Row { TextNode(.further, title: "Further") }
         }
     }
 
