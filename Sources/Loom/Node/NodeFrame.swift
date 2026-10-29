@@ -68,34 +68,112 @@ private struct EnclosureLayout: Layout {
         guard let content = subviews.first else {
             return .zero
         }
-        return shape.enclosure(of: content.sizeThatFits(contentProposal(within: proposal)), padding: padding)
+        return shape.enclosure(of: size(of: content, within: proposal), padding: padding)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         guard let content = subviews.first else {
             return
         }
-        let size = content.sizeThatFits(contentProposal(within: proposal))
         content.place(
             at: CGPoint(x: bounds.midX, y: bounds.midY),
             anchor: .center,
-            proposal: ProposedViewSize(size)
+            proposal: ProposedViewSize(size(of: content, within: proposal))
         )
     }
 
-    /// How wide the content may be, if the whole frame is to fit `proposal`.
-    private func contentProposal(within proposal: ProposedViewSize) -> ProposedViewSize {
+    /// How big the content comes out, if the whole frame is to fit `proposal`.
+    ///
+    /// An ellipse's width and a diamond's depend on the content's width alone,
+    /// so the content is simply offered that much less. A circle's depends on
+    /// the content's diagonal, height and all — and the narrower the content,
+    /// the more lines it wraps onto and the taller it grows — so no one width
+    /// can be worked out ahead. See ``widestFitting(_:within:)``.
+    private func size(of content: LayoutSubview, within proposal: ProposedViewSize) -> CGSize {
         guard let width = proposal.width else {
-            return .unspecified
+            return content.sizeThatFits(.unspecified)
         }
-        let room = Swift.max(width - padding.leading - padding.trailing, 0)
-        let content: CGFloat =
-            switch shape {
-            case .ellipse: room / 2.squareRoot()
-            case .diamond: room / 2
-            default: room
+        let room = width - padding.leading - padding.trailing
+
+        switch shape {
+        case .ellipse:
+            return content.measured(at: room / 2.squareRoot())
+        case .diamond:
+            return content.measured(at: room / 2)
+        case .circle:
+            let across = padding.leading + padding.trailing
+            let down = padding.top + padding.bottom
+            return widestFitting(content, within: width - Swift.max(across, down))
+        default:
+            return content.measured(at: room)
+        }
+    }
+
+    /// The content at the widest it can be and still have its diagonal
+    /// within `diameter` — which is to say on the fewest lines.
+    ///
+    /// Too wide, and the content's own width is too much; too narrow, and the
+    /// lines it wraps onto stack too tall. Somewhere between, it fits. So the
+    /// content is tried at the whole width first, then a tenth narrower at a
+    /// time until it fits, and the last step is halved down until the widest
+    /// width that fits is close enough.
+    ///
+    /// Content that fits at no width at all — too much to go round in a
+    /// circle that size — is left as wide as it would be anyway, rather than
+    /// narrowed until its words break.
+    private func widestFitting(_ content: LayoutSubview, within diameter: CGFloat) -> CGSize {
+        func fits(_ width: CGFloat) -> Bool {
+            content.measured(at: width).diagonal <= diameter + Self.slack
+        }
+
+        guard !fits(diameter) else {
+            return content.measured(at: diameter)
+        }
+        var tooWide = diameter
+        var narrowEnough: CGFloat?
+        for tenth in 1..<10 {
+            let width = diameter * CGFloat(10 - tenth) / 10
+            if fits(width) {
+                narrowEnough = width
+                break
             }
-        return ProposedViewSize(width: content, height: nil)
+            tooWide = width
+        }
+        guard var widest = narrowEnough else {
+            return content.measured(at: diameter)
+        }
+        for _ in 0..<Self.halvings {
+            let middle = (widest + tooWide) / 2
+            if fits(middle) {
+                widest = middle
+            }
+            else {
+                tooWide = middle
+            }
+        }
+        return content.measured(at: widest)
+    }
+
+    /// How many times the last step is halved: down to within a point or so
+    /// of the widest width that fits, for any circle a figure would hold.
+    private static let halvings = 5
+
+    /// How far a measurement may be off and still count as fitting — text
+    /// sizes are rounded to the pixel grid.
+    private static let slack: CGFloat = 0.5
+}
+
+private extension LayoutSubview {
+    /// The size the view takes when offered `width`, and as much height as it
+    /// likes.
+    func measured(at width: CGFloat) -> CGSize {
+        sizeThatFits(ProposedViewSize(width: Swift.max(width, 0), height: nil))
+    }
+}
+
+private extension CGSize {
+    var diagonal: CGFloat {
+        (width * width + height * height).squareRoot()
     }
 }
 
