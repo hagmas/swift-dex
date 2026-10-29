@@ -38,7 +38,7 @@ public protocol Node: Connectable {
 public extension Node {
     /// The content, framed, reporting where it is.
     @MainActor var elementBody: some View {
-        NodeFrame(content: body)
+        NodeFrame(id: id, content: body)
             .reportsBounds(as: id)
     }
 

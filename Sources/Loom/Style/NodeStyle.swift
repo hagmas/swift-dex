@@ -33,6 +33,9 @@ import SwiftUI
 /// Colours are fixed rather than following the system's appearance. A figure
 /// is content, not interface, and should look the same wherever it is shown.
 public struct NodeStyle: Sendable {
+    /// The outline the node is framed in.
+    public var shape: NodeShape
+
     /// The colour inside the node.
     public var fill: Color
 
@@ -58,9 +61,6 @@ public struct NodeStyle: Sendable {
     /// The space between the title and the outline.
     public var padding: EdgeInsets
 
-    /// The radius of the node's corners.
-    public var cornerRadius: CGFloat
-
     /// The width a node will not shrink below.
     ///
     /// Ragged node widths are the first thing that makes a figure look untidy,
@@ -76,6 +76,7 @@ public struct NodeStyle: Sendable {
 
     /// Creates a style.
     public init(
+        shape: NodeShape = .roundedRectangle(cornerRadius: 8),
         fill: Color = .white,
         stroke: Color = .black,
         strokeWidth: CGFloat = 1,
@@ -84,10 +85,10 @@ public struct NodeStyle: Sendable {
         fontWeight: Font.Weight = .regular,
         textAlignment: TextAlignment = .center,
         padding: EdgeInsets = EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16),
-        cornerRadius: CGFloat = 8,
         minWidth: CGFloat = 140,
         maxWidth: CGFloat? = nil
     ) {
+        self.shape = shape
         self.fill = fill
         self.stroke = stroke
         self.strokeWidth = strokeWidth
@@ -96,13 +97,29 @@ public struct NodeStyle: Sendable {
         self.fontWeight = fontWeight
         self.textAlignment = textAlignment
         self.padding = padding
-        self.cornerRadius = cornerRadius
         self.minWidth = minWidth
         self.maxWidth = maxWidth
     }
 
     /// The style a node has when nothing says otherwise.
     public static let standard = NodeStyle()
+
+    /// This style with some of it changed.
+    ///
+    /// Styles do not combine, so a style that should share most of another's
+    /// look is made from it:
+    ///
+    /// ```swift
+    /// extension NodeStyle {
+    ///     static let brand = NodeStyle(fill: .indigo.opacity(0.1), stroke: .indigo)
+    ///     static let state = NodeStyle.brand.with { $0.shape = .circle }
+    /// }
+    /// ```
+    public func with(_ change: (inout NodeStyle) -> Void) -> NodeStyle {
+        var style = self
+        change(&style)
+        return style
+    }
 }
 
 extension EnvironmentValues {

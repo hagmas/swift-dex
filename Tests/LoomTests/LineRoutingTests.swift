@@ -80,7 +80,11 @@ private let rects: [NodeID: CGRect] = [
     .waypoint: CGRect(x: 260, y: 25, width: 0, height: 0),
 ]
 
-private func routes(_ figure: some Figure, routing: Line.Routing) -> [RoutedLine] {
+private func routes(
+    _ figure: some Figure,
+    routing: Line.Routing,
+    rects: [NodeID: CGRect] = rects
+) -> [RoutedLine] {
     let placements = figure.arrangement.placements
     return LineRouter.routes(
         for: figure.lines,
@@ -141,6 +145,28 @@ final class LineRoutingTests: XCTestCase {
         let points = routes(Aligned(), routing: .orthogonal)[0].points
 
         XCTAssertEqual(points, [CGPoint(x: 150, y: 50), CGPoint(x: 150, y: 150)])
+    }
+
+    /// Two nodes a fraction of a point apart are still joined straight.
+    ///
+    /// Layout rounds each node onto the pixel grid on its own, so nodes meant
+    /// to line up can come out that far apart.
+    func test_endsAFractionApartAreJoinedStraight() {
+        var nudged = rects
+        nudged[.below]!.origin.x += 0.25
+
+        let points = routes(Aligned(), routing: .orthogonal, rects: nudged)[0].points
+
+        XCTAssertEqual(points, [CGPoint(x: 150.125, y: 50), CGPoint(x: 150.125, y: 150)])
+    }
+
+    /// Two nodes a point or more apart are stepped across as usual: that is
+    /// the figure's own doing.
+    func test_endsAPointApartStillStep() {
+        var nudged = rects
+        nudged[.below]!.origin.x += 1
+
+        XCTAssertEqual(routes(Aligned(), routing: .orthogonal, rects: nudged)[0].points.count, 4)
     }
 
     func test_aLineCanOverrideTheFiguresRouting() {
