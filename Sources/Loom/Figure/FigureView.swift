@@ -190,8 +190,8 @@ private struct LineView: View {
                 arrowHead(at: points[0], from: points[1])
             }
 
-            if let label = route.label, let middle = route.labelPoint {
-                Text(label)
+            if let label = route.label, let point = route.labelPoint {
+                let words = Text(label)
                     .font(.system(size: style.labelFontSize * scale))
                     .foregroundStyle(style.labelColor)
                     .padding(.horizontal, style.labelPadding * scale)
@@ -199,11 +199,37 @@ private struct LineView: View {
                     // than running under them. On a background that is not a
                     // flat colour, the line shows through.
                     .background(style.labelBackground)
-                    .position(middle)
-                    .opacity(labelShown(at: middle, along: own))
+
+                Group {
+                    if let side = route.labelSide {
+                        // A point with nothing in it, the words hung off its
+                        // edge on that side: they keep clear of the line
+                        // however long or short they come out. Fixed in size,
+                        // since an overlay offers them the point's no room.
+                        Color.clear
+                            .frame(width: 0, height: 0)
+                            .overlay(alignment: Self.alignment(away: side)) { words.fixedSize() }
+                            .position(
+                                x: point.x + side.dx * style.labelPadding * scale,
+                                y: point.y + side.dy * style.labelPadding * scale
+                            )
+                    }
+                    else {
+                        words.position(point)
+                    }
+                }
+                .opacity(labelShown(at: point, along: own))
             }
         }
         .opacity(style.appear == .fade ? appeared : 1)
+    }
+
+    /// The edge of the words that goes against a point, for them to lie on
+    /// `side` of it.
+    private static func alignment(away side: CGVector) -> Alignment {
+        if side.dx > 0 { return .leading }
+        if side.dx < 0 { return .trailing }
+        return side.dy > 0 ? .top : .bottom
     }
 
     @ViewBuilder

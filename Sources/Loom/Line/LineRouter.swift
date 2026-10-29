@@ -113,6 +113,14 @@ struct RoutedLine: Identifiable {
     /// Where those words go.
     var labelPoint: CGPoint?
 
+    /// Which way the words stand off from ``labelPoint``, or `nil` for them to
+    /// sit centred on it.
+    ///
+    /// Only the router knows where a line runs and only whatever draws it
+    /// knows how big the words come out, so the router says no more than this:
+    /// the words go on this side of the point, their near edge against it.
+    var labelSide: CGVector?
+
     /// How much of the line, from one end, an earlier branch of the same line
     /// already draws — or `nil` if the line is drawn whole.
     var drawnElsewhere: Overlap?
@@ -325,7 +333,11 @@ extension LineRouter {
                 points: drawn,
                 arrow: route.arrow,
                 label: route.label,
-                labelPoint: labelPoint(of: route, along: drawn)
+                labelPoint: route.label == nil ? nil : drawn.middle,
+                // Words sit halfway along and split the line. On a loop,
+                // halfway is the middle of the far side, the very part that
+                // makes it read as going round, so they stand off beyond it.
+                labelSide: route.label == nil || !route.isLoop ? nil : route.joints[0].facing
             )
         }
 
@@ -490,24 +502,6 @@ extension LineRouter {
         }
 
         return drawn
-    }
-
-    /// Where a line's words go.
-    ///
-    /// Halfway along, so the words sit on the line and split it. A loop is the
-    /// exception: halfway along a loop is the middle of its far side, which is
-    /// the very part that makes it read as going round, so the words stand off
-    /// beyond it instead.
-    private static func labelPoint(of route: Route, along points: [CGPoint]) -> CGPoint? {
-        guard route.label != nil, let middle = points.middle else {
-            return nil
-        }
-        guard route.isLoop, let facing = route.joints[0].facing else {
-            return middle
-        }
-
-        let clear = route.joints[0].base.distance(to: route.joints[1].base)
-        return CGPoint(x: middle.x + facing.dx * clear, y: middle.y + facing.dy * clear)
     }
 
     /// The points, with the ends carried on to the outlines of the nodes they
