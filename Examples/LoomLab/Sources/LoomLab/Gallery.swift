@@ -15,7 +15,7 @@ extension Scenario {
     }
 
     /// A state machine: transitions both ways between two states, loops on
-    /// several states, and a transition that goes round by a waypoint.
+    /// two states, and a transition that goes round the outside.
     static let stateMachine = Scenario(name: "State machine", steps: 0) { _ in
         AnyView(FigureView(StateMachine(), routing: .orthogonal))
     }
@@ -116,7 +116,6 @@ private extension NodeID {
     static let loading = NodeID("loading")
     static let loaded = NodeID("loaded")
     static let failed = NodeID("failed")
-    static let retry = NodeID("retry")
 
     // Layers
     static let home = NodeID("home")
@@ -199,9 +198,8 @@ private struct StateMachine: Figure {
                 TextNode(.loading, title: "Loading")
             }
             Row(spacing: 48) {
-                TextNode(.failed, title: "Failed")
                 TextNode(.loaded, title: "Loaded")
-                Waypoint(.retry)
+                TextNode(.failed, title: "Failed")
             }
         }
     }
@@ -211,8 +209,8 @@ private struct StateMachine: Figure {
         Line(from: .loading, to: .idle, label: "cancel")
         Line(from: .loading, to: .loaded, label: "success")
         Line(from: .loading, to: .failed, label: "error")
-        Line(from: .failed, to: .loading, through: .retry, label: "retry")
-        Line(looping: .loading.trailing, label: "progress")
+        Line(from: .failed.trailing, to: .loading.trailing, label: "retry")
+        Line(looping: .loading.top, label: "progress")
         Line(looping: .loaded.bottom, label: "refresh")
     }
 }

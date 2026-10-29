@@ -71,6 +71,23 @@ final class SelfLoopTests: XCTestCase {
         )
     }
 
+    /// A loop's words stand off beyond its far side, their near edge against
+    /// its middle, however long they turn out to be.
+    func test_aLoopsWordsStandOffItsFarSide() {
+        let loop = routes(Line(looping: .one.trailing, label: "waits"))[0]
+
+        XCTAssertEqual(loop.labelPoint, CGPoint(x: 230, y: 25))
+        XCTAssertEqual(loop.labelSide, CGVector(dx: 1, dy: 0))
+    }
+
+    /// Any other line's words sit centred on it.
+    func test_aLinesWordsSitOnIt() {
+        let line = routes(Line(from: .one, to: .two, label: "goes"))[0]
+
+        XCTAssertEqual(line.labelPoint, CGPoint(x: 150, y: 100))
+        XCTAssertNil(line.labelSide)
+    }
+
     func test_aLoopNeverLeavesTheNodeItHangsOff() {
         for side in [NodeID.one.top, .one.bottom, .one.leading, .one.trailing] {
             let points = routes(Line(looping: side))[0].points
