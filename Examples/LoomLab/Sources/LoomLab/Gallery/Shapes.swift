@@ -22,7 +22,7 @@ private extension NodeID {
 private extension NodeStyle {
     static let state = NodeStyle.standard.with {
         $0.shape = .circle
-        $0.minWidth = 0
+        $0.minWidth = 80
     }
     static let decision = NodeStyle.standard.with {
         $0.shape = .diamond

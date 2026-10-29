@@ -21,8 +21,14 @@ struct NodeFrame<Content: View>: View {
             .font(.system(size: style.fontSize * scale, weight: style.fontWeight))
             .foregroundStyle(style.textColor)
             .multilineTextAlignment(style.textAlignment)
-            .modifier(Enclosure(shape: style.shape, padding: style.padding * scale))
-            .frame(minWidth: style.minWidth * scale, alignment: Alignment(style.textAlignment))
+            .modifier(
+                Enclosure(
+                    shape: style.shape,
+                    padding: style.padding * scale,
+                    minWidth: style.minWidth * scale,
+                    alignment: Alignment(style.textAlignment)
+                )
+            )
             .modifier(WidthLimit(maxWidth: style.maxWidth.map { $0 * scale }))
             .background {
                 if style.shape != .none {
@@ -46,16 +52,26 @@ struct NodeFrame<Content: View>: View {
 /// A rectangle needs only the padding. A circle, an ellipse or a diamond has to
 /// reach round the content's corners, which takes more — see
 /// ``NodeShape/enclosure(of:padding:)``.
+///
+/// A circle stays round whatever it is given: its minimum width is a minimum
+/// diameter, and a circle that cannot fit the room it is offered is drawn
+/// bigger than that room rather than squeezed into an oval to fit it — too
+/// big being the figure's to fix, and out of shape being no one's.
 private struct Enclosure: ViewModifier {
     let shape: NodeShape
     let padding: EdgeInsets
+    let minWidth: CGFloat
+    let alignment: Alignment
 
     func body(content: Content) -> some View {
         switch shape {
         case .roundedRectangle, .capsule, .none:
-            content.padding(padding)
-        case .circle, .ellipse, .diamond:
+            content.padding(padding).frame(minWidth: minWidth, alignment: alignment)
+        case .ellipse, .diamond:
             EnclosureLayout(shape: shape, padding: padding) { content }
+                .frame(minWidth: minWidth, alignment: alignment)
+        case .circle:
+            EnclosureLayout(shape: shape, padding: padding, minDiameter: minWidth) { content }
         }
     }
 }
@@ -64,11 +80,19 @@ private struct EnclosureLayout: Layout {
     let shape: NodeShape
     let padding: EdgeInsets
 
+    /// How wide a circle is at the least, and so how tall.
+    var minDiameter: CGFloat = 0
+
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         guard let content = subviews.first else {
             return .zero
         }
-        return shape.enclosure(of: size(of: content, within: proposal), padding: padding)
+        let size = shape.enclosure(of: size(of: content, within: proposal), padding: padding)
+        guard shape == .circle else {
+            return size
+        }
+        let diameter = Swift.max(size.width, minDiameter)
+        return CGSize(width: diameter, height: diameter)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {

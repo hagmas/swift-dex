@@ -67,6 +67,9 @@ public struct NodeStyle: Sendable {
     /// so the default is a width rather than none. It is also how wide an
     /// ``Empty`` is unless told otherwise, so a hole lines up with the nodes
     /// around it.
+    ///
+    /// A circle's is its diameter, so a circle grows taller with it and stays
+    /// round.
     public var minWidth: CGFloat
 
     /// The width a node will not grow beyond, or `nil` for no limit.
