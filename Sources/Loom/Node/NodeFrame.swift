@@ -254,7 +254,8 @@ private struct WidthLimitLayout: Layout {
     }
 }
 
-private extension EdgeInsets {
+extension EdgeInsets {
+    /// The insets, in a figure drawn `scale` times its own size.
     static func * (insets: EdgeInsets, scale: CGFloat) -> EdgeInsets {
         EdgeInsets(
             top: insets.top * scale,

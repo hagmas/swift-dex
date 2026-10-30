@@ -81,10 +81,10 @@ Development dependencies (swift-docc-plugin, swift-format, XcodeGen) are only in
 - `Tests/SwiftDexTests/` - Test suite
 - `Sources/Loom/` - Loom, the figure library (nodes and the lines between them). It knows nothing about SwiftDex
   - `Figure/` - The `Figure` protocol and `FigureView`, which draws one
-  - `Arrangement/` - `Row`, `Column`, `Empty` and the closed tree they build
+  - `Arrangement/` - `Row`, `Column`, `Empty`, `Cluster` (a box around some elements that lines cross) and the closed tree they build
   - `Node/` - `Connectable` (anything lines connect to), `Node` (content only; the frame is drawn from `NodeStyle`), `NodeID`, and `TextNode`, the stock node
   - `Line/` - `Line`, routing, and `Waypoint`, which exists to steer lines
-  - `Style/` - `NodeStyle`, `LineStyle`, `figureScale`
+  - `Style/` - `NodeStyle`, `ClusterStyle`, `LineStyle`, `figureScale`
   - `Animation/` - How a figure's parts appear: `FigureAnimation` and the stand-ins behind it
 - `Tests/LoomTests/` - Loom's test suite
 - `Examples/SwiftDexExample/` - Example presentation demonstrating features

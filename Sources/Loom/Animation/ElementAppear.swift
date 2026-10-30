@@ -24,9 +24,12 @@ private struct ElementAppearProgress: ViewModifier, Animatable {
         set { progress = newValue }
     }
 
+    @Environment(\.appearOpacity) private var outer
+
     func body(content: Content) -> some View {
         content
             .opacity(progress)
+            .environment(\.appearOpacity, outer * progress)
             .transformPreference(ElementAppearPreference.self) { slowest in
                 slowest = Swift.min(slowest, progress)
             }
@@ -41,4 +44,13 @@ struct ElementAppearPreference: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = Swift.min(value, nextValue())
     }
+}
+
+extension EnvironmentValues {
+    /// How much of the view has appeared: the product of every element around
+    /// it that is partway through appearing.
+    ///
+    /// For what is drawn apart from the element it belongs to — a cluster's
+    /// box, beneath the lines — and so would not fade with it otherwise.
+    @Entry var appearOpacity: CGFloat = 1
 }

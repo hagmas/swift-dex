@@ -30,6 +30,13 @@ public enum Placement: Hashable, Sendable {
 
     /// A nested run of elements, and the direction it runs in.
     case group(Axis, [Placement])
+
+    /// A box around some elements — itself somewhere a line can go, and
+    /// crossed by lines to the elements in it.
+    ///
+    /// To the rest of the arrangement it is one element, at one position,
+    /// as a node is. Its elements are stacked in it from top to bottom.
+    case cluster(NodeID, [Placement])
 }
 
 public extension Placement {
@@ -42,6 +49,8 @@ public extension Placement {
             []
         case .group(_, let children):
             children.flatMap(\.nodeIDs)
+        case .cluster(let id, let children):
+            [id] + children.flatMap(\.nodeIDs)
         }
     }
 }
@@ -93,6 +102,13 @@ extension Placement {
                     break
                 case .group(let axis, let children):
                     walk(children, axis: axis, prefix: address)
+                case .cluster(let id, let children):
+                    // Seated where it is, like a node, with its elements
+                    // seated inside it: a line from outside to one of them
+                    // parts company where the cluster does, and leaves the
+                    // way it would for the cluster itself.
+                    addresses[id] = address
+                    walk(children, axis: .vertical, prefix: address)
                 }
             }
         }
@@ -110,7 +126,7 @@ extension Placement {
                 switch placement {
                 case .waypoint(let id, let axis):
                     axes[id] = axis
-                case .group(_, let children):
+                case .group(_, let children), .cluster(_, let children):
                     walk(children)
                 case .node, .gap:
                     break
