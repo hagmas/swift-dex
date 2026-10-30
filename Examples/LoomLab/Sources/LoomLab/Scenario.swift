@@ -36,6 +36,7 @@ extension Scenario {
         .flowchart,
         .flowchartAligned,
         .shapes,
+        .nested,
         .hub,
         .ragged,
     ]

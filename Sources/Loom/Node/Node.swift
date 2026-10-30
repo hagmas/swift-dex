@@ -32,7 +32,10 @@ public protocol Node: Connectable {
     associatedtype Body: View
 
     /// What the node shows, unframed.
-    @ViewBuilder var body: Body { get }
+    ///
+    /// On the main actor, as SwiftUI's own `body` is, so that it can use any
+    /// view modifier.
+    @MainActor @ViewBuilder var body: Body { get }
 }
 
 public extension Node {
