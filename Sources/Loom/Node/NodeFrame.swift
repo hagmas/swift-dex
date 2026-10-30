@@ -30,6 +30,13 @@ struct NodeFrame<Content: View>: View {
                 )
             )
             .modifier(WidthLimit(maxWidth: style.maxWidth.map { $0 * scale }))
+            // The content is drawn inside the outline, never past it. A node
+            // whose content grows — a figure inside it, gaining a node — is
+            // laid out at its new size at once while its frame grows towards
+            // it, and what is not yet inside the frame is not yet shown: the
+            // frame opens onto it rather than having it spill out. A node with
+            // no outline draws its own, and may draw it wherever it likes.
+            .modifier(ClipToOutline(outline: style.shape == .none ? nil : outline))
             .background {
                 if style.shape != .none {
                     outline.fill(style.fill)
@@ -44,6 +51,20 @@ struct NodeFrame<Content: View>: View {
             .transformPreference(FigureMarksPreference.self) { marks in
                 marks.outlines[id] = Outline(shape: style.shape, scale: scale)
             }
+    }
+}
+
+/// Clips to the outline, if there is one.
+private struct ClipToOutline: ViewModifier {
+    let outline: NodeOutline?
+
+    func body(content: Content) -> some View {
+        if let outline {
+            content.clipShape(outline)
+        }
+        else {
+            content
+        }
     }
 }
 
