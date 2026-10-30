@@ -31,6 +31,14 @@ import SwiftUI
 /// reach the node that holds it, but nothing in it. Styles reach it as they
 /// reach any view, so a style given to the holding node is the inner nodes'
 /// too unless the inner figure is given one of its own.
+///
+/// A figure is laid out at its own size, whatever room it is given, so that
+/// it looks the same wherever it is drawn. Given less room than it needs, it
+/// draws past it rather than squeezing its nodes together; given more, it sits
+/// in the middle. The view itself still takes all the room it is given — it
+/// has to stay put while the figure in it grows and shrinks — so to know how
+/// big the figure is, to make room for it, read its size with
+/// ``SwiftUICore/View/onFigureSizeChange(_:)``.
 public struct FigureView<Content: Figure>: View {
     private let figure: Content
     private let spacing: CGFloat
@@ -41,6 +49,7 @@ public struct FigureView<Content: Figure>: View {
     @Environment(\.figureAnimation) private var figureAnimation
     @Environment(\.isInsideFigure) private var isInsideFigure
     @Environment(\.figureSpace) private var figureSpace
+    @Environment(\.figureSizeAction) private var figureSizeAction
 
     /// How many nodes' phases have finished, which is what lines appearing in
     /// phases wait for — see ``LinePhaseTracker``.
@@ -92,6 +101,19 @@ public struct FigureView<Content: Figure>: View {
         ScaledVStack(alignment: .center, spacing: 8, content: figure.arrangement.elementBody)
             .environment(\.waypointSpans, WaypointSpans.spans(for: lines, spacing: spacing))
             .environment(\.isInsideFigure, true)
+            // At its own size, never the room around it: a figure that took
+            // its shape from where it is drawn would be a different figure in
+            // a narrower window.
+            .fixedSize()
+            .onGeometryChange(for: CGSize.self) {
+                $0.size
+            } action: { size in
+                // A figure inside a node is the node's business, not whoever
+                // asked the figure outside how big it is.
+                if !isInsideFigure {
+                    figureSizeAction?(size)
+                }
+            }
             .background {
                 ZStack {
                     ForEach(drawable, id: \.self) { id in
@@ -189,7 +211,43 @@ struct FigureSpace {
     let proxy: GeometryProxy
 }
 
+public extension View {
+    /// Adds an action to perform when the size of a figure in this view
+    /// changes — the size of the figure itself, not of the room it was given.
+    ///
+    /// A ``FigureView`` takes all the room it is given, so its own size says
+    /// nothing about how big its figure is. Read this instead to make room
+    /// for it, as a view that scrolls must:
+    ///
+    /// ```swift
+    /// ScrollView([.horizontal, .vertical]) {
+    ///     FigureView(BigFigure())
+    ///         .onFigureSizeChange { size = $0 }
+    ///         .frame(width: size.width, height: size.height)
+    /// }
+    /// ```
+    ///
+    /// The size is where the figure is going, not where it is: a change made
+    /// in an animation reports the size it ends at, once. Figures drawn inside
+    /// a node of the figure do not report theirs.
+    func onFigureSizeChange(_ action: @escaping @MainActor (CGSize) -> Void) -> some View {
+        environment(\.figureSizeAction, FigureSizeAction(action: action))
+    }
+}
+
+/// What to do when a figure's size changes.
+struct FigureSizeAction {
+    let action: @MainActor (CGSize) -> Void
+
+    @MainActor func callAsFunction(_ size: CGSize) {
+        action(size)
+    }
+}
+
 extension EnvironmentValues {
+    /// What to do when the figure's size changes, if anything.
+    @Entry var figureSizeAction: FigureSizeAction? = nil
+
     /// The space the outermost figure was given, or `nil` outside any figure.
     @Entry var figureSpace: FigureSpace? = nil
 
