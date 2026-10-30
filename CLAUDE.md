@@ -24,6 +24,8 @@ SwiftDex is a Swift Package Manager library for creating presentations in SwiftU
 ### Loom Lab
 - `make lab` - Open Loom's workbench (`Examples/LoomLab`, a package of its own): a figure played through its steps, with a meter for late frames
 - `make lab ARGS=--autoplay` - Play every way of appearing, print what the meter saw, and quit. Use it to check a change to Loom's animation without anyone watching: image rendering cannot show animation
+- `make lab ARGS="--scenario Nested --frames <folder>"` - Play one scenario through once, writing the figure to images a dozen or so times a second (named by step and milliseconds), and quit. This is how to look at the middle of an animation: it captures the lab's own window as shown, which needs no screen-recording permission. `--scenario <name>` also picks what `make lab` opens and what `--autoplay` plays
+- In the running lab, Save Image saves the figure as it is that instant to the Desktop
 - `make lab ARGS="--snapshot <folder>"` - Draw every scenario (a gallery of figure kinds) into images in the folder and quit, to look through how figures read. Add a scenario as a file of its own in `Examples/LoomLab/Sources/LoomLab/Gallery/` (its figure, node IDs and styles together) and list it in `Scenario.all`
 
 ### Development Dependencies
