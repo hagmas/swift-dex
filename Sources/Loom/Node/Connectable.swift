@@ -38,6 +38,11 @@ struct FigureMarks {
 
     /// The space the figure draws its lines in — see ``FigureSpace``.
     var space: Anchor<CGRect>?
+
+    /// The clusters, whose boxes are drawn beneath the lines.
+    ///
+    /// Where each one is comes with the anchors, under the same ID.
+    var clusters: [NodeID: ClusterMark] = [:]
 }
 
 struct FigureMarksPreference: PreferenceKey {
@@ -49,5 +54,6 @@ struct FigureMarksPreference: PreferenceKey {
         value.outlines.merge(next.outlines) { $1 }
         value.lines.merge(next.lines) { $1 }
         value.space = next.space ?? value.space
+        value.clusters.merge(next.clusters) { $1 }
     }
 }

@@ -119,15 +119,27 @@ public struct FigureView<Content: Figure>: View {
             .backgroundPreferenceValue(FigureMarksPreference.self) { marks in
                 GeometryReader { proxy in
                     let placements = figure.arrangement.placements
+                    let rects = rects(in: proxy, marks: marks)
                     let routes = LineRouter.routes(
                         for: lines,
-                        rects: rects(in: proxy, marks: marks),
+                        rects: rects,
                         outlines: marks.outlines,
                         addresses: Placement.addresses(in: placements),
                         waypointAxes: Placement.waypointAxes(in: placements),
                         routing: routing,
                         spacing: spacing
                     )
+                    // Clusters' boxes first, outermost first, so that the
+                    // lines inside them and across them are drawn on top.
+                    let clusters = marks.clusters.sorted { ($0.value.depth, $0.key.rawValue) < ($1.value.depth, $1.key.rawValue) }
+                    ForEach(clusters, id: \.key) { id, cluster in
+                        if let rect = rects[id] {
+                            ClusterBox(style: cluster.style, scale: scale)
+                                .frame(width: rect.width, height: rect.height)
+                                .position(x: rect.midX, y: rect.midY)
+                                .opacity(cluster.opacity)
+                        }
+                    }
                     ForEach(routes) { route in
                         LineView(
                             route: route,
