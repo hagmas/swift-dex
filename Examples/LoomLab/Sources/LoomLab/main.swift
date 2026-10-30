@@ -3,17 +3,21 @@ import SwiftUI
 
 // Run with `swift run --package-path Examples/LoomLab LoomLab`, adding
 // `--autoplay` to play every way of appearing, print what the frame meter
-// saw, and quit, or `--snapshot <folder>` to draw every scenario into images
-// there and quit.
+// saw, and quit; `--frames <folder>` to play the scenario through once,
+// writing it to images as often as the window can be captured, and quit; or
+// `--snapshot <folder>` to draw every scenario into images there and quit.
+// `--scenario <name>` says which scenario to open, play or write frames of.
 
 /// The lab as an app: one window, so that it has a proper toolbar for the
 /// sidebar's button to sit in.
 private struct LoomLabApp: App {
     static var autoplay = false
+    static var frames: URL?
+    static var scenario: String?
 
     var body: some Scene {
         Window("Loom Lab", id: "lab") {
-            LabView(autoplay: Self.autoplay)
+            LabView(scenario: Self.scenario, autoplay: Self.autoplay, frames: Self.frames)
                 .onAppear {
                     NSApp.activate()
                 }
@@ -35,7 +39,17 @@ MainActor.assumeIsolated {
         }
     }
 
+    /// The word after `flag`, if it was given.
+    func value(of flag: String) -> String? {
+        guard let index = arguments.firstIndex(of: flag), arguments.indices.contains(index + 1) else {
+            return nil
+        }
+        return arguments[index + 1]
+    }
+
     LoomLabApp.autoplay = arguments.contains("--autoplay")
+    LoomLabApp.frames = value(of: "--frames").map { URL(filePath: $0) }
+    LoomLabApp.scenario = value(of: "--scenario")
     // Run from a package rather than a bundle, the app would otherwise start
     // without a Dock icon or a menu bar.
     NSApplication.shared.setActivationPolicy(.regular)
