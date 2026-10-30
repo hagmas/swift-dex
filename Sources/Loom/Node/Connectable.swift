@@ -35,6 +35,9 @@ struct FigureMarks {
     var anchors: [NodeID: Anchor<CGRect>] = [:]
     var outlines: [NodeID: Outline] = [:]
     var lines: [DrawnLineID: CGFloat] = [:]
+
+    /// The space the figure draws its lines in — see ``FigureSpace``.
+    var space: Anchor<CGRect>?
 }
 
 struct FigureMarksPreference: PreferenceKey {
@@ -45,5 +48,6 @@ struct FigureMarksPreference: PreferenceKey {
         value.anchors.merge(next.anchors) { $1 }
         value.outlines.merge(next.outlines) { $1 }
         value.lines.merge(next.lines) { $1 }
+        value.space = next.space ?? value.space
     }
 }

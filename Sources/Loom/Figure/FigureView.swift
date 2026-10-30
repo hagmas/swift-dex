@@ -9,6 +9,28 @@ import SwiftUI
 /// The arrangement is laid out by SwiftUI, each node publishes where it landed,
 /// and the lines are drawn from those positions — behind the nodes, so a line
 /// arriving at a box never draws across it.
+///
+/// A figure can be drawn inside a node of another, by putting a `FigureView`
+/// in the node's body:
+///
+/// ```swift
+/// struct Backend: Node {
+///     let id: NodeID
+///
+///     var body: some View {
+///         VStack {
+///             Text("Backend")
+///             FigureView(BackendFigure())
+///         }
+///     }
+/// }
+/// ```
+///
+/// The figure inside keeps to itself. Its node IDs are its own, so they may
+/// repeat the ones outside, and its lines stay inside: a line outside can
+/// reach the node that holds it, but nothing in it. Styles reach it as they
+/// reach any view, so a style given to the holding node is the inner nodes'
+/// too unless the inner figure is given one of its own.
 public struct FigureView<Content: Figure>: View {
     private let figure: Content
     private let spacing: CGFloat
@@ -17,6 +39,8 @@ public struct FigureView<Content: Figure>: View {
     @Environment(\.figureScale) private var scale
     @Environment(\.lineStyle) private var lineStyle
     @Environment(\.figureAnimation) private var figureAnimation
+    @Environment(\.isInsideFigure) private var isInsideFigure
+    @Environment(\.figureSpace) private var figureSpace
 
     /// How many nodes' phases have finished, which is what lines appearing in
     /// phases wait for — see ``LinePhaseTracker``.
@@ -42,6 +66,20 @@ public struct FigureView<Content: Figure>: View {
 
     /// The content and behavior of the view.
     public var body: some View {
+        if isInsideFigure {
+            content
+        }
+        else {
+            GeometryReader { space in
+                content
+                    .environment(\.figureSpace, FigureSpace(proxy: space))
+                    .frame(width: space.size.width, height: space.size.height)
+            }
+        }
+    }
+
+    /// The figure itself, in whatever space it is drawn in.
+    @ViewBuilder private var content: some View {
         // The arrangement's root may hold several elements. Stacking them here
         // gives the outermost container a direction, which is the same one
         // `Placement.addresses(in:)` reads a line's leaving edge from.
@@ -53,6 +91,7 @@ public struct FigureView<Content: Figure>: View {
 
         ScaledVStack(alignment: .center, spacing: 8, content: figure.arrangement.elementBody)
             .environment(\.waypointSpans, WaypointSpans.spans(for: lines, spacing: spacing))
+            .environment(\.isInsideFigure, true)
             .background {
                 ZStack {
                     ForEach(drawable, id: \.self) { id in
@@ -67,13 +106,22 @@ public struct FigureView<Content: Figure>: View {
             // against a space that is itself moving comes out somewhere the node
             // is not — which never shows while a figure is still, and shows up
             // badly the moment one animates.
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            //
+            // A figure inside a node is the exception: taking all the room it
+            // is given would make the node that holds it take all of its own,
+            // so it is as big as its arrangement.
+            .frame(maxWidth: isInsideFigure ? nil : .infinity, maxHeight: isInsideFigure ? nil : .infinity)
+            // Where this space is, for a figure inside a node to read its
+            // nodes against — see `rects(in:marks:)`.
+            .transformAnchorPreference(key: FigureMarksPreference.self, value: .bounds) { marks, anchor in
+                marks.space = anchor
+            }
             .backgroundPreferenceValue(FigureMarksPreference.self) { marks in
                 GeometryReader { proxy in
                     let placements = figure.arrangement.placements
                     let routes = LineRouter.routes(
                         for: lines,
-                        rects: marks.anchors.mapValues { proxy[$0] },
+                        rects: rects(in: proxy, marks: marks),
                         outlines: marks.outlines,
                         addresses: Placement.addresses(in: placements),
                         waypointAxes: Placement.waypointAxes(in: placements),
@@ -110,10 +158,52 @@ public struct FigureView<Content: Figure>: View {
                     finished = Swift.max(finished, phase)
                 }
             }
+            // What the figure's parts publish is for this figure alone. Let
+            // out, it would reach a figure this one is drawn inside, where a
+            // node here sharing an ID with a node there would take its place.
+            .transformPreference(FigureMarksPreference.self) { $0 = FigureMarksPreference.defaultValue }
+            .transformPreference(ElementAppearPreference.self) { $0 = ElementAppearPreference.defaultValue }
     }
 }
 
+/// The space the outermost figure was given, for the figures inside it to
+/// read their nodes against.
+///
+/// It does not move while the figures in it animate, which no space inside it
+/// can promise: a figure in a node goes wherever its node goes, and an anchor
+/// resolved against a space that is itself moving comes out somewhere the node
+/// is not.
+struct FigureSpace {
+    let proxy: GeometryProxy
+}
+
+extension EnvironmentValues {
+    /// The space the outermost figure was given, or `nil` outside any figure.
+    @Entry var figureSpace: FigureSpace? = nil
+
+    /// Whether the view is part of a figure — which a figure drawn inside a
+    /// node is.
+    @Entry var isInsideFigure = false
+}
+
 private extension FigureView {
+    /// Where each node is, in the space the lines are drawn in.
+    ///
+    /// A figure on its own reads its nodes against that space, which is the
+    /// one it was given and stays put. A figure inside a node has no such
+    /// space of its own — its own goes wherever the node does — so it reads
+    /// its nodes and its own space against the outermost figure's, which does
+    /// stay put, and takes the one from the other.
+    func rects(in proxy: GeometryProxy, marks: FigureMarks) -> [NodeID: CGRect] {
+        guard isInsideFigure, let outermost = figureSpace?.proxy, let space = marks.space else {
+            return marks.anchors.mapValues { proxy[$0] }
+        }
+        let origin = outermost[space].origin
+        return marks.anchors.mapValues { anchor in
+            outermost[anchor].offsetBy(dx: -origin.x, dy: -origin.y)
+        }
+    }
+
     /// Runs the nodes' phase in the change being made, and has the lines'
     /// phase follow it.
     ///
