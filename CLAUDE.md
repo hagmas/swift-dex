@@ -43,7 +43,7 @@ Development dependencies (swift-docc-plugin, swift-format, XcodeGen) are only in
 **Slide**: Individual presentation slides
 - Implement `Slide` protocol with `content` and optional `background` views  
 - Can define `actionContainer` for animations using `@ActionContainerBuilder`
-- All slides are stateless - use Actions for dynamic behavior
+- Click-driven changes go through Actions; views inside a slide may still hold their own state (see State in Slides below)
 
 **StandardLayoutSlide**: Scaffold for common slide layouts
 - Provides `head`, `body`, and `auxiliary` view sections
@@ -65,7 +65,8 @@ Development dependencies (swift-docc-plugin, swift-format, XcodeGen) are only in
 1. **Element Targeting**: Views can be tagged with `.elementID()` for action targeting
 2. **Result Builders**: Uses `@ActionContainerBuilder` and `@ViewBuilder` extensively  
 3. **Protocol-Based Design**: Core functionality defined through protocols (`Deck`, `Slide`, `Flow`, `Action`)
-4. **Stateless Slides**: No `@State` or `@ObservableObject` - all dynamics through Action system
+4. **State in Slides**: What changes on a click goes through Actions. Views inside a slide may still keep their own state with `@State` — interactive views are fine — but navigating back discards it, so a rewound slide renders as it did on first entry
+5. **State shared across windows**: Plain `@State` forks between the presentation window and its mirrors (e.g. a presenter display). Use `@SlideValue` instead when both should show the same value: it is keyed by `ElementID`, lives in the controller's `SlideValueStore`, and is cleared on any backward step, jump, or slide transition. `VideoView` is the worked example. `\.isMirror` tells a view it is drawing on a mirror
 
 ### Custom Views
 - **Bullets**: Bulleted list with item-by-item animations
