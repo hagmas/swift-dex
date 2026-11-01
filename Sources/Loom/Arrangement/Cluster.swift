@@ -114,12 +114,17 @@ private struct ClusterView<Content: View>: View {
 ///
 /// A `VStack` lines everything in it up one way; the title and the elements
 /// want two.
+///
+/// Both are laid out at their own size, whatever the cluster is offered, as a
+/// figure is. A row works out how far what is in it gives by offering it no
+/// width at all, and a title offered none breaks after every letter: the
+/// cluster would make room for a title that tall, then set it on one line.
 private struct ClusterLayout: Layout {
     let alignment: HorizontalAlignment
     let spacing: CGFloat
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let sizes = subviews.map { $0.sizeThatFits(proposal) }
+        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
         let gaps = CGFloat(Swift.max(sizes.count - 1, 0)) * spacing
         return CGSize(
             width: sizes.map(\.width).max() ?? 0,
@@ -130,7 +135,7 @@ private struct ClusterLayout: Layout {
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         var y = bounds.minY
         for (index, subview) in subviews.enumerated() {
-            let size = subview.sizeThatFits(proposal)
+            let size = subview.sizeThatFits(.unspecified)
             // Only the title, which comes first when there is one, sits where
             // the style says; the elements are centred.
             let isTitle = index == 0 && subviews.count > 1
