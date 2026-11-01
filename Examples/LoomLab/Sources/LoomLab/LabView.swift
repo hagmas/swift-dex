@@ -24,6 +24,30 @@ struct LabView: View {
     @State private var canvasFrame = CGRect.zero
     @State private var saved: String?
 
+    /// How much larger than the lab's usual size the figure is drawn.
+    @State private var zoom: CGFloat = 1
+
+    /// How far a pinch going on has magnified the figure, and about where.
+    ///
+    /// The figure is only magnified while the pinch lasts, and drawn at the
+    /// zoom it comes to when it ends: drawn afresh at every step of the pinch,
+    /// a large figure could not keep up with the fingers.
+    @State private var pinch: (magnification: CGFloat, anchor: UnitPoint)?
+
+    /// Where the pointer is over the canvas, for a pinch to magnify about
+    /// and for scrolling to move the figure only while it is over it.
+    ///
+    /// Read from the pointer rather than from the pinch, which says where it
+    /// is in its own terms.
+    @State private var pointer: CGPoint?
+
+    /// How far the figure has been moved from the middle of the canvas, in the
+    /// window's points.
+    @State private var pan = CGSize.zero
+
+    /// What turns scrolling over the canvas into moving the figure.
+    @State private var scrollMonitor: Any?
+
     init(scenario: String?, autoplay: Bool, frames: URL?) {
         self.autoplay = autoplay
         self.frames = frames
@@ -54,6 +78,8 @@ struct LabView: View {
         .frame(minWidth: 800, minHeight: 760)
         .onChange(of: selection) {
             step = 0
+            // Each figure is looked at from its usual size first.
+            actualSize()
         }
         .task {
             if let frames {
@@ -73,28 +99,76 @@ struct LabView: View {
         }
     }
 
-    /// The figure, in a space it can scroll in.
+    /// The figure, in a space it can be moved and pinched in.
     ///
     /// However large the figure grows, it never asks the window for more room:
-    /// a figure that does not fit is panned across rather than pushing the
-    /// sidebar aside. One that does fit sits in the middle.
+    /// it is drawn in the middle of the canvas, past its edges if need be, and
+    /// moved by scrolling. The canvas is not a scroll view, which could not be
+    /// scrolled past its content: a figure zoomed about a point beside it would
+    /// jump back when the zoom ended.
+    ///
+    /// Zooming draws the figure at another scale rather than magnifying it,
+    /// so that its words stay sharp at any size.
     private var canvas: some View {
-        GeometryReader { viewport in
-            ScrollView([.horizontal, .vertical]) {
-                scenario.figure(step)
-                    .modifier(Appearing(mode: appear))
-                    .figureScale(2)
-                    .padding(40)
-                    .frame(minWidth: viewport.size.width, minHeight: viewport.size.height)
+        scenario.figure(step)
+            .modifier(Appearing(mode: appear))
+            .figureScale(Self.scale * zoom)
+            .offset(pan)
+            .scaleEffect(pinch?.magnification ?? 1, anchor: pinch?.anchor ?? .center)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
+            .contentShape(Rectangle())
+            .onContinuousHover { phase in
+                switch phase {
+                case .active(let location): pointer = location
+                case .ended: pointer = nil
+                }
             }
-        }
-        .background(.white)
-        .background(FrameMeter.Ticks(meter: meter))
-        .onGeometryChange(for: CGRect.self) {
-            $0.frame(in: .global)
-        } action: {
-            canvasFrame = $0
-        }
+            .gesture(
+                MagnifyGesture()
+                    .onChanged { value in
+                        // Magnified about the point the pointer was over when
+                        // the pinch started, held to the zooms there are.
+                        let size = canvasFrame.size
+                        let point = pointer ?? CGPoint(x: size.width / 2, y: size.height / 2)
+                        let anchor = pinch?.anchor ?? UnitPoint(x: point.x / size.width, y: point.y / size.height)
+                        let next = min(max(zoom * value.magnification, Self.zooms.lowerBound), Self.zooms.upperBound)
+                        pinch = (next / zoom, anchor)
+                    }
+                    .onEnded { _ in
+                        guard let pinch else {
+                            return
+                        }
+                        self.pinch = nil
+                        let size = canvasFrame.size
+                        zoom(
+                            to: zoom * pinch.magnification,
+                            around: CGPoint(x: pinch.anchor.x * size.width, y: pinch.anchor.y * size.height)
+                        )
+                    }
+            )
+            .onAppear {
+                scrollMonitor = NSEvent.addLocalMonitorForEvents(matching: .scrollWheel) { event in
+                    guard pointer != nil else {
+                        return event
+                    }
+                    // A mouse's wheel scrolls by lines, a trackpad by points.
+                    let points: CGFloat = event.hasPreciseScrollingDeltas ? 1 : 10
+                    pan.width += event.scrollingDeltaX * points
+                    pan.height += event.scrollingDeltaY * points
+                    return nil
+                }
+            }
+            .onDisappear {
+                scrollMonitor.map(NSEvent.removeMonitor)
+            }
+            .background(.white)
+            .background(FrameMeter.Ticks(meter: meter))
+            .onGeometryChange(for: CGRect.self) {
+                $0.frame(in: .global)
+            } action: {
+                canvasFrame = $0
+            }
     }
 
     /// What to play on one row, and playing it on the next, so that neither
@@ -128,6 +202,8 @@ struct LabView: View {
                 Button("Save Image") { saveImage() }
                     .help("Save the figure as it is this instant, mid-animation or not")
 
+                zoomControls
+
                 Spacer(minLength: 16)
 
                 Text(saved ?? meter.reading.map(String.init(describing:)) ?? "Play to measure")
@@ -136,6 +212,77 @@ struct LabView: View {
                     .lineLimit(1)
             }
         }
+    }
+
+    /// Zooming out and in, and back to the usual size.
+    ///
+    /// There is no zooming to fit: a figure is a different size at every
+    /// step, so a zoom that fits one would not fit the next.
+    private var zoomControls: some View {
+        HStack(spacing: 4) {
+            Button {
+                zoom(to: zoom / Self.zoomStep)
+            } label: {
+                Image(systemName: "minus.magnifyingglass")
+            }
+            .keyboardShortcut("-")
+            .help("Zoom out (⌘−)")
+
+            Text("\(Int((zoom * (pinch?.magnification ?? 1) * 100).rounded()))%")
+                .monospacedDigit()
+                .frame(minWidth: 44)
+
+            Button {
+                zoom(to: zoom * Self.zoomStep)
+            } label: {
+                Image(systemName: "plus.magnifyingglass")
+            }
+            .keyboardShortcut("+")
+            .help("Zoom in (⌘+)")
+
+            Button("Actual Size") { actualSize() }
+                .keyboardShortcut("0")
+                .disabled(zoom == 1 && pan == .zero)
+                .help("Back to the usual size, in the middle (⌘0)")
+        }
+        // ⌘= as well as ⌘+, as other apps take it, since + needs Shift on
+        // most keyboards.
+        .background {
+            Button("") { zoom(to: zoom * Self.zoomStep) }
+                .keyboardShortcut("=")
+                .hidden()
+        }
+    }
+
+    /// The figure's scale at the usual size, larger than its own so that it
+    /// can be looked at closely.
+    private static let scale: CGFloat = 2
+
+    private static let zoomStep: CGFloat = 1.25
+    private static let zooms: ClosedRange<CGFloat> = 0.5...3
+
+    /// Draws the figure at another zoom, keeping the part of it at `anchor`
+    /// on the canvas — the middle, unless a pinch says where — where it is.
+    private func zoom(to next: CGFloat, around anchor: CGPoint? = nil) {
+        let next = min(max(next, Self.zooms.lowerBound), Self.zooms.upperBound)
+        let size = canvasFrame.size
+        let anchor = anchor ?? CGPoint(x: size.width / 2, y: size.height / 2)
+        // The figure is drawn about the middle of the canvas, moved by the
+        // pan: what is at the anchor is that far from the figure's middle,
+        // and will be farther by the change in zoom.
+        let ratio = next / zoom
+        let fromMiddle = CGSize(width: anchor.x - size.width / 2, height: anchor.y - size.height / 2)
+        pan = CGSize(
+            width: fromMiddle.width - (fromMiddle.width - pan.width) * ratio,
+            height: fromMiddle.height - (fromMiddle.height - pan.height) * ratio
+        )
+        zoom = next
+    }
+
+    /// The figure at the usual size, in the middle of the canvas.
+    private func actualSize() {
+        zoom = 1
+        pan = .zero
     }
 
     /// The figure as it is on screen this instant, as a PNG.

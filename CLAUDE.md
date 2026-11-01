@@ -26,6 +26,7 @@ SwiftDex is a Swift Package Manager library for creating presentations in SwiftU
 - `make lab ARGS=--autoplay` - Play every way of appearing, print what the meter saw, and quit. Use it to check a change to Loom's animation without anyone watching: image rendering cannot show animation
 - `make lab ARGS="--scenario Nested --frames <folder>"` - Play one scenario through once, writing the figure to images a dozen or so times a second (named by step and milliseconds), and quit. This is how to look at the middle of an animation: it captures the lab's own window as shown, which needs no screen-recording permission. `--scenario <name>` also picks what `make lab` opens and what `--autoplay` plays
 - In the running lab, Save Image saves the figure as it is that instant to the Desktop
+- In the running lab, scroll to move the figure, pinch or ⌘+ / ⌘− to zoom, and ⌘0 or Actual Size to go back to the usual size in the middle. Zooming draws the figure at another `figureScale`, so words stay sharp
 - `make lab ARGS="--snapshot <folder>"` - Draw every scenario (a gallery of figure kinds) into images in the folder and quit, to look through how figures read. Add a scenario as a file of its own in `Examples/LoomLab/Sources/LoomLab/Gallery/` (its figure, node IDs and styles together) and list it in `Scenario.all`
 
 ### Development Dependencies
