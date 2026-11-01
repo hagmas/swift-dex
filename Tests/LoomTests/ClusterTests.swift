@@ -109,4 +109,22 @@ final class ClusterTests: XCTestCase {
         XCTAssertTrue(column.contains { $0 < 0.4 }, "no line drawn over the box")
         XCTAssertTrue(column.contains { abs($0 - 0.8) < 0.05 }, "no box drawn")
     }
+
+    /// A cluster is the same size however little room it is offered.
+    ///
+    /// A row offers what is in it no width at all, to see how far it gives, and a
+    /// title offered none would break after every letter — leaving the
+    /// cluster as tall as that title, with nothing in the space.
+    @MainActor
+    func test_aClusterIsTheSameSizeInAnyRoom() {
+        let cluster = Cluster(.backend, title: "Backend") {
+            Row { TextNode(.api, title: "API") }
+        }
+        .elementBody
+        let host = NSHostingController(rootView: cluster)
+        let roomy = host.sizeThatFits(in: CGSize(width: 1000, height: 1000))
+        let cramped = host.sizeThatFits(in: CGSize(width: 0, height: 1000))
+
+        XCTAssertEqual(cramped, roomy)
+    }
 }
