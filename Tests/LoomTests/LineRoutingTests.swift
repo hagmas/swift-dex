@@ -169,6 +169,48 @@ final class LineRoutingTests: XCTestCase {
         XCTAssertEqual(routes(Aligned(), routing: .orthogonal, rects: nudged)[0].points.count, 4)
     }
 
+    /// A curved line leaves and arrives the way its edges face, as an
+    /// orthogonal one does, and bends in between instead of turning.
+    func test_curvedRoutingLeavesAndArrivesAlongItsEdges() {
+        let points = routes(Descent(), routing: .curved)[0].points
+
+        XCTAssertEqual(points.first, CGPoint(x: 150, y: 50))
+        XCTAssertEqual(points.last, CGPoint(x: 50, y: 150))
+        // Straight down out of the source, and straight down into the target.
+        XCTAssertEqual(points[1].x, 150, accuracy: 0.5)
+        XCTAssertGreaterThan(points[1].y, 50)
+        XCTAssertEqual(points[points.count - 2].x, 50, accuracy: 0.5)
+        XCTAssertLessThan(points[points.count - 2].y, 150)
+    }
+
+    /// Halfway along, the curve between two ends facing each other is halfway
+    /// between them, where an orthogonal line steps across.
+    func test_curvedRoutingIsHalfwayAcrossHalfwayAlong() throws {
+        let middle = try XCTUnwrap(routes(Descent(), routing: .curved)[0].points.middle)
+
+        XCTAssertEqual(middle.x, 100, accuracy: 0.5)
+        XCTAssertEqual(middle.y, 100, accuracy: 0.5)
+    }
+
+    /// Drawn through points close enough together that it reads as a curve:
+    /// nowhere does it turn by more than a few degrees at once.
+    func test_aCurveNeverTurnsSharply() {
+        let points = routes(Descent(), routing: .curved)[0].points
+
+        XCTAssertGreaterThan(points.count, 8)
+        for (a, (b, c)) in zip(points, zip(points.dropFirst(), points.dropFirst(2))) {
+            let turn = abs(atan2(c.y - b.y, c.x - b.x) - atan2(b.y - a.y, b.x - a.x))
+            XCTAssertLessThan(turn, .pi / 30, "turns sharply at \(b)")
+        }
+    }
+
+    /// Ends that already line up are joined straight, curved or not.
+    func test_aCurveBetweenEndsInLineIsStraight() {
+        let points = routes(Aligned(), routing: .curved)[0].points
+
+        XCTAssertEqual(points, [CGPoint(x: 150, y: 50), CGPoint(x: 150, y: 150)])
+    }
+
     func test_aLineCanOverrideTheFiguresRouting() {
         struct Stubborn: Figure {
             var arrangement: some FigureElement {

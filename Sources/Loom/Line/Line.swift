@@ -293,6 +293,18 @@ public extension Line {
         /// cutting the corner. Where the two ends already line up the turns
         /// collapse and the line comes out straight.
         case orthogonal
+
+        /// Along a curve, leaving and arriving the way its edges face.
+        ///
+        /// The line meets its nodes on the same edges as an orthogonal one,
+        /// and bends between them rather than turning. Lines that share an
+        /// edge bend by different amounts, a lane apart, so they do not lie
+        /// on top of one another.
+        ///
+        /// The branches of a line with several nodes at one end have no
+        /// straight stretch to share, so they part at once rather than
+        /// running as one trunk.
+        case curved
     }
 }
 

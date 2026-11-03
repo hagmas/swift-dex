@@ -39,6 +39,7 @@ extension Scenario {
         .nested,
         .clusters,
         .statechart,
+        .statechartCurved,
         .hub,
         .ragged,
     ]
