@@ -12,6 +12,11 @@ extension Scenario {
                 .lineStyle(LineStyle(cornerRadius: 6))
         )
     }
+
+    /// The same statechart with its lines curved.
+    static let statechartCurved = Scenario(name: "Statechart, curved", steps: 0) { _ in
+        AnyView(FigureView(Kettle(), routing: .curved))
+    }
 }
 
 private extension NodeID {

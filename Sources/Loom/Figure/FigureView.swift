@@ -480,12 +480,15 @@ private extension LineView {
             return points
         }
 
+        // Cut back along the line rather than along its last stretch alone: a
+        // curve is drawn through points closer together than an arrowhead is
+        // long.
         var points = points
         if route.arrow.tipsEnd {
-            points[points.count - 1] = pulled(points[points.count - 1], towards: points[points.count - 2], by: inset)
+            points = points.keeping(Swift.max(points.length - inset, 0))
         }
         if route.arrow.tipsStart {
-            points[0] = pulled(points[0], towards: points[1], by: inset)
+            points = points.dropping(inset)
         }
         return points
     }

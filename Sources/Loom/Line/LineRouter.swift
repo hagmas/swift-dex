@@ -623,9 +623,10 @@ extension LineRouter {
                 let previous = route.joints[position - 1]
                 // A hop that starts and ends at one node is a loop, and a loop
                 // drawn straight is a line back on top of itself. There is no
-                // straight reading of going round, so it goes round either way.
+                // straight reading of going round, so it goes round either way
+                // — squarely, unless the figure's lines curve.
                 let isLoop = previous.node.node == joint.node.node
-                let routing: Line.Routing = isLoop ? .orthogonal : route.routing
+                let routing: Line.Routing = isLoop && route.routing == .straight ? .orthogonal : route.routing
                 // A loop reaches out about as far as it is wide, so it comes
                 // out square rather than as a long thin bracket. Everything
                 // else reaches out a lane at a time: lines leaving one side

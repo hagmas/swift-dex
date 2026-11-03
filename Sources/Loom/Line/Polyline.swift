@@ -19,6 +19,9 @@ extension Line.Routing {
     /// The ends themselves are the caller's; only what goes between them is
     /// returned.
     func corners(from start: HopEnd, to end: HopEnd, margin: CGFloat) -> [CGPoint] {
+        if self == .curved {
+            return curve(from: start, to: end, margin: margin)
+        }
         guard self == .orthogonal else {
             return []
         }
@@ -58,6 +61,61 @@ extension Line.Routing {
         }
     }
 
+    /// Points along a curve between the two ends, close enough together to be
+    /// drawn as a line.
+    ///
+    /// The curve sets off the way the start faces and arrives the way the end
+    /// faces, each pulled out by a control point. A curve is handed on as
+    /// points rather than as a curve so that everything else that reads a
+    /// line — the arrowhead, the words halfway along, drawing it in — reads
+    /// it the same way whatever it is.
+    private func curve(from start: HopEnd, to end: HopEnd, margin: CGFloat) -> [CGPoint] {
+        let leaving = start.facing ?? start.axis.direction(from: start.point, to: end.point)
+        let arriving = end.facing ?? end.axis.direction(from: end.point, to: start.point)
+
+        // How far each control point stands out from its end.
+        let pull: (CGFloat, CGFloat)
+        if leaving == arriving {
+            // Both ends face the same way, so the curve has to get clear of
+            // both before it comes back. Its furthest reach is three quarters
+            // of the way to control points level with each other, so they
+            // stand that much further out than the margin it is to clear by.
+            let reach = Swift.max(start.point.along(leaving), end.point.along(leaving)) + margin / 0.75
+            pull = (reach - start.point.along(leaving), reach - end.point.along(leaving))
+        }
+        else {
+            // Half the way across to the other end, as far as the end faces
+            // towards it; a margin's worth when it faces away.
+            let ahead = end.point.along(leaving) - start.point.along(leaving)
+            let behind = start.point.along(arriving) - end.point.along(arriving)
+            pull = (Swift.max(ahead / 2, margin), Swift.max(behind / 2, margin))
+        }
+
+        let control1 = start.point.moved(leaving, by: pull.0)
+        let control2 = end.point.moved(arriving, by: pull.1)
+
+        // Enough points that the chords between them cannot be told from the
+        // curve: a few points apart, judged by the control polygon, which is
+        // never shorter than the curve.
+        let polygon =
+            start.point.distance(to: control1) + control1.distance(to: control2)
+            + control2.distance(to: end.point)
+        let count = Swift.max(Int((polygon / 3).rounded(.up)), 8)
+
+        return (1..<count).map { step in
+            let t = CGFloat(step) / CGFloat(count)
+            let u = 1 - t
+            let a = u * u * u
+            let b = 3 * u * u * t
+            let c = 3 * u * t * t
+            let d = t * t * t
+            return CGPoint(
+                x: a * start.point.x + b * control1.x + c * control2.x + d * end.point.x,
+                y: a * start.point.y + b * control1.y + c * control2.y + d * end.point.y
+            )
+        }
+    }
+
     /// Out past whichever end reaches further, across, and back.
     ///
     /// Both ends sit on the outward boundary of their own node in this
@@ -81,6 +139,31 @@ extension Line.Routing {
             ? Swift.max(start.y, end.y) + margin
             : Swift.min(start.y, end.y) - margin
         return [CGPoint(x: start.x, y: y), CGPoint(x: end.x, y: y)]
+    }
+}
+
+extension Axis {
+    /// The way along this axis from one point towards another.
+    ///
+    /// For an end with no edge to face out of — a waypoint — which the line
+    /// passes through along its axis, headed for the next stop.
+    func direction(from point: CGPoint, to other: CGPoint) -> CGVector {
+        switch self {
+        case .horizontal: CGVector(dx: other.x < point.x ? -1 : 1, dy: 0)
+        case .vertical: CGVector(dx: 0, dy: other.y < point.y ? -1 : 1)
+        }
+    }
+}
+
+private extension CGPoint {
+    /// How far along `direction` the point is.
+    func along(_ direction: CGVector) -> CGFloat {
+        x * direction.dx + y * direction.dy
+    }
+
+    /// The point moved `distance` along `direction`.
+    func moved(_ direction: CGVector, by distance: CGFloat) -> CGPoint {
+        CGPoint(x: x + direction.dx * distance, y: y + direction.dy * distance)
     }
 }
 

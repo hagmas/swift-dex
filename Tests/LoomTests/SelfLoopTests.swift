@@ -107,6 +107,22 @@ final class SelfLoopTests: XCTestCase {
         XCTAssertEqual(straight, round)
     }
 
+    /// A curved loop is round rather than square, and reaches as far out as a
+    /// square one, so its words stand off it in the same place.
+    func test_aCurvedLoopReachesAsFarOutAsASquareOne() throws {
+        let loop = routes(routing: .curved, Line(looping: .one.trailing, label: "waits"))[0]
+        let box = rects[.one]!
+
+        XCTAssertGreaterThan(loop.points.count, 4)
+        XCTAssertEqual(loop.points.map(\.x).max() ?? 0, 230, accuracy: 0.5)
+        for point in loop.points where box.insetBy(dx: 0.01, dy: 0.01).contains(point) {
+            XCTFail("put \(point) inside the node")
+        }
+        let label = try XCTUnwrap(loop.labelPoint)
+        XCTAssertEqual(label.x, 230, accuracy: 0.5)
+        XCTAssertEqual(label.y, 25, accuracy: 0.5)
+    }
+
     func test_aLoopComesOutTheSameWayEveryTime() {
         // Both ends of a loop are headed the same way, so nothing but the
         // tie-break decides which of them takes the near lane.
