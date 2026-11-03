@@ -6,7 +6,9 @@ extension Scenario {
     /// figure's on purpose.
     ///
     /// It grows a node inside, then one outside, so that the lines on both
-    /// sides have to follow the node holding the figure.
+    /// sides have to follow the node holding the figure. The figure inside
+    /// has a loop and a line going round the outside, which reach past its
+    /// nodes, so the node makes room for them.
     static let nested = Scenario(name: "Nested", steps: 2) { step in
         AnyView(FigureView(System(step: step), routing: .orthogonal))
     }
@@ -66,6 +68,10 @@ private struct Backend: Node {
             FigureView(Services(step: step), routing: .orthogonal)
                 .nodeStyle(.standard)
                 .lineStyle(LineStyle(labelBackground: containerFill))
+                // The node is as big as the figure's nodes and cuts off what
+                // goes past them: room for the loop above, and for the line
+                // going round on the right.
+                .padding(EdgeInsets(top: 40, leading: 0, bottom: 0, trailing: 64))
         }
     }
 }
@@ -92,5 +98,7 @@ private struct Services: Figure {
     var lines: [Line] {
         Line(from: .a, to: .b, label: "queries")
         Line(from: .b, to: .c)
+        Line(looping: .a.top, label: "retries")
+        Line(from: .c.trailing, to: .b.trailing, label: "refills")
     }
 }

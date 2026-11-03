@@ -32,6 +32,16 @@ import SwiftUI
 /// reach any view, so a style given to the holding node is the inner nodes'
 /// too unless the inner figure is given one of its own.
 ///
+/// The node is as big as the figure's nodes, and its content is cut to its
+/// outline. A line that reaches past them — a loop off a side, a line going
+/// round the outside, the words on them — is cut off with it, so make room
+/// for it with padding:
+///
+/// ```swift
+/// FigureView(BackendFigure())
+///     .padding(.trailing, 48)  // for the line going round on the right
+/// ```
+///
 /// A figure is laid out at its own size, whatever room it is given, so that
 /// it looks the same wherever it is drawn. Given less room than it needs, it
 /// draws past it rather than squeezing its nodes together; given more, it sits
@@ -39,6 +49,10 @@ import SwiftUI
 /// has to stay put while the figure in it grows and shrinks — so to know how
 /// big the figure is, to make room for it, read its size with
 /// ``SwiftUICore/View/onFigureSizeChange(_:)``.
+///
+/// That size is its nodes', not its lines': a line coming or going would
+/// otherwise move every node. A line that reaches past the nodes is drawn
+/// past them, and a figure that has one needs that much more room around it.
 public struct FigureView<Content: Figure>: View {
     private let figure: Content
     private let spacing: CGFloat
