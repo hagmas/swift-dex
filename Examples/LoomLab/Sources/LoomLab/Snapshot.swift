@@ -1,4 +1,3 @@
-import AppKit
 import Loom
 import SwiftUI
 
@@ -13,19 +12,13 @@ enum Snapshot {
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
 
         for (index, scenario) in Scenario.all.enumerated() {
-            let view = scenario.figure(scenario.steps)
-                .figureScale(2)
-                .padding(40)
-                .frame(width: 1000, height: 760)
-                .background(.white)
-
-            let renderer = ImageRenderer(content: view)
-            renderer.scale = 1
-            guard
-                let image = renderer.nsImage,
-                let tiff = image.tiffRepresentation,
-                let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:])
-            else {
+            var renderer = FigureRenderer(
+                content: scenario.figure(scenario.steps)
+                    .figureScale(2)
+                    .background(.white)
+            )
+            renderer.margin = 40
+            guard let png = renderer.pngData() else {
                 print("\(scenario.name): could not be drawn")
                 continue
             }

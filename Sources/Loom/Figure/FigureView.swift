@@ -50,6 +50,7 @@ public struct FigureView<Content: Figure>: View {
     @Environment(\.isInsideFigure) private var isInsideFigure
     @Environment(\.figureSpace) private var figureSpace
     @Environment(\.figureSizeAction) private var figureSizeAction
+    @Environment(\.figureExtentAction) private var figureExtentAction
 
     /// How many nodes' phases have finished, which is what lines appearing in
     /// phases wait for — see ``LinePhaseTracker``.
@@ -162,13 +163,32 @@ public struct FigureView<Content: Figure>: View {
                                 .opacity(cluster.opacity)
                         }
                     }
-                    ForEach(routes) { route in
-                        LineView(
-                            route: route,
-                            style: lines[route.line].style ?? lineStyle,
-                            scale: scale,
-                            appeared: marks.lines[route.id] ?? 1
-                        )
+                    ZStack {
+                        ForEach(routes) { route in
+                            LineView(
+                                route: route,
+                                style: lines[route.line].style ?? lineStyle,
+                                scale: scale,
+                                appeared: marks.lines[route.id] ?? 1
+                            )
+                        }
+                    }
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+                    .overlayPreferenceValue(LabelBoundsPreference.self) { labels in
+                        if !isInsideFigure, let figureExtentAction {
+                            // Lines can reach past the nodes — a loop, a line
+                            // going round the outside, the words on them — so
+                            // what the figure draws is measured from all of it.
+                            Color.clear
+                                .onGeometryChange(for: CGRect.self) { space in
+                                    // From the middle, where the nodes are
+                                    // centred, however big the view turns out.
+                                    extent(nodes: rects.values, routes: routes, labels: labels.map { space[$0] })
+                                        .offsetBy(dx: -space.size.width / 2, dy: -space.size.height / 2)
+                                } action: {
+                                    figureExtentAction($0)
+                                }
+                        }
                     }
                 }
             }
@@ -197,6 +217,7 @@ public struct FigureView<Content: Figure>: View {
             // node here sharing an ID with a node there would take its place.
             .transformPreference(FigureMarksPreference.self) { $0 = FigureMarksPreference.defaultValue }
             .transformPreference(ElementAppearPreference.self) { $0 = ElementAppearPreference.defaultValue }
+            .transformPreference(LabelBoundsPreference.self) { $0 = LabelBoundsPreference.defaultValue }
     }
 }
 
@@ -244,9 +265,33 @@ struct FigureSizeAction {
     }
 }
 
+/// What to do with the extent of everything a figure draws.
+struct FigureExtentAction {
+    let action: @MainActor (CGRect) -> Void
+
+    @MainActor func callAsFunction(_ extent: CGRect) {
+        action(extent)
+    }
+}
+
+/// Where the words on a figure's lines are, for the figure to know how far
+/// what it draws reaches.
+struct LabelBoundsPreference: PreferenceKey {
+    static let defaultValue: [Anchor<CGRect>] = []
+
+    static func reduce(value: inout [Anchor<CGRect>], nextValue: () -> [Anchor<CGRect>]) {
+        value += nextValue()
+    }
+}
+
 extension EnvironmentValues {
     /// What to do when the figure's size changes, if anything.
     @Entry var figureSizeAction: FigureSizeAction? = nil
+
+    /// What to do with the extent of everything the figure draws, if
+    /// anything — measured, unlike its size, from its lines as well as its
+    /// nodes, and from the middle of the view the figure is drawn in.
+    @Entry var figureExtentAction: FigureExtentAction? = nil
 
     /// The space the outermost figure was given, or `nil` outside any figure.
     @Entry var figureSpace: FigureSpace? = nil
@@ -272,6 +317,29 @@ private extension FigureView {
         return marks.anchors.mapValues { anchor in
             outermost[anchor].offsetBy(dx: -origin.x, dy: -origin.y)
         }
+    }
+
+    /// Everything the figure draws, in the space the lines are drawn in: its
+    /// nodes and clusters, its lines with their arrowheads, and the words on
+    /// them.
+    func extent(nodes: some Sequence<CGRect>, routes: [RoutedLine], labels: [CGRect]) -> CGRect {
+        var extent = CGRect.null
+        for rect in nodes {
+            extent = extent.union(rect)
+        }
+        for route in routes {
+            let style = figure.lines[route.line].style ?? lineStyle
+            // An arrowhead is wider than the line it tips, and reaches as far
+            // to either side of it as it is long at most.
+            let reach = Swift.max(style.arrowHead.size ?? style.width * 5, style.width) * scale
+            for point in route.points {
+                extent = extent.union(CGRect(x: point.x - reach, y: point.y - reach, width: reach * 2, height: reach * 2))
+            }
+        }
+        for label in labels {
+            extent = extent.union(label)
+        }
+        return extent
     }
 
     /// Runs the nodes' phase in the change being made, and has the lines'
@@ -359,6 +427,10 @@ private struct LineView: View {
                     // than running under them. On a background that is not a
                     // flat colour, the line shows through.
                     .background(style.labelBackground)
+                    // Where they end up, for the figure to know how far what
+                    // it draws reaches: on the words themselves, since words
+                    // hung off a point lie outside the point they hang from.
+                    .anchorPreference(key: LabelBoundsPreference.self, value: .bounds) { [$0] }
 
                 Group {
                     if let side = route.labelSide {
