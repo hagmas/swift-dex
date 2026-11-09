@@ -22,7 +22,7 @@ private extension NodeID {
 private extension NodeStyle {
     static let state = NodeStyle.standard.with {
         $0.shape = .circle
-        $0.minWidth = 80
+        $0.minWidth = 112
     }
     static let decision = NodeStyle.standard.with {
         $0.shape = .diamond
@@ -37,17 +37,17 @@ private extension NodeStyle {
 
 private struct Shapes: Figure {
     var arrangement: some FigureElement {
-        Column(alignment: .columnSpine, spacing: 32) {
+        Column(alignment: .columnSpine, spacing: 44) {
             Row { TextNode(.begin, title: "Begin").nodeStyle(.terminal) }
-            Row(spacing: 48) {
+            Row(spacing: 68) {
                 TextNode(.ready, title: "Ready").nodeStyle(.state).aligned(on: .columnSpine)
                 TextNode(.aside, title: "Logs").nodeStyle(.note)
             }
-            Row(spacing: 48) {
+            Row(spacing: 68) {
                 TextNode(.saving, title: "Saving").nodeStyle(.state)
                 TextNode(.check, title: "Valid?").nodeStyle(.decision).aligned(on: .columnSpine)
             }
-            Row(spacing: 48) {
+            Row(spacing: 68) {
                 TextNode(.ok, title: "Done").nodeStyle(.state)
                 TextNode(.retrying, title: "Retry").nodeStyle(.state)
             }

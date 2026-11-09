@@ -12,16 +12,16 @@ private struct Overreaching: Node {
     var body: some View {
         Color(red: 1, green: 0, blue: 0)
             .frame(width: 20, height: 20)
-            .offset(x: 200)
+            .offset(x: 400)
     }
 }
 
-/// Whether the point 270 across, 50 down — where the red square is drawn,
+/// Whether the point 500 across, 50 down — where the red square is drawn,
 /// outside the node's frame — comes out red.
 @MainActor
 private func showsBeyondTheFrame(_ shape: NodeShape) -> Bool {
-    // The frame is the default minimum width, 140, with the square laid out in
-    // its middle at 60...80 and drawn 200 further on.
+    // The frame is the default minimum width, 200, with the square laid out in
+    // its middle at 90...110 and drawn 400 further on.
     let view = Overreaching()
         .elementBody
         .nodeStyle(NodeStyle.standard.with { $0.shape = shape })
@@ -29,7 +29,7 @@ private func showsBeyondTheFrame(_ shape: NodeShape) -> Bool {
         .background(.white)
     let renderer = ImageRenderer(content: view)
     renderer.scale = 1
-    guard let image = renderer.cgImage, let color = NSBitmapImageRep(cgImage: image).colorAt(x: 270, y: 50) else {
+    guard let image = renderer.cgImage, let color = NSBitmapImageRep(cgImage: image).colorAt(x: 500, y: 50) else {
         XCTFail("Could not draw the node")
         return false
     }

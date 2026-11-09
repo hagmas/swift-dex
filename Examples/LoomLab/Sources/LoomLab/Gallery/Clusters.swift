@@ -10,7 +10,7 @@ extension Scenario {
     static let clusters = Scenario(name: "Clusters", steps: 2) { step in
         AnyView(
             FigureView(Architecture(step: step), routing: .orthogonal)
-                .nodeStyle(NodeStyle(minWidth: 90))
+                .nodeStyle(NodeStyle(minWidth: 128))
         )
     }
 }
@@ -30,7 +30,7 @@ private extension ClusterStyle {
     static let network = ClusterStyle.standard.with {
         $0.fill = .white
         $0.stroke = .orange
-        $0.dash = [6, 4]
+        $0.dash = [8, 6]
         $0.titleColor = .orange
     }
 }
@@ -39,18 +39,18 @@ private struct Architecture: Figure {
     var step: Int
 
     var arrangement: some FigureElement {
-        Column(alignment: .columnSpine, spacing: 48) {
+        Column(alignment: .columnSpine, spacing: 68) {
             Row { TextNode(.client, title: "Client") }
             // The monitor beside the network rather than above it, so that
             // its line comes in from the side instead of alongside the
             // client's — level with the worker it watches, so it runs
             // straight across both boxes.
-            Row(alignment: .rowSpine, spacing: 64) {
+            Row(alignment: .rowSpine, spacing: 88) {
                 Cluster(.vpc, title: "VPC") {
-                    Row(alignment: .rowSpine, spacing: 32) {
+                    Row(alignment: .rowSpine, spacing: 44) {
                         TextNode(.database, title: "Database").aligned(on: .rowSpine)
                         Cluster(.backend, title: "Backend") {
-                            Row(spacing: 24) {
+                            Row(spacing: 32) {
                                 TextNode(.api, title: "API").aligned(on: .rowSpine)
                                 if step >= 1 {
                                     TextNode(.worker, title: "Worker").aligned(on: .columnSpine)

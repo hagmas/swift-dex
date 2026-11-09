@@ -11,13 +11,13 @@
 
     private struct SampleFigure: Figure {
         var arrangement: some FigureElement {
-            Column(spacing: 48) {
-                Row(spacing: 32) {
+            Column(spacing: 68) {
+                Row(spacing: 44) {
                     TextNode(.viewModel, title: "ViewModel")
                     Waypoint(.sideChannel)
                 }
                 Row { TextNode(.repository, title: "Repository") }
-                Row(spacing: 32) {
+                Row(spacing: 44) {
                     TextNode(.apiClient, title: "APIClient")
                     TextNode(.cache, title: "Cache (on disk)")
                 }

@@ -31,9 +31,9 @@ private struct Flowchart: Figure {
     var aligned: Bool
 
     var arrangement: some FigureElement {
-        Column(alignment: aligned ? .columnSpine : .center, spacing: 40) {
+        Column(alignment: aligned ? .columnSpine : .center, spacing: 56) {
             Row { TextNode(.start, title: "Start") }
-            Row(spacing: 64) {
+            Row(spacing: 88) {
                 TextNode(.fetch, title: "Fetch data").aligned(on: .columnSpine)
                 Waypoint(.back)
             }

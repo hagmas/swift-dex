@@ -81,29 +81,28 @@ private struct ClusterView<Content: View>: View {
     let content: Content
 
     @Environment(\.clusterStyle) private var style
-    @Environment(\.figureScale) private var scale
     @Environment(\.clusterDepth) private var depth
     @Environment(\.appearOpacity) private var opacity
 
     var body: some View {
-        ClusterLayout(alignment: style.titleAlignment, spacing: style.titleSpacing * scale) {
+        ClusterLayout(alignment: style.titleAlignment, spacing: style.titleSpacing) {
             if let title {
                 Text(title)
-                    .font(.system(size: style.titleSize * scale, weight: style.titleWeight))
+                    .font(.system(size: style.titleSize, weight: style.titleWeight))
                     .foregroundStyle(style.titleColor)
             }
-            ScaledVStack(alignment: .center, spacing: 8, content: content)
+            VStack(alignment: .center, spacing: 12) { content }
                 .environment(\.clusterDepth, depth + 1)
         }
-        .padding(style.padding * scale)
+        .padding(style.padding)
         // Drawn inside the box, never past it, as a node's content is: an
         // element added to a cluster is laid out where it ends up at once,
         // while the box grows towards it.
-        .clipShape(RoundedRectangle(cornerRadius: style.cornerRadius * scale))
+        .clipShape(RoundedRectangle(cornerRadius: style.cornerRadius))
         .reportsBounds(as: id)
         .transformPreference(FigureMarksPreference.self) { marks in
             // Lines to the cluster meet its box.
-            marks.outlines[id] = Outline(shape: .roundedRectangle(cornerRadius: style.cornerRadius), scale: scale)
+            marks.outlines[id] = Outline(shape: .roundedRectangle(cornerRadius: style.cornerRadius))
             marks.clusters[id] = ClusterMark(style: style, depth: depth, opacity: opacity)
         }
     }
@@ -154,15 +153,14 @@ private struct ClusterLayout: Layout {
 /// A cluster's box.
 struct ClusterBox: View {
     let style: ClusterStyle
-    let scale: CGFloat
 
     var body: some View {
-        let box = RoundedRectangle(cornerRadius: style.cornerRadius * scale)
+        let box = RoundedRectangle(cornerRadius: style.cornerRadius)
         box.fill(style.fill)
             .overlay {
                 box.strokeBorder(
                     style.stroke,
-                    style: StrokeStyle(lineWidth: style.strokeWidth * scale, dash: style.dash.map { $0 * scale })
+                    style: StrokeStyle(lineWidth: style.strokeWidth, dash: style.dash)
                 )
             }
     }

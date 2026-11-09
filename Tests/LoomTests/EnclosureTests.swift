@@ -11,7 +11,7 @@ private extension NodeID {
 /// A title that fills its lines almost to the width it is offered.
 ///
 /// Short words leave little room at the end of a line, which is when a circle
-/// comes out widest: offered the whole width inside a circle 160 across, this
+/// comes out widest: offered the whole width inside a circle 224 across, this
 /// one's diagonal is more than the circle, and the circle used to be squeezed
 /// into an oval taller than it was wide.
 private let long = String(repeating: "ab ", count: 10)
@@ -39,14 +39,14 @@ final class EnclosureTests: XCTestCase {
     /// A width limit holds whatever the shape, by wrapping the content.
     func test_everyShapeKeepsToItsWidthLimit() {
         for shape in [NodeShape.roundedRectangle(cornerRadius: 8), .capsule, .circle, .ellipse, .diamond] {
-            XCTAssertLessThanOrEqual(frame(long, shape, maxWidth: 160).width, 160.5, "\(shape)")
+            XCTAssertLessThanOrEqual(frame(long, shape, maxWidth: 224).width, 224.5, "\(shape)")
         }
     }
 
     /// A circle wraps its content onto narrower lines to keep within the
     /// limit, and stays round.
     func test_aLimitedCircleStaysRound() {
-        let size = frame(long, .circle, maxWidth: 160)
+        let size = frame(long, .circle, maxWidth: 224)
 
         XCTAssertEqual(size.width, size.height, accuracy: 0.5)
     }
@@ -59,15 +59,15 @@ final class EnclosureTests: XCTestCase {
     /// A minimum width is a circle's minimum diameter: a short title in a
     /// circle with the default width is as tall as it is wide.
     func test_aMinimumWidthIsACirclesMinimumDiameter() {
-        let size = frame("Ready", .circle, minWidth: 140)
+        let size = frame("Ready", .circle, minWidth: 200)
 
-        XCTAssertEqual(size, CGSize(width: 140, height: 140))
+        XCTAssertEqual(size, CGSize(width: 200, height: 200))
     }
 
     /// Too much to go round in a circle within the limit, a circle grows past
     /// the limit rather than out of shape.
     func test_aCircleThatCannotKeepToItsLimitStaysRound() {
-        let size = frame(String(repeating: "ab ", count: 30), .circle, maxWidth: 160)
+        let size = frame(String(repeating: "ab ", count: 30), .circle, maxWidth: 224)
 
         XCTAssertEqual(size.width, size.height, accuracy: 0.5)
     }

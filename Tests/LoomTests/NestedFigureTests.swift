@@ -65,13 +65,13 @@ final class NestedFigureTests: XCTestCase {
     /// A figure on its own takes the room it is given; one inside a figure
     /// takes only what its arrangement needs.
     func test_aFigureInsideAFigureIsOnlyAsBigAsItsArrangement() {
-        let room = CGSize(width: 1000, height: 1000)
+        let room = CGSize(width: 2000, height: 2000)
         let alone = NSHostingController(rootView: FigureView(Pair())).sizeThatFits(in: room)
         let inside = NSHostingController(rootView: FigureView(Pair()).environment(\.isInsideFigure, true))
             .sizeThatFits(in: room)
 
         XCTAssertEqual(alone, room)
-        XCTAssertLessThan(inside.width, 500)
-        XCTAssertLessThan(inside.height, 200)
+        XCTAssertLessThan(inside.width, 700)
+        XCTAssertLessThan(inside.height, 280)
     }
 }

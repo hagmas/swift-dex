@@ -12,24 +12,23 @@ struct NodeFrame<Content: View>: View {
     let content: Content
 
     @Environment(\.nodeStyle) private var style
-    @Environment(\.figureScale) private var scale
 
     var body: some View {
-        let outline = NodeOutline(shape: style.shape, scale: scale)
+        let outline = NodeOutline(shape: style.shape)
 
         content
-            .font(.system(size: style.fontSize * scale, weight: style.fontWeight))
+            .font(.system(size: style.fontSize, weight: style.fontWeight))
             .foregroundStyle(style.textColor)
             .multilineTextAlignment(style.textAlignment)
             .modifier(
                 Enclosure(
                     shape: style.shape,
-                    padding: style.padding * scale,
-                    minWidth: style.minWidth * scale,
+                    padding: style.padding,
+                    minWidth: style.minWidth,
                     alignment: Alignment(style.textAlignment)
                 )
             )
-            .modifier(WidthLimit(maxWidth: style.maxWidth.map { $0 * scale }))
+            .modifier(WidthLimit(maxWidth: style.maxWidth))
             // The content is drawn inside the outline, never past it. A node
             // whose content grows — a figure inside it, gaining a node — is
             // laid out at its new size at once while its frame grows towards
@@ -44,12 +43,12 @@ struct NodeFrame<Content: View>: View {
             }
             .overlay {
                 if style.shape != .none {
-                    outline.strokeBorder(style.stroke, lineWidth: style.strokeWidth * scale)
+                    outline.strokeBorder(style.stroke, lineWidth: style.strokeWidth)
                 }
             }
             // Lines meet the outline, so they are told what it is.
             .transformPreference(FigureMarksPreference.self) { marks in
-                marks.outlines[id] = Outline(shape: style.shape, scale: scale)
+                marks.outlines[id] = Outline(shape: style.shape)
             }
     }
 }
@@ -251,18 +250,6 @@ private struct WidthLimitLayout: Layout {
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         subviews.first?.place(at: bounds.origin, proposal: ProposedViewSize(bounds.size))
-    }
-}
-
-extension EdgeInsets {
-    /// The insets, in a figure drawn `scale` times its own size.
-    static func * (insets: EdgeInsets, scale: CGFloat) -> EdgeInsets {
-        EdgeInsets(
-            top: insets.top * scale,
-            leading: insets.leading * scale,
-            bottom: insets.bottom * scale,
-            trailing: insets.trailing * scale
-        )
     }
 }
 

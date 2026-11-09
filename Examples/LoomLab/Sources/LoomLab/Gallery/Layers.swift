@@ -27,17 +27,17 @@ private extension NodeID {
 
 private struct Layers: Figure {
     var arrangement: some FigureElement {
-        Column(spacing: 64) {
-            Row(spacing: 24) {
+        Column(spacing: 88) {
+            Row(spacing: 32) {
                 TextNode(.home, title: "HomeView")
                 TextNode(.search, title: "SearchView")
                 TextNode(.profile, title: "ProfileView")
             }
-            Row(spacing: 24) {
+            Row(spacing: 32) {
                 TextNode(.feedModel, title: "FeedModel")
                 TextNode(.userModel, title: "UserModel")
             }
-            Row(spacing: 24) {
+            Row(spacing: 32) {
                 TextNode(.api, title: "APIClient")
                 TextNode(.cache, title: "Cache")
                 TextNode(.auth, title: "Auth")

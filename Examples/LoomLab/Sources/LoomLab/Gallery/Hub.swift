@@ -20,17 +20,17 @@ private extension NodeID {
 
 private struct Hub: Figure {
     var arrangement: some FigureElement {
-        Column(spacing: 48) {
-            Row(spacing: 32) {
+        Column(spacing: 68) {
+            Row(spacing: 44) {
                 TextNode(.north, title: "Logger")
                 TextNode(.northEast, title: "Metrics")
             }
-            Row(spacing: 32) {
+            Row(spacing: 44) {
                 TextNode(.west, title: "Settings")
                 TextNode(.core, title: "Core")
                 TextNode(.east, title: "Network")
             }
-            Row(spacing: 32) {
+            Row(spacing: 44) {
                 TextNode(.southWest, title: "Storage")
                 TextNode(.south, title: "UI")
             }

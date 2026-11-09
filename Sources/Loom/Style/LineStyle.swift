@@ -18,7 +18,7 @@ import SwiftUI
 /// of the arrangement, so a style on a ``Row`` or ``Column`` does not reach
 /// them; a line that should look different says so itself.
 ///
-/// Every number is in points, in the figure's own terms, and colours are fixed
+/// Every number is in points, drawn as it is, and colours are fixed
 /// rather than following the system's appearance — for the same reasons as
 /// ``NodeStyle``.
 public struct LineStyle: Sendable {
@@ -69,15 +69,15 @@ public struct LineStyle: Sendable {
     /// Creates a style.
     public init(
         color: Color = .black,
-        width: CGFloat = 1.5,
+        width: CGFloat = 2,
         cornerRadius: CGFloat = 0,
         dash: [CGFloat] = [],
         arrowHead: ArrowHead = .filled,
         appear: Appear = .draw,
-        labelFontSize: CGFloat = 10,
+        labelFontSize: CGFloat = 14,
         labelColor: Color = .black,
         labelBackground: Color = .white,
-        labelPadding: CGFloat = 4
+        labelPadding: CGFloat = 6
     ) {
         self.color = color
         self.width = width

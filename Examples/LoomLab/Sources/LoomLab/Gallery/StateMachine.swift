@@ -18,12 +18,12 @@ private extension NodeID {
 
 private struct StateMachine: Figure {
     var arrangement: some FigureElement {
-        Column(spacing: 56) {
-            Row(spacing: 48) {
+        Column(spacing: 80) {
+            Row(spacing: 68) {
                 TextNode(.idle, title: "Idle")
                 TextNode(.loading, title: "Loading")
             }
-            Row(spacing: 48) {
+            Row(spacing: 68) {
                 TextNode(.loaded, title: "Loaded")
                 TextNode(.failed, title: "Failed")
             }
