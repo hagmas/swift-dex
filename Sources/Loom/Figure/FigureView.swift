@@ -425,11 +425,11 @@ private struct LineView: View {
             .stroke(style.color, style: StrokeStyle(lineWidth: width, dash: style.dash.map { $0 * scale }))
 
             if route.arrow.tipsEnd, points.count >= 2 {
-                arrowHead(at: points[points.count - 1], from: points[points.count - 2])
+                arrowHead(at: points[points.count - 1], from: heading(into: points))
             }
 
             if route.arrow.tipsStart, points.count >= 2 {
-                arrowHead(at: points[0], from: points[1])
+                arrowHead(at: points[0], from: heading(into: points.reversed()))
             }
 
             if let label = route.label, let point = route.labelPoint {
@@ -560,23 +560,72 @@ private extension LineView {
         return overlap.atStart ? points.dropping(cut) : Array(Array(points.reversed()).dropping(cut).reversed())
     }
 
+    /// Where an arrowhead at the last point is aimed from: as far back along
+    /// the line as the head is long, unless the line turns a corner first.
+    ///
+    /// Not simply the point before the last, which on a curve is so close
+    /// that it gives the direction at the very tip: a curve still turning
+    /// there would have the head pointing one way and the line meeting its
+    /// base from another. A corner is different, and a head just past one
+    /// points along the run it is on.
+    func heading(into points: [CGPoint]) -> CGPoint {
+        points[approach(into: points)]
+    }
+
+    /// The index of the point ``heading(into:)`` aims from.
+    func approach(into points: [CGPoint]) -> Int {
+        var travelled = points[points.count - 1].distance(to: points[points.count - 2])
+        var index = points.count - 2
+        while travelled < head, index > 0 {
+            let next = points[index - 1]
+            let turn = abs(angle(from: points[index], to: points[index + 1]) - angle(from: next, to: points[index]))
+            // Gentler than this from one point to the next is a curve.
+            guard Swift.min(turn, 2 * .pi - turn) < .pi / 12 else {
+                break
+            }
+            travelled += next.distance(to: points[index])
+            index -= 1
+        }
+        return index
+    }
+
+    private func angle(from start: CGPoint, to end: CGPoint) -> CGFloat {
+        atan2(end.y - start.y, end.x - start.x)
+    }
+
     /// The points the stroke runs through, stopped short of any arrowhead.
     func stroked(_ points: [CGPoint]) -> [CGPoint] {
         guard points.count >= 2 else {
             return points
         }
 
-        // Cut back along the line rather than along its last stretch alone: a
-        // curve is drawn through points closer together than an arrowhead is
-        // long.
         var points = points
         if route.arrow.tipsEnd {
-            points = points.keeping(Swift.max(points.length - inset, 0))
+            points = stoppedShort(points)
         }
         if route.arrow.tipsStart {
-            points = points.dropping(inset)
+            points = Array(stoppedShort(Array(points.reversed())).reversed())
         }
         return points
+    }
+
+    /// `points`, stopped short of an arrowhead at the last of them.
+    ///
+    /// The head is aimed from as far back as it is long, and inside it the
+    /// stroke runs straight along that aim rather than following the line: a
+    /// curve still turning there would wander off the middle of the head, and
+    /// its square end, set across the curve rather than the head, would poke
+    /// out of one side.
+    private func stoppedShort(_ points: [CGPoint]) -> [CGPoint] {
+        let tip = points[points.count - 1]
+        let index = approach(into: points)
+        let from = points[index]
+        guard from.distance(to: tip) > inset else {
+            // A corner closer to the tip than the stroke stops: cut back
+            // along the line, round the corner if need be.
+            return points.keeping(Swift.max(points.length - inset, 0))
+        }
+        return Array(points[...index]) + [pulled(tip, towards: from, by: inset)]
     }
 
     /// `point`, moved `distance` towards `target` but never past it.
