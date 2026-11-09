@@ -183,8 +183,7 @@ public struct FigureView<Content: Figure>: View {
                                 route: route,
                                 style: lines[route.line].style ?? lineStyle,
                                 scale: scale,
-                                appeared: marks.lines[route.id] ?? 1,
-                                measuresLabels: !isInsideFigure && figureExtentAction != nil
+                                appeared: marks.lines[route.id] ?? 1
                             )
                         }
                     }
@@ -277,20 +276,6 @@ struct FigureSizeAction {
 
     @MainActor func callAsFunction(_ size: CGSize) {
         action(size)
-    }
-}
-
-/// Says where a line's words are, when asked to.
-private struct ReportsLabelBounds: ViewModifier {
-    let active: Bool
-
-    func body(content: Content) -> some View {
-        if active {
-            content.anchorPreference(key: LabelBoundsPreference.self, value: .bounds) { [$0] }
-        }
-        else {
-            content
-        }
     }
 }
 
@@ -421,13 +406,6 @@ private struct LineView: View {
     /// How much of the line has appeared, from none of it to all.
     let appeared: CGFloat
 
-    /// Whether to say where the words are, which only a figure asked how far
-    /// what it draws reaches needs to know.
-    ///
-    /// Only then: reported on every figure, they moved the whole figure when
-    /// a line with words appeared, for reasons not yet understood.
-    var measuresLabels = false
-
     private var width: CGFloat {
         style.width * scale
     }
@@ -466,7 +444,7 @@ private struct LineView: View {
                     // Where they end up, for the figure to know how far what
                     // it draws reaches: on the words themselves, since words
                     // hung off a point lie outside the point they hang from.
-                    .modifier(ReportsLabelBounds(active: measuresLabels))
+                    .anchorPreference(key: LabelBoundsPreference.self, value: .bounds) { [$0] }
 
                 Group {
                     if let side = route.labelSide {
