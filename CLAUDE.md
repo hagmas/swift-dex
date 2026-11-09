@@ -85,7 +85,7 @@ Development dependencies (swift-docc-plugin, swift-format, XcodeGen) are only in
   - `Figure/` - The `Figure` protocol, `FigureView`, which draws one, and `FigureRenderer`, which draws one into an image just big enough to hold it
   - `Arrangement/` - `Row`, `Column`, `Empty`, `Cluster` (a box around some elements that lines cross) and the closed tree they build
   - `Node/` - `Connectable` (anything lines connect to), `Node` (content only; the frame is drawn from `NodeStyle`), `NodeID`, and `TextNode`, the stock node
-  - `Line/` - `Line`, routing, and `Waypoint`, which exists to steer lines
+  - `Line/` - `Line`, routing, `LineView`, which draws one, and `Waypoint`, which exists to steer lines
   - `Style/` - `NodeStyle`, `ClusterStyle`, `LineStyle`, `figureScale`
   - `Animation/` - How a figure's parts appear: `FigureAnimation` and the stand-ins behind it
 - `Tests/LoomTests/` - Loom's test suite
