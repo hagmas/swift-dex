@@ -40,9 +40,9 @@ private struct Converting: View {
 
     var body: some View {
         ActionReader(Convert.self, elementID: elementID, clicks: 1) { progress in
-            FigureView(Types(converted: converted(progress)), routing: .orthogonal)
+            FigureView(Types(converted: converted(progress)), spacing: 14 * slideFigureRatio, routing: .orthogonal)
+                .nodeStyle(.standard.onSlide())
                 .lineStyle(.rounded)
-                .figureAtBodyTextSize()
         } animation: { _ in
             .smooth(duration: 0.8)
         }
@@ -63,27 +63,29 @@ private extension NodeStyle {
     static let classType = NodeStyle(
         fill: Color(red: 0.88, green: 0.93, blue: 1.0),
         stroke: Color(red: 0.2, green: 0.4, blue: 0.85),
-        strokeWidth: 1.5
+        strokeWidth: 2
     )
+    .onSlide()
 
     static let structType = NodeStyle(
-        shape: .roundedRectangle(cornerRadius: 2),
+        shape: .roundedRectangle(cornerRadius: 3),
         fill: Color(red: 1.0, green: 0.93, blue: 0.85),
         stroke: Color(red: 0.85, green: 0.45, blue: 0.1),
-        strokeWidth: 1.5,
+        strokeWidth: 2,
         fontWeight: .semibold
     )
+    .onSlide()
 }
 
 private extension LineStyle {
     /// Every line in the figure turns its corners the same way.
-    static let rounded = LineStyle(cornerRadius: 8)
+    static let rounded = LineStyle(cornerRadius: 11).onSlide()
 
     /// Conformance to a protocol, the way UML draws realization.
-    static let conformance = LineStyle(cornerRadius: 8, dash: [5, 3], arrowHead: .hollow)
+    static let conformance = LineStyle(cornerRadius: 11, dash: [7, 4], arrowHead: .hollow).onSlide()
 
     /// A use that is not ownership.
-    static let dependency = LineStyle(cornerRadius: 8, dash: [5, 3], arrowHead: .open)
+    static let dependency = LineStyle(cornerRadius: 11, dash: [7, 4], arrowHead: .open).onSlide()
 }
 
 private extension NodeID {
@@ -100,13 +102,13 @@ private struct Types: Figure {
     var converted: Bool
 
     var arrangement: some FigureElement {
-        Column(spacing: 40) {
-            Row(spacing: 32) {
+        Column(spacing: 56 * slideFigureRatio) {
+            Row(spacing: 44 * slideFigureRatio) {
                 TextNode(.view, title: "ProfileView")
                 TextNode(.model, title: "ProfileModel")
             }
             .nodeStyle(.classType)
-            Row(spacing: 32) {
+            Row(spacing: 44 * slideFigureRatio) {
                 TextNode(.settings, title: "Settings")
                     .nodeStyle(.structType)
                 TextNode(.user, title: "User")
@@ -114,7 +116,7 @@ private struct Types: Figure {
                 TextNode(.point, title: "Point")
                     .nodeStyle(.structType)
             }
-            Row(spacing: 32) {
+            Row(spacing: 44 * slideFigureRatio) {
                 Empty()
                 TextNode(.identifiable, title: "Identifiable")
                 Empty()

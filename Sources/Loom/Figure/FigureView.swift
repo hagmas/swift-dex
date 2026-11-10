@@ -58,7 +58,6 @@ public struct FigureView<Content: Figure>: View {
     private let spacing: CGFloat
     private let routing: Line.Routing
 
-    @Environment(\.figureScale) private var scale
     @Environment(\.lineStyle) private var lineStyle
     @Environment(\.figureAnimation) private var figureAnimation
     @Environment(\.isInsideFigure) private var isInsideFigure
@@ -80,7 +79,7 @@ public struct FigureView<Content: Figure>: View {
     ///     but a figure almost always wants one kind of line throughout.
     public init(
         _ figure: Content,
-        spacing: CGFloat = 10,
+        spacing: CGFloat = 14,
         routing: Line.Routing = .straight
     ) {
         self.figure = figure
@@ -107,13 +106,12 @@ public struct FigureView<Content: Figure>: View {
         // The arrangement's root may hold several elements. Stacking them here
         // gives the outermost container a direction, which is the same one
         // `Placement.addresses(in:)` reads a line's leaving edge from.
-        let spacing = spacing * scale
         let lines = figure.lines
         let present = Set(figure.nodeIDs)
         let drawable = LineRouter.drawnIDs(for: lines, present: present.contains)
         let _ = figureAnimation == nil ? () : phaseTracker.note(drawable)
 
-        ScaledVStack(alignment: .center, spacing: 8, content: figure.arrangement.elementBody)
+        VStack(alignment: .center, spacing: 12) { figure.arrangement.elementBody }
             .environment(\.waypointSpans, WaypointSpans.spans(for: lines, spacing: spacing))
             .environment(\.isInsideFigure, true)
             // At its own size, never the room around it: a figure that took
@@ -171,7 +169,7 @@ public struct FigureView<Content: Figure>: View {
                     let clusters = marks.clusters.sorted { ($0.value.depth, $0.key.rawValue) < ($1.value.depth, $1.key.rawValue) }
                     ForEach(clusters, id: \.key) { id, cluster in
                         if let rect = rects[id] {
-                            ClusterBox(style: cluster.style, scale: scale)
+                            ClusterBox(style: cluster.style)
                                 .frame(width: rect.width, height: rect.height)
                                 .position(x: rect.midX, y: rect.midY)
                                 .opacity(cluster.opacity)
@@ -182,7 +180,6 @@ public struct FigureView<Content: Figure>: View {
                             LineView(
                                 route: route,
                                 style: lines[route.line].style ?? lineStyle,
-                                scale: scale,
                                 appeared: marks.lines[route.id] ?? 1
                             )
                         }
@@ -345,7 +342,7 @@ private extension FigureView {
             let style = figure.lines[route.line].style ?? lineStyle
             // An arrowhead is wider than the line it tips, and reaches as far
             // to either side of it as it is long at most.
-            let reach = Swift.max(style.arrowHead.size ?? style.width * 5, style.width) * scale
+            let reach = Swift.max(style.arrowHead.size ?? style.width * 5, style.width)
             for point in route.points {
                 extent = extent.union(CGRect(x: point.x - reach, y: point.y - reach, width: reach * 2, height: reach * 2))
             }

@@ -61,8 +61,7 @@ extension NodeShape {
         }
     }
 
-    /// The outline drawn in `rect`, with any corner radius multiplied by
-    /// `scale`.
+    /// The outline drawn in `rect`.
     ///
     /// Made from SwiftUI's own shapes, so a rounded rectangle has SwiftUI's
     /// continuous corners — which the lines then meet exactly.
@@ -70,10 +69,10 @@ extension NodeShape {
     /// Inset by `inset` the way SwiftUI insets its shapes — a rounded
     /// rectangle's corners tighten as it shrinks — so that an outline stroked
     /// inside the frame draws as SwiftUI's own would.
-    func path(in rect: CGRect, scale: CGFloat, inset: CGFloat = 0) -> Path {
+    func path(in rect: CGRect, inset: CGFloat = 0) -> Path {
         switch self {
         case .roundedRectangle(let cornerRadius):
-            RoundedRectangle(cornerRadius: cornerRadius * scale).inset(by: inset).path(in: rect)
+            RoundedRectangle(cornerRadius: cornerRadius).inset(by: inset).path(in: rect)
         case .capsule:
             Capsule().inset(by: inset).path(in: rect)
         case .circle, .ellipse:
@@ -93,24 +92,22 @@ extension NodeShape {
     }
 }
 
-/// A node's outline as the lines see it: a shape, at the figure's scale.
+/// A node's outline as the lines see it.
 struct Outline: Sendable {
     let shape: NodeShape
-    let scale: CGFloat
 
     func path(in rect: CGRect) -> CGPath {
-        shape.path(in: rect, scale: scale).cgPath
+        shape.path(in: rect).cgPath
     }
 }
 
 /// A node's outline as a SwiftUI shape, to fill and stroke.
 struct NodeOutline: InsettableShape {
     let shape: NodeShape
-    let scale: CGFloat
     var inset: CGFloat = 0
 
     func path(in rect: CGRect) -> Path {
-        shape.path(in: rect, scale: scale, inset: inset)
+        shape.path(in: rect, inset: inset)
     }
 
     func inset(by amount: CGFloat) -> NodeOutline {

@@ -9,7 +9,7 @@ extension Scenario {
     static let statechart = Scenario(name: "Statechart", steps: 0) { _ in
         AnyView(
             FigureView(Kettle(), routing: .orthogonal)
-                .lineStyle(LineStyle(cornerRadius: 6))
+                .lineStyle(LineStyle(cornerRadius: 8))
         )
     }
 
@@ -48,14 +48,14 @@ private extension NodeStyle {
         $0.shape = .capsule
         $0.fill = Color(white: 0.95)
         $0.stroke = .gray
-        $0.minWidth = 120
+        $0.minWidth = 168
     }
     static let fault = NodeStyle(fill: Color(red: 1, green: 0.9, blue: 0.9), stroke: .red, textColor: .red)
     static let start = NodeStyle(
         shape: .circle,
         fill: .black,
         padding: EdgeInsets(),
-        minWidth: 18
+        minWidth: 24
     )
 }
 
@@ -67,30 +67,30 @@ private extension ClusterStyle {
     }
     static let legend = ClusterStyle.standard.with {
         $0.fill = .white
-        $0.dash = [4, 4]
+        $0.dash = [6, 6]
     }
 }
 
 private struct Kettle: Figure {
     var arrangement: some FigureElement {
-        Column(alignment: .columnSpine, spacing: 48) {
+        Column(alignment: .columnSpine, spacing: 68) {
             Row { TextNode(.start, title: "").nodeStyle(.start).aligned(on: .columnSpine) }
             Row { TextNode(.off, title: "Off").nodeStyle(.waiting).aligned(on: .columnSpine) }
             // The fault off to the side, level with the heating it stops, so
             // the line to it runs straight out of both boxes.
-            Row(alignment: .rowSpine, spacing: 80) {
+            Row(alignment: .rowSpine, spacing: 112) {
                 TextNode(.dryBoil, title: "Dry-boil cut-out").nodeStyle(.fault).aligned(on: .rowSpine)
                 Cluster(.pluggedIn, title: "On the base") {
                     // A column of its own, since a cluster stacks what is in
                     // it close together, with no room for the words on the
                     // lines between.
-                    Column(spacing: 48) {
+                    Column(spacing: 68) {
                         Row { TextNode(.standingBy, title: "Standing by").nodeStyle(.waiting).aligned(on: .columnSpine) }
                         // Further apart than the rest, for the three lines
                         // between to turn and carry their words.
-                        Column(spacing: 72) {
+                        Column(spacing: 100) {
                             Row { TextNode(.choosing, title: "Choosing a drink").nodeStyle(.waiting) }
-                            Row(spacing: 24) {
+                            Row(spacing: 32) {
                                 TextNode(.greenTea, title: "Green tea · 80°")
                                 TextNode(.coffee, title: "Coffee · 92°")
                                 TextNode(.boil, title: "Boil · 100°")
@@ -99,7 +99,7 @@ private struct Kettle: Figure {
                         }
                         Row {
                             Cluster(.heating, title: "Heating") {
-                                Row(alignment: .rowSpine, spacing: 120) {
+                                Row(alignment: .rowSpine, spacing: 168) {
                                     TextNode(.warming, title: "Warming the water").aligned(on: .rowSpine)
                                     TextNode(.holding, title: "Holding the heat")
                                 }
@@ -114,7 +114,7 @@ private struct Kettle: Figure {
             Row { TextNode(.liftedOff, title: "Lifted off").nodeStyle(.waiting).aligned(on: .columnSpine) }
             Row {
                 Cluster(.legend, title: "Legend") {
-                    Row(spacing: 16) {
+                    Row(spacing: 24) {
                         TextNode(.legendWaiting, title: "Waiting").nodeStyle(.waiting)
                         TextNode(.legendWorking, title: "Working").nodeStyle(.working)
                         TextNode(.legendChoice, title: "Choice").nodeStyle(.choice)

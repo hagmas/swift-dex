@@ -27,8 +27,9 @@ import SwiftUI
 /// ``Row`` or ``Column`` it covers everything inside; applied to a node it
 /// covers that node alone.
 ///
-/// Every number is in points, in the figure's own terms. A figure is not told
-/// how big it will be shown: a host that wants it larger scales the whole of it.
+/// Every number is in points, and drawn as it is. A figure shown larger — on
+/// a slide, say — is given a style with larger numbers, made for where it is
+/// shown.
 ///
 /// Colours are fixed rather than following the system's appearance. A figure
 /// is content, not interface, and should look the same wherever it is shown.
@@ -79,16 +80,16 @@ public struct NodeStyle: Sendable {
 
     /// Creates a style.
     public init(
-        shape: NodeShape = .roundedRectangle(cornerRadius: 8),
+        shape: NodeShape = .roundedRectangle(cornerRadius: 12),
         fill: Color = .white,
         stroke: Color = .black,
-        strokeWidth: CGFloat = 1,
+        strokeWidth: CGFloat = 1.5,
         textColor: Color = .black,
-        fontSize: CGFloat = 13,
+        fontSize: CGFloat = 18,
         fontWeight: Font.Weight = .regular,
         textAlignment: TextAlignment = .center,
-        padding: EdgeInsets = EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16),
-        minWidth: CGFloat = 140,
+        padding: EdgeInsets = EdgeInsets(top: 16, leading: 22, bottom: 16, trailing: 22),
+        minWidth: CGFloat = 200,
         maxWidth: CGFloat? = nil
     ) {
         self.shape = shape

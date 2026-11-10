@@ -34,8 +34,8 @@ private struct System: Figure {
     var step: Int
 
     var arrangement: some FigureElement {
-        Column(spacing: 48) {
-            Row(spacing: 32) {
+        Column(spacing: 68) {
+            Row(spacing: 44) {
                 TextNode(.a, title: "App")
                 TextNode(.b, title: "Logs")
                 if step >= 2 {
@@ -59,7 +59,7 @@ private struct Backend: Node {
     var step: Int
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 6) {
             Text("Backend")
             // The container's style would reach the nodes inside too, so they
             // are given the standard one back. The words on the lines are
@@ -71,7 +71,7 @@ private struct Backend: Node {
                 // The node is as big as the figure's nodes and cuts off what
                 // goes past them: room for the loop above, and for the line
                 // going round on the right.
-                .padding(EdgeInsets(top: 40, leading: 0, bottom: 0, trailing: 64))
+                .padding(EdgeInsets(top: 28, leading: 0, bottom: 0, trailing: 44))
         }
     }
 }
@@ -81,13 +81,13 @@ private struct Services: Figure {
     var step: Int
 
     var arrangement: some FigureElement {
-        Column(spacing: 32) {
-            Row(spacing: 48) {
+        Column(spacing: 44) {
+            Row(spacing: 68) {
                 TextNode(.a, title: "API")
                 TextNode(.b, title: "DB")
             }
             if step >= 1 {
-                Row(spacing: 48) {
+                Row(spacing: 68) {
                     Empty()
                     TextNode(.c, title: "Cache")
                 }

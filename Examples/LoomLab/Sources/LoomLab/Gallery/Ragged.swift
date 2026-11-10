@@ -7,7 +7,7 @@ extension Scenario {
     static let ragged = Scenario(name: "Ragged titles", steps: 0) { _ in
         AnyView(
             FigureView(Ragged(), routing: .orthogonal)
-                .nodeStyle(NodeStyle(maxWidth: 180))
+                .nodeStyle(NodeStyle(maxWidth: 250))
         )
     }
 }
@@ -21,13 +21,13 @@ private extension NodeID {
 
 private struct Ragged: Figure {
     var arrangement: some FigureElement {
-        Column(spacing: 48) {
-            Row(spacing: 24) {
+        Column(spacing: 68) {
+            Row(spacing: 32) {
                 TextNode(.short, title: "DB")
                 TextNode(.long, title: "A service whose name goes on for a while")
                 TextNode(.tiny, title: "X")
             }
-            Row(spacing: 24) {
+            Row(spacing: 32) {
                 Empty()
                 TextNode(.longer, title: "Something with an even longer name than that one, really")
                 Empty()

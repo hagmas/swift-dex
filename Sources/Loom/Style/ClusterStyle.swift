@@ -18,8 +18,8 @@ import SwiftUI
 ///     .clusterStyle(.vpc)
 /// ```
 ///
-/// As with ``NodeStyle``, styles do not combine, the numbers are in the
-/// figure's own terms, and the colours are fixed.
+/// As with ``NodeStyle``, styles do not combine, the numbers are points drawn
+/// as they are, and the colours are fixed.
 public struct ClusterStyle: Sendable {
     /// The colour inside the box.
     public var fill: Color
@@ -58,15 +58,15 @@ public struct ClusterStyle: Sendable {
     public init(
         fill: Color = Color(white: 0.97),
         stroke: Color = Color(white: 0.6),
-        strokeWidth: CGFloat = 1,
+        strokeWidth: CGFloat = 1.5,
         dash: [CGFloat] = [],
-        cornerRadius: CGFloat = 12,
-        padding: EdgeInsets = EdgeInsets(top: 12, leading: 16, bottom: 16, trailing: 16),
+        cornerRadius: CGFloat = 16,
+        padding: EdgeInsets = EdgeInsets(top: 16, leading: 22, bottom: 22, trailing: 22),
         titleColor: Color = Color(white: 0.35),
-        titleSize: CGFloat = 11,
+        titleSize: CGFloat = 15,
         titleWeight: Font.Weight = .semibold,
         titleAlignment: HorizontalAlignment = .leading,
-        titleSpacing: CGFloat = 12
+        titleSpacing: CGFloat = 16
     ) {
         self.fill = fill
         self.stroke = stroke

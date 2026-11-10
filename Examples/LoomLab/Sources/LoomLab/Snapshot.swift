@@ -14,7 +14,6 @@ enum Snapshot {
         for (index, scenario) in Scenario.all.enumerated() {
             var renderer = FigureRenderer(
                 content: scenario.figure(scenario.steps)
-                    .figureScale(2)
                     .background(.white)
             )
             renderer.margin = 40

@@ -41,7 +41,7 @@ private func routes(top shape: NodeShape) -> [RoutedLine] {
     return LineRouter.routes(
         for: figure.lines,
         rects: rects,
-        outlines: [.top: Outline(shape: shape, scale: 1)],
+        outlines: [.top: Outline(shape: shape)],
         addresses: Placement.addresses(in: placements),
         waypointAxes: Placement.waypointAxes(in: placements),
         routing: .orthogonal,

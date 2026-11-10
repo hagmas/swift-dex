@@ -11,7 +11,7 @@ public extension HorizontalAlignment {
     /// ```swift
     /// Column(alignment: .columnSpine) {
     ///     Row { TextNode(.start, title: "Start") }
-    ///     Row(spacing: 64) {
+    ///     Row(spacing: 88) {
     ///         TextNode(.fetch, title: "Fetch data").aligned(on: .columnSpine)
     ///         Waypoint(.back)
     ///     }

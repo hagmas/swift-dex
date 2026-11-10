@@ -6,7 +6,7 @@ extension Scenario {
     static let growingFan = Scenario(name: "Growing fan", steps: 3) { step in
         AnyView(
             FigureView(GrowingFan(step: step), routing: .orthogonal)
-                .lineStyle(LineStyle(cornerRadius: 6))
+                .lineStyle(LineStyle(cornerRadius: 8))
         )
     }
 }
@@ -23,9 +23,9 @@ private struct GrowingFan: Figure {
     var step: Int
 
     var arrangement: some FigureElement {
-        Column(spacing: 56) {
+        Column(spacing: 80) {
             Row { TextNode(.source, title: "Source") }
-            Row(spacing: 24) {
+            Row(spacing: 32) {
                 TextNode(.stage1, title: "Parse")
                 if step >= 1 { TextNode(.stage2, title: "Validate") }
                 if step >= 2 { TextNode(.stage3, title: "Enrich") }

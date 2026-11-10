@@ -20,7 +20,7 @@ private struct GrowingFlow: Figure {
     var step: Int
 
     var arrangement: some FigureElement {
-        Column(spacing: 48) {
+        Column(spacing: 68) {
             if step < 3 {
                 Row { TextNode(.view, title: "View") }
             }

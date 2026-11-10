@@ -26,7 +26,7 @@ SwiftDex is a Swift Package Manager library for creating presentations in SwiftU
 - `make lab ARGS=--autoplay` - Play every way of appearing, print what the meter saw, and quit. Use it to check a change to Loom's animation without anyone watching: image rendering cannot show animation
 - `make lab ARGS="--scenario Nested --frames <folder>"` - Play one scenario through once, writing the figure to images a dozen or so times a second (named by step and milliseconds), and quit. This is how to look at the middle of an animation: it captures the lab's own window as shown, which needs no screen-recording permission. `--scenario <name>` also picks what `make lab` opens and what `--autoplay` plays
 - In the running lab, Save Image saves the figure as it is that instant to the Desktop
-- In the running lab, scroll to move the figure, pinch or ⌘+ / ⌘− to zoom, and ⌘0 or Actual Size to go back to the usual size in the middle. Zooming draws the figure at another `figureScale`, so words stay sharp
+- In the running lab, scroll to move the figure, pinch or ⌘+ / ⌘− to zoom, and ⌘0 or Actual Size to go back to the usual size in the middle. At the usual size the figure is drawn as its numbers say; zooming magnifies it with `scaleEffect`, so words zoomed in on are soft
 - `make lab ARGS="--snapshot <folder>"` - Draw every scenario (a gallery of figure kinds) into images in the folder and quit, to look through how figures read. Each image is cut to its figure, lines that reach past the nodes included, by `FigureRenderer`. Add a scenario as a file of its own in `Examples/LoomLab/Sources/LoomLab/Gallery/` (its figure, node IDs and styles together) and list it in `Scenario.all`
 
 ### Development Dependencies
@@ -86,7 +86,7 @@ Development dependencies (swift-docc-plugin, swift-format, XcodeGen) are only in
   - `Arrangement/` - `Row`, `Column`, `Empty`, `Cluster` (a box around some elements that lines cross) and the closed tree they build
   - `Node/` - `Connectable` (anything lines connect to), `Node` (content only; the frame is drawn from `NodeStyle`), `NodeID`, and `TextNode`, the stock node
   - `Line/` - `Line`, routing, `LineView`, which draws one, and `Waypoint`, which exists to steer lines
-  - `Style/` - `NodeStyle`, `ClusterStyle`, `LineStyle`, `figureScale`
+  - `Style/` - `NodeStyle`, `ClusterStyle`, `LineStyle`. Their numbers are points, drawn as they are: Loom has no scale of its own, and a figure shown larger is given styles with larger numbers
   - `Animation/` - How a figure's parts appear: `FigureAnimation` and the stand-ins behind it
 - `Tests/LoomTests/` - Loom's test suite
 - `Examples/SwiftDexExample/` - Example presentation demonstrating features

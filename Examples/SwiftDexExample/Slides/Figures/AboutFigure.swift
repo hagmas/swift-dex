@@ -40,9 +40,10 @@ private struct GrowingFlow: View {
 
     var body: some View {
         ActionReader(Grow.self, elementID: elementID, clicks: 3) { progress in
-            FigureView(DataFlow(reached: reached(progress)), routing: .orthogonal)
+            FigureView(DataFlow(reached: reached(progress)), spacing: 14 * slideFigureRatio, routing: .orthogonal)
                 .figureAnimation(.phased(linesFrom: 0.8))
-                .figureAtBodyTextSize()
+                .nodeStyle(.standard.onSlide())
+                .lineStyle(.standard.onSlide())
         } animation: { _ in
             .bouncy(duration: 0.8)
         }
@@ -79,7 +80,7 @@ private struct DataFlow: Figure {
     var reached: Int
 
     var arrangement: some FigureElement {
-        Column(spacing: 48) {
+        Column(spacing: 68 * slideFigureRatio) {
             if reached < 3 {
                 Row { TextNode(.view, title: "View") }
             }

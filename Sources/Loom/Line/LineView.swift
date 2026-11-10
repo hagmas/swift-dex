@@ -4,17 +4,16 @@ import SwiftUI
 struct LineView: View {
     let route: RoutedLine
     let style: LineStyle
-    let scale: CGFloat
 
     /// How much of the line has appeared, from none of it to all.
     let appeared: CGFloat
 
     private var width: CGFloat {
-        style.width * scale
+        style.width
     }
 
     private var head: CGFloat {
-        style.arrowHead.size.map { $0 * scale } ?? width * 5
+        style.arrowHead.size ?? width * 5
     }
 
     var body: some View {
@@ -23,9 +22,9 @@ struct LineView: View {
 
         ZStack {
             Path { path in
-                path.addRoundedLines(stroked(points), radius: style.cornerRadius * scale)
+                path.addRoundedLines(stroked(points), radius: style.cornerRadius)
             }
-            .stroke(style.color, style: StrokeStyle(lineWidth: width, dash: style.dash.map { $0 * scale }))
+            .stroke(style.color, style: StrokeStyle(lineWidth: width, dash: style.dash))
 
             if route.arrow.tipsEnd, points.count >= 2 {
                 arrowHead(at: points[points.count - 1], from: heading(into: points))
@@ -37,9 +36,9 @@ struct LineView: View {
 
             if let label = route.label, let point = route.labelPoint {
                 let words = Text(label)
-                    .font(.system(size: style.labelFontSize * scale))
+                    .font(.system(size: style.labelFontSize))
                     .foregroundStyle(style.labelColor)
-                    .padding(.horizontal, style.labelPadding * scale)
+                    .padding(.horizontal, style.labelPadding)
                     // Opaque, so the line reads as split by the words rather
                     // than running under them. On a background that is not a
                     // flat colour, the line shows through.
@@ -59,8 +58,8 @@ struct LineView: View {
                             .frame(width: 0, height: 0)
                             .overlay(alignment: Self.alignment(away: side)) { words.fixedSize() }
                             .position(
-                                x: point.x + side.dx * style.labelPadding * scale,
-                                y: point.y + side.dy * style.labelPadding * scale
+                                x: point.x + side.dx * style.labelPadding,
+                                y: point.y + side.dy * style.labelPadding
                             )
                     }
                     else {
@@ -143,7 +142,7 @@ private extension LineView {
         }
         let drawn = points.length * appeared
         let passed = drawn - points.distance(alongTo: point)
-        let fade = style.labelFontSize * scale * 2
+        let fade = style.labelFontSize * 2
         return Swift.min(Swift.max(passed / fade, 0), 1)
     }
 
@@ -159,7 +158,7 @@ private extension LineView {
             return points
         }
 
-        let cut = Swift.max(overlap.length - style.cornerRadius * scale, 0)
+        let cut = Swift.max(overlap.length - style.cornerRadius, 0)
         return overlap.atStart ? points.dropping(cut) : Array(Array(points.reversed()).dropping(cut).reversed())
     }
 

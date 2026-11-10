@@ -19,7 +19,7 @@ public struct Row<Content: FigureElement>: FigureElement {
     ///   - content: The elements, left to right.
     public init(
         alignment: VerticalAlignment = .center,
-        spacing: CGFloat = 8,
+        spacing: CGFloat = 12,
         @FigureBuilder content: () -> Content
     ) {
         self.alignment = alignment
@@ -29,7 +29,7 @@ public struct Row<Content: FigureElement>: FigureElement {
 
     /// The row, laid out by SwiftUI.
     public var elementBody: some View {
-        ScaledHStack(alignment: alignment, spacing: spacing, content: content.elementBody)
+        HStack(alignment: alignment, spacing: spacing) { content.elementBody }
     }
 
     /// The row's elements, as one horizontal group.
@@ -54,7 +54,7 @@ public struct Column<Content: FigureElement>: FigureElement {
     ///   - content: The elements, top to bottom.
     public init(
         alignment: HorizontalAlignment = .center,
-        spacing: CGFloat = 8,
+        spacing: CGFloat = 12,
         @FigureBuilder content: () -> Content
     ) {
         self.alignment = alignment
@@ -64,42 +64,12 @@ public struct Column<Content: FigureElement>: FigureElement {
 
     /// The column, laid out by SwiftUI.
     public var elementBody: some View {
-        ScaledVStack(alignment: alignment, spacing: spacing, content: content.elementBody)
+        VStack(alignment: alignment, spacing: spacing) { content.elementBody }
     }
 
     /// The column's elements, as one vertical group.
     public var placements: [Placement] {
         [.group(.vertical, content.placements)]
-    }
-}
-
-/// An `HStack` whose spacing is in the figure's own terms.
-private struct ScaledHStack<Content: View>: View {
-    let alignment: VerticalAlignment
-    let spacing: CGFloat
-    let content: Content
-
-    @Environment(\.figureScale) private var scale
-
-    var body: some View {
-        HStack(alignment: alignment, spacing: spacing * scale) {
-            content
-        }
-    }
-}
-
-/// A `VStack` whose spacing is in the figure's own terms.
-struct ScaledVStack<Content: View>: View {
-    let alignment: HorizontalAlignment
-    let spacing: CGFloat
-    let content: Content
-
-    @Environment(\.figureScale) private var scale
-
-    var body: some View {
-        VStack(alignment: alignment, spacing: spacing * scale) {
-            content
-        }
     }
 }
 
@@ -143,13 +113,12 @@ private struct Hole: View {
     let height: CGFloat?
 
     @Environment(\.nodeStyle) private var style
-    @Environment(\.figureScale) private var scale
 
     var body: some View {
         // Told no height, it is given none rather than left to choose: a
         // `Color.clear` with no height takes all it is offered, which stretches
         // the row it sits in.
         Color.clear
-            .frame(width: (width ?? style.minWidth) * scale, height: (height ?? 0) * scale)
+            .frame(width: width ?? style.minWidth, height: height ?? 0)
     }
 }

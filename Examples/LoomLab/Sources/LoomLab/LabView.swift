@@ -107,12 +107,13 @@ struct LabView: View {
     /// scrolled past its content: a figure zoomed about a point beside it would
     /// jump back when the zoom ended.
     ///
-    /// Zooming draws the figure at another scale rather than magnifying it,
-    /// so that its words stay sharp at any size.
+    /// At its usual size the figure is drawn as its numbers say. Zooming
+    /// magnifies what is drawn, so words zoomed in on are soft: for a close
+    /// look at them, `--snapshot` draws the figure at twice the pixels.
     private var canvas: some View {
         scenario.figure(step)
             .modifier(Appearing(mode: appear))
-            .figureScale(Self.scale * zoom)
+            .scaleEffect(zoom)
             .offset(pan)
             .scaleEffect(pinch?.magnification ?? 1, anchor: pinch?.anchor ?? .center)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -253,10 +254,6 @@ struct LabView: View {
                 .hidden()
         }
     }
-
-    /// The figure's scale at the usual size, larger than its own so that it
-    /// can be looked at closely.
-    private static let scale: CGFloat = 2
 
     private static let zoomStep: CGFloat = 1.25
     private static let zooms: ClosedRange<CGFloat> = 0.5...3

@@ -7,7 +7,7 @@ extension Scenario {
     static let classDiagram = Scenario(name: "Class diagram", steps: 0) { _ in
         AnyView(
             FigureView(ClassDiagram(), routing: .orthogonal)
-                .lineStyle(LineStyle(cornerRadius: 6))
+                .lineStyle(LineStyle(cornerRadius: 8))
         )
     }
 }
@@ -25,26 +25,26 @@ private extension NodeStyle {
     static let protocolType = NodeStyle(fill: Color(white: 0.96), fontWeight: .medium)
     static let classType = NodeStyle(fill: Color(red: 0.89, green: 0.93, blue: 1), stroke: .blue)
     static let structType = NodeStyle(
-        shape: .roundedRectangle(cornerRadius: 2),
+        shape: .roundedRectangle(cornerRadius: 3),
         fill: Color(red: 1, green: 0.94, blue: 0.86),
         stroke: .orange
     )
 }
 
 private extension LineStyle {
-    static let inheritance = LineStyle(cornerRadius: 6, arrowHead: .hollow)
-    static let conformance = LineStyle(cornerRadius: 6, dash: [5, 3], arrowHead: .hollow)
-    static let dependency = LineStyle(cornerRadius: 6, dash: [5, 3], arrowHead: .open)
+    static let inheritance = LineStyle(cornerRadius: 8, arrowHead: .hollow)
+    static let conformance = LineStyle(cornerRadius: 8, dash: [7, 4], arrowHead: .hollow)
+    static let dependency = LineStyle(cornerRadius: 8, dash: [7, 4], arrowHead: .open)
 }
 
 private struct ClassDiagram: Figure {
     var arrangement: some FigureElement {
-        Column(spacing: 56) {
-            Row(spacing: 40) {
+        Column(spacing: 80) {
+            Row(spacing: 56) {
                 TextNode(.named, title: "Named").nodeStyle(.protocolType)
                 TextNode(.animal, title: "Animal").nodeStyle(.classType)
             }
-            Row(spacing: 24) {
+            Row(spacing: 32) {
                 TextNode(.dog, title: "Dog").nodeStyle(.classType)
                 TextNode(.cat, title: "Cat").nodeStyle(.classType)
                 TextNode(.bird, title: "Bird").nodeStyle(.classType)
