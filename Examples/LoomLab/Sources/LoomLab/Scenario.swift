@@ -44,7 +44,6 @@ extension Scenario {
     StateMachineScenario.self,
     LayersScenario.self,
     FlowchartScenario.self,
-    AlignedFlowchartScenario.self,
     ShapesScenario.self,
     NestedScenario.self,
     PicturesScenario.self,

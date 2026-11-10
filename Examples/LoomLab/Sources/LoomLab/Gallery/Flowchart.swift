@@ -1,7 +1,9 @@
 import Loom
 import SwiftUI
 
-/// A flowchart whose "no" branch loops back up round the side.
+/// A flowchart whose "no" branch loops back up round the side, twice side by
+/// side: as written, and with its boxes lined up on a spine so the lines down
+/// it run straight.
 struct FlowchartScenario: Scenario {
     static let name = "Flowchart"
 
@@ -9,57 +11,84 @@ struct FlowchartScenario: Scenario {
     let routing: Line.Routing
 
     var body: some View {
-        FigureView(Flowchart(aligned: false), routing: routing)
+        FigureView(Flowcharts(), routing: routing)
+            // The words on the lines are backed in the clusters' colour, so
+            // they still look to split the line rather than sit on a patch.
+            .lineStyle(LineStyle(labelBackground: ClusterStyle.standard.fill))
     }
 }
 
-/// The same flowchart with its boxes lined up on a spine, so the lines
-/// down it run straight.
-struct AlignedFlowchartScenario: Scenario {
-    static let name = "Flowchart, aligned"
+/// The node IDs of one of the two flowcharts.
+///
+/// The two sit in the same figure, boxed in clusters, so each needs IDs of
+/// its own: the same names, under its own prefix.
+private struct ChartIDs {
+    let start: NodeID
+    let fetch: NodeID
+    let valid: NodeID
+    let save: NodeID
+    let done: NodeID
+    let back: NodeID
 
-    let step: Int
-    let routing: Line.Routing
-
-    var body: some View {
-        FigureView(Flowchart(aligned: true), routing: routing)
+    init(_ prefix: String) {
+        start = NodeID("\(prefix).start")
+        fetch = NodeID("\(prefix).fetch")
+        valid = NodeID("\(prefix).valid")
+        save = NodeID("\(prefix).save")
+        done = NodeID("\(prefix).done")
+        back = NodeID("\(prefix).back")
     }
+
+    static let asWritten = ChartIDs("written")
+    static let aligned = ChartIDs("aligned")
 }
 
 private extension NodeID {
-    static let start = NodeID("start")
-    static let fetch = NodeID("fetch")
-    static let valid = NodeID("valid")
-    static let save = NodeID("save")
-    static let done = NodeID("done")
-    static let back = NodeID("back")
+    static let asWritten = NodeID("asWritten")
+    static let aligned = NodeID("aligned")
 }
 
-private struct Flowchart: Figure {
-    /// Whether the boxes are lined up on the column's spine.
-    ///
-    /// Without it, the waypoint beside "Fetch data" pulls that row's middle
-    /// off the others', and every line through it bends.
-    var aligned: Bool
-
+private struct Flowcharts: Figure {
     var arrangement: some FigureElement {
-        Column(alignment: aligned ? .columnSpine : .center, spacing: 56) {
-            Row { TextNode(.start, title: "Start") }
-            Row(spacing: 88) {
-                TextNode(.fetch, title: "Fetch data").aligned(on: .columnSpine)
-                Waypoint(.back)
+        Row(alignment: .top, spacing: 56) {
+            Cluster(.asWritten, title: "As written") {
+                chart(.asWritten, aligned: false)
             }
-            Row { TextNode(.valid, title: "Valid?") }
-            Row { TextNode(.save, title: "Save") }
-            Row { TextNode(.done, title: "Done") }
+            Cluster(.aligned, title: "Aligned") {
+                chart(.aligned, aligned: true)
+            }
         }
     }
 
     var lines: [Line] {
-        Line(from: .start, to: .fetch)
-        Line(from: .fetch, to: .valid)
-        Line(from: .valid, to: .save, label: "yes")
-        Line(from: .valid.trailing, to: .fetch.trailing, through: .back, label: "no")
-        Line(from: .save, to: .done)
+        lines(of: .asWritten) + lines(of: .aligned)
+    }
+
+    /// One flowchart.
+    ///
+    /// Unaligned, the waypoint beside "Fetch data" pulls that row's middle off
+    /// the others', and every line through it bends. Aligned, the boxes line
+    /// up on the column's spine.
+    private func chart(_ ids: ChartIDs, aligned: Bool) -> some FigureElement {
+        Column(alignment: aligned ? .columnSpine : .center, spacing: 56) {
+            Row { TextNode(ids.start, title: "Start") }
+            Row(spacing: 88) {
+                TextNode(ids.fetch, title: "Fetch data").aligned(on: .columnSpine)
+                Waypoint(ids.back)
+            }
+            Row { TextNode(ids.valid, title: "Valid?") }
+            Row { TextNode(ids.save, title: "Save") }
+            Row { TextNode(ids.done, title: "Done") }
+        }
+    }
+
+    private func lines(of ids: ChartIDs) -> [Line] {
+        [
+            Line(from: ids.start, to: ids.fetch),
+            Line(from: ids.fetch, to: ids.valid),
+            Line(from: ids.valid, to: ids.save, label: "yes"),
+            Line(from: ids.valid.trailing, to: ids.fetch.trailing, through: ids.back, label: "no"),
+            Line(from: ids.save, to: ids.done),
+        ]
     }
 }
