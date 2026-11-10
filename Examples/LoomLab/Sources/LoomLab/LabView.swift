@@ -126,31 +126,12 @@ struct LabView: View {
                 }
             }
             .gesture(
-                MagnifyGesture()
-                    .onChanged { value in
-                        // Magnified about the point the pointer was over when
-                        // the pinch started, held to the zooms there are.
-                        let size = canvasFrame.size
-                        let point = pointer ?? CGPoint(x: size.width / 2, y: size.height / 2)
-                        let anchor = pinch?.anchor ?? UnitPoint(x: point.x / size.width, y: point.y / size.height)
-                        let next = min(max(zoom * value.magnification, Self.zooms.lowerBound), Self.zooms.upperBound)
-                        pinch = (next / zoom, anchor)
-                    }
-                    .onEnded { _ in
-                        guard let pinch else {
-                            return
-                        }
-                        self.pinch = nil
-                        let size = canvasFrame.size
-                        zoom(
-                            to: zoom * pinch.magnification,
-                            around: CGPoint(x: pinch.anchor.x * size.width, y: pinch.anchor.y * size.height)
-                        )
-                    }
+                magnify,
+                including: unattended ? .none : .all
             )
             .onAppear {
                 scrollMonitor = NSEvent.addLocalMonitorForEvents(matching: .scrollWheel) { event in
-                    guard pointer != nil else {
+                    guard pointer != nil, !unattended else {
                         return event
                     }
                     // A mouse's wheel scrolls by lines, a trackpad by points.
@@ -170,6 +151,38 @@ struct LabView: View {
             } action: {
                 canvasFrame = $0
             }
+    }
+
+    /// Pinching zooms the figure.
+    private var magnify: some Gesture {
+        MagnifyGesture()
+            .onChanged { value in
+                // Magnified about the point the pointer was over when
+                // the pinch started, held to the zooms there are.
+                let size = canvasFrame.size
+                let point = pointer ?? CGPoint(x: size.width / 2, y: size.height / 2)
+                let anchor = pinch?.anchor ?? UnitPoint(x: point.x / size.width, y: point.y / size.height)
+                let next = min(max(zoom * value.magnification, Self.zooms.lowerBound), Self.zooms.upperBound)
+                pinch = (next / zoom, anchor)
+            }
+            .onEnded { _ in
+                guard let pinch else {
+                    return
+                }
+                self.pinch = nil
+                let size = canvasFrame.size
+                zoom(
+                    to: zoom * pinch.magnification,
+                    around: CGPoint(x: pinch.anchor.x * size.width, y: pinch.anchor.y * size.height)
+                )
+            }
+    }
+
+    /// Whether the scenario plays by itself, with nobody watching: then
+    /// scrolling or pinching over the window moves nothing, so a stray swipe
+    /// does not show up as the figure moving.
+    private var unattended: Bool {
+        frames != nil || autoplay
     }
 
     /// What to play on one row, and playing it on the next, so that neither
