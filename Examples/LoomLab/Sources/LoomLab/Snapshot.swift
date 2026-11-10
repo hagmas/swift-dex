@@ -11,9 +11,9 @@ enum Snapshot {
     static func write(to folder: URL) throws {
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
 
-        for (index, scenario) in Scenario.all.enumerated() {
+        for (index, scenario) in scenarios.enumerated() {
             var renderer = FigureRenderer(
-                content: scenario.figure(scenario.steps)
+                content: figure(of: scenario, step: scenario.steps, routing: scenario.routing)
                     .background(.white)
             )
             renderer.margin = 40

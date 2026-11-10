@@ -1,19 +1,24 @@
 import Loom
 import SwiftUI
 
-extension Scenario {
-    /// Nodes drawn as pictures rather than boxes — a house, a relay mast, a
-    /// server — with a request going out from the house and the answer coming
-    /// back.
-    ///
-    /// It starts out still. Each step sets the next part of the journey
-    /// flowing, and stills the one before.
-    static let pictures = Scenario(name: "Pictures", steps: 3) { step in
-        AnyView(
-            FigureView(Journey(step: step), spacing: 16, routing: .curved)
-                .nodeStyle(.picture)
-                .lineStyle(.plain)
-        )
+/// Nodes drawn as pictures rather than boxes — a house, a relay mast, a
+/// server — with a request going out from the house and the answer coming
+/// back.
+///
+/// It starts out still. Each step sets the next part of the journey
+/// flowing, and stills the one before.
+struct PicturesScenario: Scenario {
+    static let name = "Pictures"
+    static let steps = 3
+    static let routing = Line.Routing.curved
+
+    let step: Int
+    let routing: Line.Routing
+
+    var body: some View {
+        FigureView(Journey(step: step), spacing: 16, routing: routing)
+            .nodeStyle(.picture)
+            .lineStyle(.plain)
     }
 }
 

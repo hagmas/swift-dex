@@ -1,21 +1,20 @@
 import Loom
 import SwiftUI
 
-extension Scenario {
-    /// A statechart the size of a real one: a kettle's states, nested in
-    /// clusters, with a choice fanning out three ways, lines to and from the
-    /// clusters themselves, a transition that goes the long way round, a state
-    /// off to one side, and a legend.
-    static let statechart = Scenario(name: "Statechart", steps: 0) { _ in
-        AnyView(
-            FigureView(Kettle(), routing: .orthogonal)
-                .lineStyle(LineStyle(cornerRadius: 8))
-        )
-    }
+/// A statechart the size of a real one: a kettle's states, nested in
+/// clusters, with a choice fanning out three ways, lines to and from the
+/// clusters themselves, a transition that goes the long way round, a state
+/// off to one side, and a legend.
+struct StatechartScenario: Scenario {
+    static let name = "Statechart"
+    static let routing = Line.Routing.curved
 
-    /// The same statechart with its lines curved.
-    static let statechartCurved = Scenario(name: "Statechart, curved", steps: 0) { _ in
-        AnyView(FigureView(Kettle(), routing: .curved))
+    let step: Int
+    let routing: Line.Routing
+
+    var body: some View {
+        FigureView(Kettle(), routing: routing)
+            .lineStyle(LineStyle(cornerRadius: 8))
     }
 }
 

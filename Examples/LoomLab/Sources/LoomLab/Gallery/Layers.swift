@@ -1,16 +1,16 @@
 import Loom
 import SwiftUI
 
-extension Scenario {
-    /// Layers of an app, each a row of boxes, with many lines between
-    /// neighbouring layers.
-    static let layers = Scenario(name: "Layers", steps: 0) { _ in
-        AnyView(FigureView(Layers(), routing: .orthogonal))
-    }
+/// Layers of an app, each a row of boxes, with many lines between
+/// neighbouring layers.
+struct LayersScenario: Scenario {
+    static let name = "Layers"
 
-    /// The same layers with straight lines.
-    static let layersStraight = Scenario(name: "Layers, straight", steps: 0) { _ in
-        AnyView(FigureView(Layers(), routing: .straight))
+    let step: Int
+    let routing: Line.Routing
+
+    var body: some View {
+        FigureView(Layers(), routing: routing)
     }
 }
 

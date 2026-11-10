@@ -1,11 +1,16 @@
 import Loom
 import SwiftUI
 
-extension Scenario {
-    /// A state machine: transitions both ways between two states, loops on
-    /// two states, and a transition that goes round the outside.
-    static let stateMachine = Scenario(name: "State machine", steps: 0) { _ in
-        AnyView(FigureView(StateMachine(), routing: .orthogonal))
+/// A state machine: transitions both ways between two states, loops on
+/// two states, and a transition that goes round the outside.
+struct StateMachineScenario: Scenario {
+    static let name = "State machine"
+
+    let step: Int
+    let routing: Line.Routing
+
+    var body: some View {
+        FigureView(StateMachine(), routing: routing)
     }
 }
 

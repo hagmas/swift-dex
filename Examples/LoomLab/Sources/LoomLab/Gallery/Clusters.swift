@@ -1,17 +1,21 @@
 import Loom
 import SwiftUI
 
-extension Scenario {
-    /// Clusters, one inside another, with lines across their boxes to the
-    /// nodes in them and one to a box as a whole.
-    ///
-    /// It grows a node inside the inner cluster, then one outside both, so
-    /// that the boxes have to grow and the lines across them follow.
-    static let clusters = Scenario(name: "Clusters", steps: 2) { step in
-        AnyView(
-            FigureView(Architecture(step: step), routing: .orthogonal)
-                .nodeStyle(NodeStyle(minWidth: 128))
-        )
+/// Clusters, one inside another, with lines across their boxes to the
+/// nodes in them and one to a box as a whole.
+///
+/// It grows a node inside the inner cluster, then one outside both, so
+/// that the boxes have to grow and the lines across them follow.
+struct ClustersScenario: Scenario {
+    static let name = "Clusters"
+    static let steps = 2
+
+    let step: Int
+    let routing: Line.Routing
+
+    var body: some View {
+        FigureView(Architecture(step: step), routing: routing)
+            .nodeStyle(NodeStyle(minWidth: 128))
     }
 }
 

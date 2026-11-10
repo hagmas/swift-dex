@@ -1,14 +1,17 @@
 import Loom
 import SwiftUI
 
-extension Scenario {
-    /// Titles long and short, some wrapping inside a width limit, and rows of
-    /// uneven length held in columns with holes.
-    static let ragged = Scenario(name: "Ragged titles", steps: 0) { _ in
-        AnyView(
-            FigureView(Ragged(), routing: .orthogonal)
-                .nodeStyle(NodeStyle(maxWidth: 250))
-        )
+/// Titles long and short, some wrapping inside a width limit, and rows of
+/// uneven length held in columns with holes.
+struct RaggedScenario: Scenario {
+    static let name = "Ragged titles"
+
+    let step: Int
+    let routing: Line.Routing
+
+    var body: some View {
+        FigureView(Ragged(), routing: routing)
+            .nodeStyle(NodeStyle(maxWidth: 250))
     }
 }
 
