@@ -11,6 +11,7 @@ struct ShapesScenario: Scenario {
 
     var body: some View {
         FigureView(Shapes(), routing: routing)
+            .lineStyle(.iceCandy)
     }
 }
 
@@ -25,16 +26,16 @@ private extension NodeID {
 }
 
 private extension NodeStyle {
-    static let state = NodeStyle.standard.with {
+    static let state = NodeStyle.frosty(.soda).with {
         $0.shape = .circle
         $0.minWidth = 112
     }
-    static let decision = NodeStyle.standard.with {
+    static let decision = NodeStyle.frosty(.lemon).with {
         $0.shape = .diamond
         $0.minWidth = 0
     }
-    static let terminal = NodeStyle.standard.with { $0.shape = .capsule }
-    static let note = NodeStyle.standard.with {
+    static let terminal = NodeStyle.juicy(.melon)
+    static let note = NodeStyle.frosty(.caramel).with {
         $0.shape = .ellipse
         $0.minWidth = 0
     }

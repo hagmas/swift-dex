@@ -35,7 +35,7 @@ private extension NodeStyle {
     /// their captions, so each picture stands on its own.
     static let picture = NodeStyle(
         shape: .none,
-        textColor: Color(white: 0.2),
+        textColor: IceCandy.ink,
         fontSize: 15,
         padding: EdgeInsets(top: 24, leading: 24, bottom: 24, trailing: 24),
         minWidth: 0
@@ -43,23 +43,20 @@ private extension NodeStyle {
 }
 
 private extension LineStyle {
-    static let plain = LineStyle(color: Color(white: 0.25), width: 3, labelBackground: .white)
+    static let plain = LineStyle.iceCandy.with { $0.width = 3 }
 
     /// The request on its way, dots travelling out along it.
-    static let travelling = LineStyle(color: Color(white: 0.25), width: 3, flow: .dots, labelBackground: .white)
+    static let travelling = plain.with { $0.flow = .dots }
 
     /// The answer, dashed whether or not it is on its way, so that setting
     /// off changes nothing but that its dashes start marching.
-    static let answer = LineStyle(color: Color(white: 0.25), width: 3, dash: [9, 9], labelBackground: .white)
+    ///
+    /// Round ends lengthen each dash by the line's width, so the dashes are
+    /// written that much shorter.
+    static let answer = plain.with { $0.dash = [6, 12] }
 
     /// The answer on its way, its dashes marching back.
-    static let marching = LineStyle(
-        color: Color(white: 0.25),
-        width: 3,
-        dash: [9, 9],
-        flow: .dashes(speed: 40),
-        labelBackground: .white
-    )
+    static let marching = answer.with { $0.flow = .dashes(speed: 40) }
 }
 
 private struct Journey: Figure {
@@ -69,9 +66,9 @@ private struct Journey: Figure {
 
     var arrangement: some FigureElement {
         Row(spacing: 168) {
-            Picture(id: .home, caption: "Home", tint: .orange) { House() }
-            Picture(id: .relay, caption: "Relay", tint: .purple) { Mast() }
-            Picture(id: .server, caption: "Server", tint: .teal) { Rack() }
+            Picture(id: .home, caption: "Home", tint: IceCandy.Flavor.orange.color) { House() }
+            Picture(id: .relay, caption: "Relay", tint: IceCandy.Flavor.grape.color) { Mast() }
+            Picture(id: .server, caption: "Server", tint: IceCandy.Flavor.soda.color) { Rack() }
         }
     }
 

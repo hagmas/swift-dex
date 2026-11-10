@@ -10,6 +10,8 @@ struct HubScenario: Scenario {
 
     var body: some View {
         FigureView(Hub(), routing: routing)
+            .nodeStyle(.frosty(.soda))
+            .lineStyle(.iceCandy)
     }
 }
 
@@ -32,7 +34,7 @@ private struct Hub: Figure {
             }
             Row(spacing: 44) {
                 TextNode(.west, title: "Settings")
-                TextNode(.core, title: "Core")
+                TextNode(.core, title: "Core").nodeStyle(.juicy(.grape))
                 TextNode(.east, title: "Network")
             }
             Row(spacing: 44) {

@@ -15,7 +15,8 @@ struct ClustersScenario: Scenario {
 
     var body: some View {
         FigureView(Architecture(step: step), routing: routing)
-            .nodeStyle(NodeStyle(minWidth: 128))
+            .nodeStyle(NodeStyle.frosty(.soda).with { $0.minWidth = 128 })
+            .lineStyle(.iceCandy)
     }
 }
 
@@ -31,12 +32,12 @@ private extension NodeID {
 }
 
 private extension ClusterStyle {
-    static let network = ClusterStyle.standard.with {
-        $0.fill = .white
-        $0.stroke = .orange
+    static let network = ClusterStyle.frosty(.orange).with {
+        $0.stroke = IceCandy.Flavor.orange.color
+        $0.strokeWidth = 1.5
         $0.dash = [8, 6]
-        $0.titleColor = .orange
     }
+    static let backend = ClusterStyle.frosty(.grape)
 }
 
 private struct Architecture: Figure {
@@ -62,8 +63,8 @@ private struct Architecture: Figure {
                             }
                         }
                         // The network's style would reach the cluster inside
-                        // it too, so it is given the standard one back.
-                        .clusterStyle(.standard)
+                        // it too, so it is given one of its own.
+                        .clusterStyle(.backend)
                     }
                 }
                 .clusterStyle(.network)

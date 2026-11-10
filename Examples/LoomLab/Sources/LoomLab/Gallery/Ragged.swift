@@ -11,7 +11,15 @@ struct RaggedScenario: Scenario {
 
     var body: some View {
         FigureView(Ragged(), routing: routing)
-            .nodeStyle(NodeStyle(maxWidth: 250))
+            // Rounded rectangles rather than capsules: a capsule round a title
+            // wrapped onto several lines would bulge.
+            .nodeStyle(
+                NodeStyle.frosty(.soda).with {
+                    $0.shape = .roundedRectangle(cornerRadius: 14)
+                    $0.maxWidth = 250
+                }
+            )
+            .lineStyle(.iceCandy)
     }
 }
 

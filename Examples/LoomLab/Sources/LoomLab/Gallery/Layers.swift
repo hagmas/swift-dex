@@ -11,6 +11,7 @@ struct LayersScenario: Scenario {
 
     var body: some View {
         FigureView(Layers(), routing: routing)
+            .lineStyle(.iceCandy)
     }
 }
 
@@ -29,18 +30,18 @@ private struct Layers: Figure {
     var arrangement: some FigureElement {
         Column(spacing: 88) {
             Row(spacing: 32) {
-                TextNode(.home, title: "HomeView")
-                TextNode(.search, title: "SearchView")
-                TextNode(.profile, title: "ProfileView")
+                TextNode(.home, title: "HomeView").nodeStyle(.frosty(.grape))
+                TextNode(.search, title: "SearchView").nodeStyle(.frosty(.grape))
+                TextNode(.profile, title: "ProfileView").nodeStyle(.frosty(.grape))
             }
             Row(spacing: 32) {
-                TextNode(.feedModel, title: "FeedModel")
-                TextNode(.userModel, title: "UserModel")
+                TextNode(.feedModel, title: "FeedModel").nodeStyle(.frosty(.soda))
+                TextNode(.userModel, title: "UserModel").nodeStyle(.frosty(.soda))
             }
             Row(spacing: 32) {
-                TextNode(.api, title: "APIClient")
-                TextNode(.cache, title: "Cache")
-                TextNode(.auth, title: "Auth")
+                TextNode(.api, title: "APIClient").nodeStyle(.frosty(.melon))
+                TextNode(.cache, title: "Cache").nodeStyle(.frosty(.melon))
+                TextNode(.auth, title: "Auth").nodeStyle(.frosty(.melon))
             }
         }
     }

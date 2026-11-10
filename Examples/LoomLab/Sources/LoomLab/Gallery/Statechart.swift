@@ -14,7 +14,8 @@ struct StatechartScenario: Scenario {
 
     var body: some View {
         FigureView(Kettle(), routing: routing)
-            .lineStyle(LineStyle(cornerRadius: 8))
+            .lineStyle(.iceCandy(cornerRadius: 8))
+            .clusterStyle(.frosty(.soda))
     }
 }
 
@@ -41,31 +42,25 @@ private extension NodeID {
 }
 
 private extension NodeStyle {
-    static let waiting = NodeStyle(fill: Color(red: 0.9, green: 0.94, blue: 1), stroke: .blue)
-    static let working = NodeStyle(fill: Color(red: 1, green: 0.94, blue: 0.86), stroke: .orange)
-    static let choice = NodeStyle.standard.with {
-        $0.shape = .capsule
-        $0.fill = Color(white: 0.95)
-        $0.stroke = .gray
-        $0.minWidth = 168
-    }
-    static let fault = NodeStyle(fill: Color(red: 1, green: 0.9, blue: 0.9), stroke: .red, textColor: .red)
+    static let waiting = NodeStyle.frosty(.soda)
+    static let working = NodeStyle.frosty(.orange)
+    static let choice = NodeStyle.frosty(.grape).with { $0.minWidth = 168 }
+    /// Poured solid, to stand out from the states that are all well.
+    static let fault = NodeStyle.juicy(.cherry)
     static let start = NodeStyle(
         shape: .circle,
-        fill: .black,
+        fill: IceCandy.ink,
         padding: EdgeInsets(),
         minWidth: 24
     )
 }
 
 private extension ClusterStyle {
-    static let heating = ClusterStyle.standard.with {
-        $0.fill = Color(red: 1, green: 0.98, blue: 0.95)
-        $0.stroke = .orange
-        $0.titleColor = .orange
-    }
-    static let legend = ClusterStyle.standard.with {
-        $0.fill = .white
+    static let heating = ClusterStyle.frosty(.orange)
+    static let legend = ClusterStyle.frosty(.soda).with {
+        $0.fill = .clear
+        $0.stroke = IceCandy.ink.opacity(0.3)
+        $0.strokeWidth = 1.5
         $0.dash = [6, 6]
     }
 }
