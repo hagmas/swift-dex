@@ -8,6 +8,9 @@ struct LineView: View {
     /// How much of the line has appeared, from none of it to all.
     let appeared: CGFloat
 
+    /// How long, in seconds, whatever flows along the line has been flowing.
+    var time: TimeInterval = 0
+
     private var width: CGFloat {
         style.width
     }
@@ -20,11 +23,17 @@ struct LineView: View {
         let own = ownPart(of: route.points)
         let points = shown(own)
 
+        let stroke = stroked(points)
+
         ZStack {
             Path { path in
-                path.addRoundedLines(stroked(points), radius: style.cornerRadius)
+                path.addRoundedLines(stroke, radius: style.cornerRadius)
             }
-            .stroke(style.color, style: StrokeStyle(lineWidth: width, dash: style.dash))
+            .stroke(style.color, style: strokeStyle)
+
+            if let flow = style.flow, flow.mark == .dots {
+                dots(along: stroke, flow: flow)
+            }
 
             if route.arrow.tipsEnd, points.count >= 2 {
                 arrowHead(at: points[points.count - 1], from: heading(into: points))
@@ -70,6 +79,47 @@ struct LineView: View {
             }
         }
         .opacity(style.appear == .fade ? appeared : 1)
+    }
+
+    /// The stroke, dashed if the line is, or if its dashes flow — and then
+    /// moved along by however far they have flowed.
+    private var strokeStyle: StrokeStyle {
+        guard let flow = style.flow, flow.mark == .dashes else {
+            return StrokeStyle(lineWidth: width, dash: style.dash)
+        }
+        let dash = style.dash.isEmpty ? [flow.spacing / 2, flow.spacing / 2] : style.dash
+        let period = dash.reduce(0, +)
+        // A pattern that starts further back puts each dash further on.
+        let phase = period > 0 ? -(time * flow.speed).truncatingRemainder(dividingBy: period) : 0
+        return StrokeStyle(lineWidth: width, dash: dash, dashPhase: phase)
+    }
+
+    /// Dots travelling along `points`, `flow.spacing` apart and as far on as
+    /// they have flowed.
+    ///
+    /// Each fades in as it sets off and out as it arrives, rather than
+    /// popping into being at one end and out of it at the other.
+    private func dots(along points: [CGPoint], flow: LineStyle.Flow) -> some View {
+        let length = points.length
+        let size = width * 3
+        let fade = size * 2
+        let travelled = time * flow.speed
+        let first = flow.spacing > 0 ? travelled.truncatingRemainder(dividingBy: flow.spacing) : 0
+
+        return Canvas { context, _ in
+            guard flow.spacing > 0, length > 0 else {
+                return
+            }
+            var distance = first
+            while distance <= length {
+                if let point = points.point(along: distance) {
+                    context.opacity = Swift.min(1, distance / fade, (length - distance) / fade)
+                    let dot = CGRect(x: point.x - size / 2, y: point.y - size / 2, width: size, height: size)
+                    context.fill(Path(ellipseIn: dot), with: .color(style.color))
+                }
+                distance += flow.spacing
+            }
+        }
     }
 
     /// The edge of the words that goes against a point, for them to lie on

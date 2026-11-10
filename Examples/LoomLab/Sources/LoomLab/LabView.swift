@@ -332,7 +332,10 @@ struct LabView: View {
         // Long enough for the window to be up and drawn.
         try? await Task.sleep(for: .seconds(1))
 
-        for next in stride(from: 1, through: scenario.steps, by: 1) {
+        // A scenario with no steps is captured as it stands, for whatever
+        // flows along its lines.
+        let steps = scenario.steps == 0 ? [0] : Array(1...scenario.steps)
+        for next in steps {
             change(to: next)
             let start = ContinuousClock.now
             // As long as playing waits between steps.
@@ -369,7 +372,10 @@ struct LabView: View {
         try? await Task.sleep(for: .seconds(0.5))
 
         meter.start()
-        for next in stride(from: 1, through: scenario.steps, by: 1) {
+        // A scenario with no steps is captured as it stands, for whatever
+        // flows along its lines.
+        let steps = scenario.steps == 0 ? [0] : Array(1...scenario.steps)
+        for next in steps {
             change(to: next)
             // Long enough for lines appearing in phases to finish too.
             try? await Task.sleep(for: .seconds(1.6))

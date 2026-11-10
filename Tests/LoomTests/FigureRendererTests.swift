@@ -36,6 +36,30 @@ private func size(of figure: Pair, scale: CGFloat = 1, margin: CGFloat = 0) thro
     return CGSize(width: image.width, height: image.height)
 }
 
+/// The colours of the image of `content`, pixel by pixel.
+@MainActor
+private func pixels(of content: some View) throws -> Data {
+    let image = try XCTUnwrap(FigureRenderer(content: content).cgImage)
+    // Drawn again into rows of exactly the image's width: the image's own
+    // rows may be padded with bytes that mean nothing.
+    var bytes = [UInt8](repeating: 0, count: image.width * image.height * 4)
+    try bytes.withUnsafeMutableBytes { buffer in
+        let context = try XCTUnwrap(
+            CGContext(
+                data: buffer.baseAddress,
+                width: image.width,
+                height: image.height,
+                bitsPerComponent: 8,
+                bytesPerRow: image.width * 4,
+                space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            )
+        )
+        context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+    }
+    return Data(bytes)
+}
+
 final class FigureRendererTests: XCTestCase {
     /// The margin goes all the way round.
     @MainActor
@@ -77,5 +101,20 @@ final class FigureRendererTests: XCTestCase {
         let png = try XCTUnwrap(FigureRenderer(content: FigureView(Pair())).pngData())
 
         XCTAssertEqual(Array(png.prefix(4)), [0x89, 0x50, 0x4E, 0x47])
+    }
+
+    /// Whatever flows along a figure's lines is drawn where it starts out, so
+    /// the same figure makes the same picture whenever it is drawn.
+    @MainActor
+    func test_aFlowingFigureIsDrawnTheSameEveryTime() async throws {
+        let figure = FigureView(Pair(loop: true)).lineStyle(LineStyle(flow: .dots))
+        // The first figure drawn in a process can differ from the rest by a
+        // few pixels along its bottom edge, flowing or not.
+        _ = try pixels(of: figure)
+        let first = try pixels(of: figure)
+        try await Task.sleep(for: .milliseconds(300))
+        let second = try pixels(of: figure)
+
+        XCTAssertEqual(first, second)
     }
 }

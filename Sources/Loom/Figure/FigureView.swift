@@ -64,6 +64,7 @@ public struct FigureView<Content: Figure>: View {
     @Environment(\.figureSpace) private var figureSpace
     @Environment(\.figureSizeAction) private var figureSizeAction
     @Environment(\.figureExtentAction) private var figureExtentAction
+    @Environment(\.figureIsStill) private var figureIsStill
 
     /// How many nodes' phases have finished, which is what lines appearing in
     /// phases wait for — see ``LinePhaseTracker``.
@@ -175,13 +176,23 @@ public struct FigureView<Content: Figure>: View {
                                 .opacity(cluster.opacity)
                         }
                     }
-                    ZStack {
-                        ForEach(routes) { route in
-                            LineView(
-                                route: route,
-                                style: lines[route.line].style ?? lineStyle,
-                                appeared: marks.lines[route.id] ?? 1
-                            )
+                    // Lines with something flowing along them are drawn again
+                    // every frame; a figure with none never is.
+                    let flowing = routes.contains { (lines[$0.line].style ?? lineStyle).flow != nil }
+                    TimelineView(.animation(paused: !flowing || figureIsStill)) { timeline in
+                        // Time since a fixed moment rather than since the figure
+                        // appeared, so that the same figure in two windows flows
+                        // in step.
+                        let time = flowing && !figureIsStill ? timeline.date.timeIntervalSinceReferenceDate : 0
+                        ZStack {
+                            ForEach(routes) { route in
+                                LineView(
+                                    route: route,
+                                    style: lines[route.line].style ?? lineStyle,
+                                    appeared: marks.lines[route.id] ?? 1,
+                                    time: time
+                                )
+                            }
                         }
                     }
                     .frame(width: proxy.size.width, height: proxy.size.height)
@@ -303,6 +314,10 @@ extension EnvironmentValues {
     /// anything — measured, unlike its size, from its lines as well as its
     /// nodes, and from the middle of the view the figure is drawn in.
     @Entry var figureExtentAction: FigureExtentAction? = nil
+
+    /// Whether the figure is drawn as a still picture, with whatever flows
+    /// along its lines where it starts out.
+    @Entry var figureIsStill = false
 
     /// The space the outermost figure was given, or `nil` outside any figure.
     @Entry var figureSpace: FigureSpace? = nil

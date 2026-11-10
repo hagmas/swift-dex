@@ -50,6 +50,15 @@ public struct LineStyle: Sendable {
     /// How the line appears when it is added to a figure that is changing.
     public var appear: Appear
 
+    /// What flows along the line, from where it leaves to where it arrives,
+    /// for as long as it is shown — or `nil` for a line that keeps still.
+    ///
+    /// Not an animation the figure is changed in, but part of how the line
+    /// looks: a figure is still while nothing flows along it, and moves on
+    /// its own while something does. To start or stop the flow, give the line
+    /// a style with or without one.
+    public var flow: Flow?
+
     /// The point size of the line's label.
     public var labelFontSize: CGFloat
 
@@ -74,6 +83,7 @@ public struct LineStyle: Sendable {
         dash: [CGFloat] = [],
         arrowHead: ArrowHead = .filled,
         appear: Appear = .draw,
+        flow: Flow? = nil,
         labelFontSize: CGFloat = 14,
         labelColor: Color = .black,
         labelBackground: Color = .white,
@@ -85,6 +95,7 @@ public struct LineStyle: Sendable {
         self.dash = dash
         self.arrowHead = arrowHead
         self.appear = appear
+        self.flow = flow
         self.labelFontSize = labelFontSize
         self.labelColor = labelColor
         self.labelBackground = labelBackground
@@ -96,6 +107,61 @@ public struct LineStyle: Sendable {
 }
 
 public extension LineStyle {
+    /// What flows along a line, and how fast.
+    ///
+    /// ```swift
+    /// LineStyle(flow: .dots)
+    /// LineStyle(flow: .dashes(speed: 30))
+    /// ```
+    struct Flow: Hashable, Sendable {
+        /// What it is that flows.
+        public enum Mark: Hashable, Sendable {
+            /// Dots travelling over the line, which is drawn as it would be
+            /// without them. A dot sets off from where the line leaves and
+            /// goes in under its arrowhead.
+            case dots
+
+            /// The line itself, dashed, its dashes marching along. They are
+            /// the line's own ``LineStyle/dash`` if it has one, or else dashes
+            /// and gaps half ``Flow/spacing`` long each.
+            case dashes
+        }
+
+        /// What it is that flows.
+        public var mark: Mark
+
+        /// How far it moves along the line in a second, in points.
+        public var speed: CGFloat
+
+        /// How far apart one dot or dash is from the next, in points.
+        public var spacing: CGFloat
+
+        /// Creates a flow.
+        public init(_ mark: Mark, speed: CGFloat = 60, spacing: CGFloat? = nil) {
+            self.mark = mark
+            self.speed = speed
+            self.spacing = spacing ?? (mark == .dots ? 56 : 16)
+        }
+
+        /// Dots travelling over the line.
+        public static let dots = Flow(.dots)
+
+        /// The line, dashed, its dashes marching along.
+        public static let dashes = Flow(.dashes)
+
+        /// Dots travelling over the line, `speed` points a second and
+        /// `spacing` points apart.
+        public static func dots(speed: CGFloat = 60, spacing: CGFloat = 56) -> Flow {
+            Flow(.dots, speed: speed, spacing: spacing)
+        }
+
+        /// The line, dashed, its dashes marching `speed` points a second,
+        /// `spacing` points from one to the next.
+        public static func dashes(speed: CGFloat = 60, spacing: CGFloat = 16) -> Flow {
+            Flow(.dashes, speed: speed, spacing: spacing)
+        }
+    }
+
     /// How a line appears.
     ///
     /// Either way it takes the animation the figure was changed in — or, when
