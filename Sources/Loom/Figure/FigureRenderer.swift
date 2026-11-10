@@ -22,7 +22,7 @@ import UniformTypeIdentifiers
 /// clear where the figure draws nothing.
 ///
 /// The figure is drawn at rest, where any change it is in the middle of would
-/// leave it.
+/// leave it, and with whatever flows along its lines where it starts out.
 @MainActor
 public struct FigureRenderer<Content: View> {
     /// The view the figure is drawn by.
@@ -55,7 +55,7 @@ public struct FigureRenderer<Content: View> {
         )
         let room = CGSize(width: reach.width * 2, height: reach.height * 2)
 
-        let renderer = ImageRenderer(content: content)
+        let renderer = ImageRenderer(content: content.environment(\.figureIsStill, true))
         renderer.proposedSize = ProposedViewSize(room)
         renderer.scale = scale
         guard let image = renderer.cgImage else {
@@ -106,10 +106,13 @@ public struct FigureRenderer<Content: View> {
     private func extent() -> CGRect? {
         let measured = MeasuredExtent()
         let renderer = ImageRenderer(
-            content: content.environment(
-                \.figureExtentAction,
-                FigureExtentAction { measured.extent = $0 }
-            )
+            content:
+                content
+                .environment(\.figureIsStill, true)
+                .environment(
+                    \.figureExtentAction,
+                    FigureExtentAction { measured.extent = $0 }
+                )
         )
         renderer.proposedSize = ProposedViewSize(width: 1, height: 1)
         renderer.scale = 1

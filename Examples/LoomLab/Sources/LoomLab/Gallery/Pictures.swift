@@ -5,11 +5,14 @@ extension Scenario {
     /// Nodes drawn as pictures rather than boxes — a house, a relay mast, a
     /// server — with a request going out from the house and the answer coming
     /// back.
-    static let pictures = Scenario(name: "Pictures", steps: 0) { _ in
+    ///
+    /// It starts out still. Each step sets the next part of the journey
+    /// flowing, and stills the one before.
+    static let pictures = Scenario(name: "Pictures", steps: 3) { step in
         AnyView(
-            FigureView(Journey(), spacing: 16, routing: .curved)
+            FigureView(Journey(step: step), spacing: 16, routing: .curved)
                 .nodeStyle(.picture)
-                .lineStyle(LineStyle(color: Color(white: 0.25), width: 3, labelBackground: .white))
+                .lineStyle(.plain)
         )
     }
 }
@@ -35,7 +38,31 @@ private extension NodeStyle {
     )
 }
 
+private extension LineStyle {
+    static let plain = LineStyle(color: Color(white: 0.25), width: 3, labelBackground: .white)
+
+    /// The request on its way, dots travelling out along it.
+    static let travelling = LineStyle(color: Color(white: 0.25), width: 3, flow: .dots, labelBackground: .white)
+
+    /// The answer, dashed whether or not it is on its way, so that setting
+    /// off changes nothing but that its dashes start marching.
+    static let answer = LineStyle(color: Color(white: 0.25), width: 3, dash: [9, 9], labelBackground: .white)
+
+    /// The answer on its way, its dashes marching back.
+    static let marching = LineStyle(
+        color: Color(white: 0.25),
+        width: 3,
+        dash: [9, 9],
+        flow: .dashes(speed: 40),
+        labelBackground: .white
+    )
+}
+
 private struct Journey: Figure {
+    /// Which part of the journey is under way: none yet, the request reaching
+    /// the relay, the relay passing it on, or the answer coming back.
+    var step: Int
+
     var arrangement: some FigureElement {
         Row(spacing: 168) {
             Picture(id: .home, caption: "Home", tint: .orange) { House() }
@@ -45,11 +72,13 @@ private struct Journey: Figure {
     }
 
     var lines: [Line] {
-        Line(from: .home, to: .relay, label: "request")
-        Line(from: .relay, to: .server)
+        // The same lines at every step, only flowing or not: a line's style
+        // is not part of which line it is, so none of them is drawn in anew.
+        Line(from: .home, to: .relay, label: "request", style: step == 1 ? .travelling : .plain)
+        Line(from: .relay, to: .server, style: step == 2 ? .travelling : .plain)
         // Back underneath, the long way round, so it does not lie on the way
         // out.
-        Line(from: .server.bottom, to: .home.bottom, label: "response")
+        Line(from: .server.bottom, to: .home.bottom, label: "response", style: step == 3 ? .marching : .answer)
     }
 }
 
