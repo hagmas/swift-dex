@@ -11,7 +11,8 @@ struct GrowingFanScenario: Scenario {
 
     var body: some View {
         FigureView(GrowingFan(step: step), routing: routing)
-            .lineStyle(LineStyle(cornerRadius: 8))
+            .nodeStyle(.juicy(.soda))
+            .lineStyle(.iceCandy(cornerRadius: 8))
     }
 }
 
@@ -28,7 +29,7 @@ private struct GrowingFan: Figure {
 
     var arrangement: some FigureElement {
         Column(spacing: 80) {
-            Row { TextNode(.source, title: "Source") }
+            Row { TextNode(.source, title: "Source").nodeStyle(.juicy(.orange)) }
             Row(spacing: 32) {
                 TextNode(.stage1, title: "Parse")
                 if step >= 1 { TextNode(.stage2, title: "Validate") }

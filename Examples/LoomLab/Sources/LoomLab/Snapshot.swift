@@ -14,7 +14,7 @@ enum Snapshot {
         for (index, scenario) in scenarios.enumerated() {
             var renderer = FigureRenderer(
                 content: figure(of: scenario, step: scenario.steps, routing: scenario.routing)
-                    .background(.white)
+                    .background(IceCandy.frost)
             )
             renderer.margin = 40
             guard let png = renderer.pngData() else {

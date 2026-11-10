@@ -11,7 +11,7 @@ struct ClassDiagramScenario: Scenario {
 
     var body: some View {
         FigureView(ClassDiagram(), routing: routing)
-            .lineStyle(LineStyle(cornerRadius: 8))
+            .lineStyle(.iceCandy(cornerRadius: 8))
     }
 }
 
@@ -25,19 +25,23 @@ private extension NodeID {
 }
 
 private extension NodeStyle {
-    static let protocolType = NodeStyle(fill: Color(white: 0.96), fontWeight: .medium)
-    static let classType = NodeStyle(fill: Color(red: 0.89, green: 0.93, blue: 1), stroke: .blue)
-    static let structType = NodeStyle(
-        shape: .roundedRectangle(cornerRadius: 3),
-        fill: Color(red: 1, green: 0.94, blue: 0.86),
-        stroke: .orange
-    )
+    /// A protocol is only a promise, so it is left frosty; the types that
+    /// keep it are poured solid.
+    static let protocolType = NodeStyle.frosty(.grape)
+    static let classType = NodeStyle.juicy(.soda)
+    static let structType = NodeStyle.juicy(.orange)
 }
 
 private extension LineStyle {
-    static let inheritance = LineStyle(cornerRadius: 8, arrowHead: .hollow)
-    static let conformance = LineStyle(cornerRadius: 8, dash: [7, 4], arrowHead: .hollow)
-    static let dependency = LineStyle(cornerRadius: 8, dash: [7, 4], arrowHead: .open)
+    static let inheritance = LineStyle.iceCandy(cornerRadius: 8).with { $0.arrowHead = .hollow }
+    static let conformance = LineStyle.iceCandy(cornerRadius: 8).with {
+        $0.dash = [7, 4]
+        $0.arrowHead = .hollow
+    }
+    static let dependency = LineStyle.iceCandy(cornerRadius: 8).with {
+        $0.dash = [7, 4]
+        $0.arrowHead = .open
+    }
 }
 
 private struct ClassDiagram: Figure {

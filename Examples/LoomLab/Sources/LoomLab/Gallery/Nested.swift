@@ -17,6 +17,8 @@ struct NestedScenario: Scenario {
 
     var body: some View {
         FigureView(System(step: step, routing: routing), routing: routing)
+            .nodeStyle(.frosty(.soda))
+            .lineStyle(.iceCandy)
     }
 }
 
@@ -27,12 +29,12 @@ private extension NodeID {
     static let backend = NodeID("backend")
 }
 
-private let containerFill = Color(white: 0.96)
-
 private extension NodeStyle {
-    static let container = NodeStyle.standard.with {
-        $0.fill = containerFill
-        $0.fontWeight = .medium
+    /// A frosty box rather than a capsule: a capsule's ends would round off
+    /// the figure inside.
+    static let container = NodeStyle.frosty(.soda).with {
+        $0.shape = .roundedRectangle(cornerRadius: 22)
+        $0.fill = IceCandy.Flavor.soda.lightened(by: 0.92)
     }
 }
 
@@ -72,12 +74,9 @@ private struct Backend: Node {
         VStack(spacing: 6) {
             Text("Backend")
             // The container's style would reach the nodes inside too, so they
-            // are given the standard one back. The words on the lines are
-            // backed in the container's colour, so they still look to split
-            // the line rather than sit on a patch.
+            // are given one of their own.
             FigureView(Services(step: step), routing: routing)
-                .nodeStyle(.standard)
-                .lineStyle(LineStyle(labelBackground: containerFill))
+                .nodeStyle(.frosty(.grape))
                 // The node is as big as the figure's nodes and cuts off what
                 // goes past them: room for the loop above, and for the line
                 // going round on the right.

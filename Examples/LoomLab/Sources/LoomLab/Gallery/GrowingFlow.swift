@@ -12,6 +12,7 @@ struct GrowingFlowScenario: Scenario {
 
     var body: some View {
         FigureView(GrowingFlow(step: step), routing: routing)
+            .lineStyle(.iceCandy)
     }
 }
 
@@ -28,14 +29,14 @@ private struct GrowingFlow: Figure {
     var arrangement: some FigureElement {
         Column(spacing: 68) {
             if step < 3 {
-                Row { TextNode(.view, title: "View") }
+                Row { TextNode(.view, title: "View").nodeStyle(.frosty(.grape)) }
             }
-            Row { TextNode(.model, title: "ViewModel") }
+            Row { TextNode(.model, title: "ViewModel").nodeStyle(.frosty(.soda)) }
             if step >= 1 {
-                Row { TextNode(.store, title: "Store") }
+                Row { TextNode(.store, title: "Store").nodeStyle(.frosty(.melon)) }
             }
             if step >= 2 {
-                Row { TextNode(.remote, title: "Remote") }
+                Row { TextNode(.remote, title: "Remote").nodeStyle(.frosty(.orange)) }
             }
         }
     }

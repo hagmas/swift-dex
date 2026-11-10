@@ -11,6 +11,7 @@ struct StateMachineScenario: Scenario {
 
     var body: some View {
         FigureView(StateMachine(), routing: routing)
+            .lineStyle(.iceCandy)
     }
 }
 
@@ -25,12 +26,12 @@ private struct StateMachine: Figure {
     var arrangement: some FigureElement {
         Column(spacing: 80) {
             Row(spacing: 68) {
-                TextNode(.idle, title: "Idle")
-                TextNode(.loading, title: "Loading")
+                TextNode(.idle, title: "Idle").nodeStyle(.frosty(.soda))
+                TextNode(.loading, title: "Loading").nodeStyle(.frosty(.lemon))
             }
             Row(spacing: 68) {
-                TextNode(.loaded, title: "Loaded")
-                TextNode(.failed, title: "Failed")
+                TextNode(.loaded, title: "Loaded").nodeStyle(.frosty(.melon))
+                TextNode(.failed, title: "Failed").nodeStyle(.juicy(.cherry))
             }
         }
     }

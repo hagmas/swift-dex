@@ -12,9 +12,8 @@ struct FlowchartScenario: Scenario {
 
     var body: some View {
         FigureView(Flowcharts(), routing: routing)
-            // The words on the lines are backed in the clusters' colour, so
-            // they still look to split the line rather than sit on a patch.
-            .lineStyle(LineStyle(labelBackground: ClusterStyle.standard.fill))
+            .nodeStyle(.frosty(.soda))
+            .lineStyle(.iceCandy)
     }
 }
 
@@ -54,9 +53,11 @@ private struct Flowcharts: Figure {
             Cluster(.asWritten, title: "As written") {
                 chart(.asWritten, aligned: false)
             }
+            .clusterStyle(.frosty(.caramel))
             Cluster(.aligned, title: "Aligned") {
                 chart(.aligned, aligned: true)
             }
+            .clusterStyle(.frosty(.melon))
         }
     }
 

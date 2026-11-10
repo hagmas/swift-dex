@@ -163,7 +163,7 @@ struct LabView: View {
             .onDisappear {
                 scrollMonitor.map(NSEvent.removeMonitor)
             }
-            .background(.white)
+            .background(IceCandy.frost)
             .background(FrameMeter.Ticks(meter: meter))
             .onGeometryChange(for: CGRect.self) {
                 $0.frame(in: .global)
