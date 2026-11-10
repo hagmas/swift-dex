@@ -41,6 +41,14 @@ public struct LineStyle: Sendable {
     /// Arrowheads are always drawn solid.
     public var dash: [CGFloat]
 
+    /// How the line's ends, and each of its dashes, are finished: square
+    /// across the line where it stops, by default, or rounded off.
+    ///
+    /// A round end reaches half the line's width past where the line stops,
+    /// as SwiftUI's does — into the outline of a node it meets, or under an
+    /// arrowhead, where it does not show.
+    public var lineCap: CGLineCap
+
     /// What the line's tipped ends look like.
     ///
     /// Which ends are tipped is not a matter of style: it is part of what the
@@ -75,24 +83,34 @@ public struct LineStyle: Sendable {
     /// The space between the label's words and the line on either side.
     public var labelPadding: CGFloat
 
+    /// The radius the corners of the colour behind the label are rounded
+    /// to, or `0` for square ones.
+    ///
+    /// Held to half the label's height, as SwiftUI holds a rounded
+    /// rectangle's, so a large enough radius makes a capsule of it.
+    public var labelCornerRadius: CGFloat
+
     /// Creates a style.
     public init(
         color: Color = .black,
         width: CGFloat = 2,
         cornerRadius: CGFloat = 0,
         dash: [CGFloat] = [],
+        lineCap: CGLineCap = .butt,
         arrowHead: ArrowHead = .filled,
         appear: Appear = .draw,
         flow: Flow? = nil,
         labelFontSize: CGFloat = 14,
         labelColor: Color = .black,
         labelBackground: Color = .white,
-        labelPadding: CGFloat = 6
+        labelPadding: CGFloat = 6,
+        labelCornerRadius: CGFloat = 0
     ) {
         self.color = color
         self.width = width
         self.cornerRadius = cornerRadius
         self.dash = dash
+        self.lineCap = lineCap
         self.arrowHead = arrowHead
         self.appear = appear
         self.flow = flow
@@ -100,6 +118,7 @@ public struct LineStyle: Sendable {
         self.labelColor = labelColor
         self.labelBackground = labelBackground
         self.labelPadding = labelPadding
+        self.labelCornerRadius = labelCornerRadius
     }
 
     /// The style a line has when nothing says otherwise.

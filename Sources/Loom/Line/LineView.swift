@@ -51,7 +51,7 @@ struct LineView: View {
                     // Opaque, so the line reads as split by the words rather
                     // than running under them. On a background that is not a
                     // flat colour, the line shows through.
-                    .background(style.labelBackground)
+                    .background(style.labelBackground, in: RoundedRectangle(cornerRadius: style.labelCornerRadius))
                     // Where they end up, for the figure to know how far what
                     // it draws reaches: on the words themselves, since words
                     // hung off a point lie outside the point they hang from.
@@ -85,13 +85,13 @@ struct LineView: View {
     /// moved along by however far they have flowed.
     private var strokeStyle: StrokeStyle {
         guard let flow = style.flow, flow.mark == .dashes else {
-            return StrokeStyle(lineWidth: width, dash: style.dash)
+            return StrokeStyle(lineWidth: width, lineCap: style.lineCap, dash: style.dash)
         }
         let dash = style.dash.isEmpty ? [flow.spacing / 2, flow.spacing / 2] : style.dash
         let period = dash.reduce(0, +)
         // A pattern that starts further back puts each dash further on.
         let phase = period > 0 ? -(time * flow.speed).truncatingRemainder(dividingBy: period) : 0
-        return StrokeStyle(lineWidth: width, dash: dash, dashPhase: phase)
+        return StrokeStyle(lineWidth: width, lineCap: style.lineCap, dash: dash, dashPhase: phase)
     }
 
     /// Dots travelling along `points`, `flow.spacing` apart and as far on as
