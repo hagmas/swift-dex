@@ -14,6 +14,11 @@ struct LabView: View {
 
     @State private var selection: String?
     @State private var step = 0
+
+    /// How the figure's lines are drawn: the scenario's own way until the
+    /// inspector asks for another.
+    @State private var routing: Line.Routing
+    @State private var showsInspector = true
     @State private var appear = AppearMode.phasedEarly
     @State private var motion = Motion.bouncy
     @State private var meter = FrameMeter()
@@ -51,18 +56,19 @@ struct LabView: View {
     init(scenario: String?, autoplay: Bool, frames: URL?) {
         self.autoplay = autoplay
         self.frames = frames
-        _selection = State(initialValue: Scenario.all.first { $0.name == scenario }?.name ?? Scenario.all[0].name)
+        let first = LoomLab.scenario(named: scenario) ?? scenarios[0]
+        _selection = State(initialValue: first.name)
+        _routing = State(initialValue: first.routing)
     }
 
-    private var scenario: Scenario {
-        Scenario.all.first { $0.name == selection } ?? Scenario.all[0]
+    private var scenario: any Scenario.Type {
+        LoomLab.scenario(named: selection) ?? scenarios[0]
     }
 
     var body: some View {
         NavigationSplitView {
-            List(Scenario.all, selection: $selection) { scenario in
-                Text(scenario.name)
-                    .tag(scenario.name)
+            List(scenarios.map { $0.name }, id: \.self, selection: $selection) { name in
+                Text(name)
             }
             .navigationSplitViewColumnWidth(min: 160, ideal: 200)
         } detail: {
@@ -74,10 +80,23 @@ struct LabView: View {
                 controls
                     .padding()
             }
+            .inspector(isPresented: $showsInspector) {
+                inspector
+                    .inspectorColumnWidth(min: 200, ideal: 240)
+            }
+            .toolbar {
+                Button {
+                    showsInspector.toggle()
+                } label: {
+                    Label("Inspector", systemImage: "sidebar.right")
+                }
+                .help("Show or hide how the figure is drawn")
+            }
         }
         .frame(minWidth: 800, minHeight: 760)
         .onChange(of: selection) {
             step = 0
+            routing = scenario.routing
             // Each figure is looked at from its usual size first.
             actualSize()
         }
@@ -111,7 +130,7 @@ struct LabView: View {
     /// magnifies what is drawn, so words zoomed in on are soft: for a close
     /// look at them, `--snapshot` draws the figure at twice the pixels.
     private var canvas: some View {
-        scenario.figure(step)
+        figure(of: scenario, step: step, routing: routing)
             .modifier(Appearing(mode: appear))
             .scaleEffect(zoom)
             .offset(pan)
@@ -183,6 +202,23 @@ struct LabView: View {
     /// does not show up as the figure moving.
     private var unattended: Bool {
         frames != nil || autoplay
+    }
+
+    /// How the figure is drawn, as opposed to how it is played, which is down
+    /// below it.
+    private var inspector: some View {
+        Form {
+            Section("Lines") {
+                Picker("Routing", selection: $routing) {
+                    Text("Straight").tag(Line.Routing.straight)
+                    Text("Orthogonal").tag(Line.Routing.orthogonal)
+                    Text("Curved").tag(Line.Routing.curved)
+                }
+                .pickerStyle(.inline)
+                .labelsHidden()
+            }
+        }
+        .formStyle(.grouped)
     }
 
     /// What to play on one row, and playing it on the next, so that neither

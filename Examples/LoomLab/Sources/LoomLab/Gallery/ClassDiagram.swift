@@ -1,14 +1,17 @@
 import Loom
 import SwiftUI
 
-extension Scenario {
-    /// A class diagram: subclasses gathering under one hollow arrowhead,
-    /// conformance dashed, and a dependency.
-    static let classDiagram = Scenario(name: "Class diagram", steps: 0) { _ in
-        AnyView(
-            FigureView(ClassDiagram(), routing: .orthogonal)
-                .lineStyle(LineStyle(cornerRadius: 8))
-        )
+/// A class diagram: subclasses gathering under one hollow arrowhead,
+/// conformance dashed, and a dependency.
+struct ClassDiagramScenario: Scenario {
+    static let name = "Class diagram"
+
+    let step: Int
+    let routing: Line.Routing
+
+    var body: some View {
+        FigureView(ClassDiagram(), routing: routing)
+            .lineStyle(LineStyle(cornerRadius: 8))
     }
 }
 

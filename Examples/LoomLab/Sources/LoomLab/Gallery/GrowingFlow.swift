@@ -1,11 +1,17 @@
 import Loom
 import SwiftUI
 
-extension Scenario {
-    /// Nodes added two steps running, one of them with a loop, then the one at
-    /// the top taken away — the figure on the example deck's Figures slide.
-    static let growingFlow = Scenario(name: "Growing flow", steps: 3) { step in
-        AnyView(FigureView(GrowingFlow(step: step), routing: .orthogonal))
+/// Nodes added two steps running, one of them with a loop, then the one at
+/// the top taken away — the figure on the example deck's Figures slide.
+struct GrowingFlowScenario: Scenario {
+    static let name = "Growing flow"
+    static let steps = 3
+
+    let step: Int
+    let routing: Line.Routing
+
+    var body: some View {
+        FigureView(GrowingFlow(step: step), routing: routing)
     }
 }
 

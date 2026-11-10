@@ -1,13 +1,17 @@
 import Loom
 import SwiftUI
 
-extension Scenario {
-    /// A pipeline that grows a stage at a time, its fan widening as it goes.
-    static let growingFan = Scenario(name: "Growing fan", steps: 3) { step in
-        AnyView(
-            FigureView(GrowingFan(step: step), routing: .orthogonal)
-                .lineStyle(LineStyle(cornerRadius: 8))
-        )
+/// A pipeline that grows a stage at a time, its fan widening as it goes.
+struct GrowingFanScenario: Scenario {
+    static let name = "Growing fan"
+    static let steps = 3
+
+    let step: Int
+    let routing: Line.Routing
+
+    var body: some View {
+        FigureView(GrowingFan(step: step), routing: routing)
+            .lineStyle(LineStyle(cornerRadius: 8))
     }
 }
 

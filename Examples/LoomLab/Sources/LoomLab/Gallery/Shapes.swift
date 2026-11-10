@@ -1,11 +1,16 @@
 import Loom
 import SwiftUI
 
-extension Scenario {
-    /// Nodes of every shape, with lines sitting side by side and a loop on
-    /// them, so that their ends are off the middle of a side.
-    static let shapes = Scenario(name: "Shapes", steps: 0) { _ in
-        AnyView(FigureView(Shapes(), routing: .orthogonal))
+/// Nodes of every shape, with lines sitting side by side and a loop on
+/// them, so that their ends are off the middle of a side.
+struct ShapesScenario: Scenario {
+    static let name = "Shapes"
+
+    let step: Int
+    let routing: Line.Routing
+
+    var body: some View {
+        FigureView(Shapes(), routing: routing)
     }
 }
 

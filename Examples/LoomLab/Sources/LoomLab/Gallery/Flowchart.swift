@@ -1,16 +1,28 @@
 import Loom
 import SwiftUI
 
-extension Scenario {
-    /// A flowchart whose "no" branch loops back up round the side.
-    static let flowchart = Scenario(name: "Flowchart", steps: 0) { _ in
-        AnyView(FigureView(Flowchart(aligned: false), routing: .orthogonal))
-    }
+/// A flowchart whose "no" branch loops back up round the side.
+struct FlowchartScenario: Scenario {
+    static let name = "Flowchart"
 
-    /// The same flowchart with its boxes lined up on a spine, so the lines
-    /// down it run straight.
-    static let flowchartAligned = Scenario(name: "Flowchart, aligned", steps: 0) { _ in
-        AnyView(FigureView(Flowchart(aligned: true), routing: .orthogonal))
+    let step: Int
+    let routing: Line.Routing
+
+    var body: some View {
+        FigureView(Flowchart(aligned: false), routing: routing)
+    }
+}
+
+/// The same flowchart with its boxes lined up on a spine, so the lines
+/// down it run straight.
+struct AlignedFlowchartScenario: Scenario {
+    static let name = "Flowchart, aligned"
+
+    let step: Int
+    let routing: Line.Routing
+
+    var body: some View {
+        FigureView(Flowchart(aligned: true), routing: routing)
     }
 }
 

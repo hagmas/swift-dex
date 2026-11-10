@@ -1,16 +1,22 @@
 import Loom
 import SwiftUI
 
-extension Scenario {
-    /// A figure inside a node of another, its node IDs repeating the outer
-    /// figure's on purpose.
-    ///
-    /// It grows a node inside, then one outside, so that the lines on both
-    /// sides have to follow the node holding the figure. The figure inside
-    /// has a loop and a line going round the outside, which reach past its
-    /// nodes, so the node makes room for them.
-    static let nested = Scenario(name: "Nested", steps: 2) { step in
-        AnyView(FigureView(System(step: step), routing: .orthogonal))
+/// A figure inside a node of another, its node IDs repeating the outer
+/// figure's on purpose.
+///
+/// It grows a node inside, then one outside, so that the lines on both
+/// sides have to follow the node holding the figure. The figure inside
+/// has a loop and a line going round the outside, which reach past its
+/// nodes, so the node makes room for them.
+struct NestedScenario: Scenario {
+    static let name = "Nested"
+    static let steps = 2
+
+    let step: Int
+    let routing: Line.Routing
+
+    var body: some View {
+        FigureView(System(step: step, routing: routing), routing: routing)
     }
 }
 
@@ -33,6 +39,9 @@ private extension NodeStyle {
 private struct System: Figure {
     var step: Int
 
+    /// How the lines are drawn, inside the backend as well as out.
+    var routing: Line.Routing
+
     var arrangement: some FigureElement {
         Column(spacing: 68) {
             Row(spacing: 44) {
@@ -42,7 +51,7 @@ private struct System: Figure {
                     TextNode(.c, title: "Metrics")
                 }
             }
-            Row { Backend(id: .backend, step: step).nodeStyle(.container) }
+            Row { Backend(id: .backend, step: step, routing: routing).nodeStyle(.container) }
         }
     }
 
@@ -57,6 +66,7 @@ private struct System: Figure {
 private struct Backend: Node {
     let id: NodeID
     var step: Int
+    var routing: Line.Routing
 
     var body: some View {
         VStack(spacing: 6) {
@@ -65,7 +75,7 @@ private struct Backend: Node {
             // are given the standard one back. The words on the lines are
             // backed in the container's colour, so they still look to split
             // the line rather than sit on a patch.
-            FigureView(Services(step: step), routing: .orthogonal)
+            FigureView(Services(step: step), routing: routing)
                 .nodeStyle(.standard)
                 .lineStyle(LineStyle(labelBackground: containerFill))
                 // The node is as big as the figure's nodes and cuts off what

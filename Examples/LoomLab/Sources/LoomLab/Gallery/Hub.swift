@@ -1,10 +1,15 @@
 import Loom
 import SwiftUI
 
-extension Scenario {
-    /// One node many others point at.
-    static let hub = Scenario(name: "Hub", steps: 0) { _ in
-        AnyView(FigureView(Hub(), routing: .orthogonal))
+/// One node many others point at.
+struct HubScenario: Scenario {
+    static let name = "Hub"
+
+    let step: Int
+    let routing: Line.Routing
+
+    var body: some View {
+        FigureView(Hub(), routing: routing)
     }
 }
 
