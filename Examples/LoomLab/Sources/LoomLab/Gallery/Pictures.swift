@@ -6,9 +6,9 @@ extension Scenario {
     /// server — with a request going out from the house and the answer coming
     /// back.
     ///
-    /// Each step sets the next part of the journey flowing, and stills the one
-    /// before.
-    static let pictures = Scenario(name: "Pictures", steps: 2) { step in
+    /// It starts out still. Each step sets the next part of the journey
+    /// flowing, and stills the one before.
+    static let pictures = Scenario(name: "Pictures", steps: 3) { step in
         AnyView(
             FigureView(Journey(step: step), spacing: 16, routing: .curved)
                 .nodeStyle(.picture)
@@ -59,8 +59,8 @@ private extension LineStyle {
 }
 
 private struct Journey: Figure {
-    /// Which part of the journey is under way: the request reaching the
-    /// relay, the relay passing it on, or the answer coming back.
+    /// Which part of the journey is under way: none yet, the request reaching
+    /// the relay, the relay passing it on, or the answer coming back.
     var step: Int
 
     var arrangement: some FigureElement {
@@ -74,11 +74,11 @@ private struct Journey: Figure {
     var lines: [Line] {
         // The same lines at every step, only flowing or not: a line's style
         // is not part of which line it is, so none of them is drawn in anew.
-        Line(from: .home, to: .relay, label: "request", style: step == 0 ? .travelling : .plain)
-        Line(from: .relay, to: .server, style: step == 1 ? .travelling : .plain)
+        Line(from: .home, to: .relay, label: "request", style: step == 1 ? .travelling : .plain)
+        Line(from: .relay, to: .server, style: step == 2 ? .travelling : .plain)
         // Back underneath, the long way round, so it does not lie on the way
         // out.
-        Line(from: .server.bottom, to: .home.bottom, label: "response", style: step == 2 ? .marching : .answer)
+        Line(from: .server.bottom, to: .home.bottom, label: "response", style: step == 3 ? .marching : .answer)
     }
 }
 
