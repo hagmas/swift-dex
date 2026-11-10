@@ -26,14 +26,13 @@ private extension NodeID {
 private extension NodeStyle {
     /// No frame, since each picture draws its own; the words are its caption.
     ///
-    /// Room enough all round that lines stop well clear of the pictures: one
-    /// meeting the bottom stops about as far under the caption as the caption
-    /// sits under the picture.
+    /// Room enough all round that lines stop well clear of the pictures and
+    /// their captions, so each picture stands on its own.
     static let picture = NodeStyle(
         shape: .none,
         textColor: Color(white: 0.2),
-        fontWeight: .semibold,
-        padding: EdgeInsets(top: 18, leading: 18, bottom: 18, trailing: 18),
+        fontSize: 15,
+        padding: EdgeInsets(top: 24, leading: 24, bottom: 24, trailing: 24),
         minWidth: 0
     )
 }
@@ -97,8 +96,8 @@ private struct Picture<Art: View>: Node {
         VStack(spacing: 14) {
             art
                 .foregroundStyle(tint.gradient)
-                .frame(width: 124, height: 124)
-                .shadow(color: tint.opacity(0.3), radius: 11, y: 6)
+                .frame(width: 100, height: 100)
+                .shadow(color: tint.opacity(0.3), radius: 9, y: 5)
             Text(caption)
         }
     }
@@ -131,7 +130,7 @@ private struct HouseShape: Shape {
         // Walls.
         path.addRoundedRect(
             in: CGRect(x: rect.minX + w * 0.14, y: rect.minY + h * 0.42, width: w * 0.72, height: h * 0.54),
-            cornerSize: CGSize(width: 6, height: 6)
+            cornerSize: CGSize(width: 5, height: 5)
         )
         return path
     }
@@ -149,7 +148,7 @@ private struct HouseOpenings: Shape {
         )
         path.addRoundedRect(
             in: CGRect(x: rect.minX + w * 0.54, y: rect.minY + h * 0.56, width: w * 0.2, height: h * 0.18),
-            cornerSize: CGSize(width: 4, height: 4)
+            cornerSize: CGSize(width: 3, height: 3)
         )
         return path
     }
@@ -161,7 +160,7 @@ private struct Mast: View {
         ZStack {
             MastShape()
             Waves()
-                .stroke(style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                .stroke(style: StrokeStyle(lineWidth: 5, lineCap: .round))
         }
     }
 }
@@ -171,16 +170,29 @@ private struct MastShape: Shape {
         let w = rect.width
         let h = rect.height
         let middle = rect.minX + w / 2
+        let beacon = CGPoint(x: middle, y: rect.minY + h * 0.22 + w * 0.08)
+        let radius = w * 0.08
         var path = Path()
         // The tower, wide at the foot and narrow at the top, standing a little
-        // clear of the beacon.
-        path.move(to: CGPoint(x: middle - w * 0.05, y: rect.minY + h * 0.46))
-        path.addLine(to: CGPoint(x: middle + w * 0.05, y: rect.minY + h * 0.46))
+        // clear of the beacon: its top is cupped round the beacon, the same
+        // distance from it all the way across.
+        let cup = radius * 2
+        let topHalf = w * 0.05
+        let top = beacon.y + (cup * cup - topHalf * topHalf).squareRoot()
+        path.move(to: CGPoint(x: middle - topHalf, y: top))
+        let from = atan2(top - beacon.y, -topHalf)
+        let to = atan2(top - beacon.y, topHalf)
+        for step in 1...12 {
+            let angle = from + (to - from) * CGFloat(step) / 12
+            path.addLine(to: CGPoint(x: beacon.x + cup * cos(angle), y: beacon.y + cup * sin(angle)))
+        }
         path.addLine(to: CGPoint(x: middle + w * 0.2, y: rect.minY + h * 0.95))
         path.addLine(to: CGPoint(x: middle - w * 0.2, y: rect.minY + h * 0.95))
         path.closeSubpath()
         // The beacon on top.
-        path.addEllipse(in: CGRect(x: middle - w * 0.08, y: rect.minY + h * 0.22, width: w * 0.16, height: w * 0.16))
+        path.addEllipse(
+            in: CGRect(x: beacon.x - radius, y: beacon.y - radius, width: radius * 2, height: radius * 2)
+        )
         return path
     }
 }
@@ -210,19 +222,22 @@ private struct Waves: Shape {
 /// A server: a rack of three units, each with its lights.
 private struct Rack: View {
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 6) {
             ForEach(0..<3) { unit in
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: 6)
+                    .frame(width: 88, height: 23)
                     .overlay(alignment: .leading) {
-                        HStack(spacing: 7) {
-                            Circle().fill(.white).frame(width: 10, height: 10)
-                            Circle().fill(.white.opacity(unit == 1 ? 1 : 0.5)).frame(width: 10, height: 10)
-                            Capsule().fill(.white.opacity(0.6)).frame(width: 40, height: 6)
+                        HStack(spacing: 6) {
+                            Circle().fill(.white).frame(width: 8, height: 8)
+                            Circle().fill(.white.opacity(unit == 1 ? 1 : 0.5)).frame(width: 8, height: 8)
+                            Capsule().fill(.white.opacity(0.6)).frame(width: 32, height: 5)
                         }
-                        .padding(.leading, 14)
+                        .padding(.leading, 11)
                     }
             }
         }
-        .padding(.horizontal, 8)
+        // Standing on the same ground as the house and the mast.
+        .padding(.bottom, 4)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
     }
 }
